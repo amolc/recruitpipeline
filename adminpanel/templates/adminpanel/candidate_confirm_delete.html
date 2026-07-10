@@ -1,0 +1,42 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Delete {{ candidate.full_name }} — Candidates{% endblock %}
+{% block page_title %}Delete Candidate{% endblock %}
+
+{% block extra_head %}
+<style>
+  .confirm-card {
+    background: var(--color-bg-card); border: 1px solid var(--color-border);
+    border-radius: var(--radius); padding: 40px; max-width: 480px; text-align: center;
+  }
+  .confirm-card h2 { font-size: 1.25rem; margin-bottom: 8px; }
+  .confirm-card p { color: var(--color-text-muted); font-size: 0.875rem; margin-bottom: 24px; }
+  .confirm-card .name { font-weight: 700; color: var(--color-text); }
+  .actions-bar { display: flex; gap: 10px; justify-content: center; }
+  .btn {
+    padding: 10px 24px; font-size: 0.8125rem; font-weight: 600; font-family: inherit;
+    border: none; border-radius: 6px; cursor: pointer; transition: 0.15s; text-decoration: none;
+  }
+  .btn-del { background: #ef4444; color: #fff; }
+  .btn-del:hover { opacity: 0.85; }
+  .btn-cancel { background: transparent; color: var(--color-text-muted); border: 1px solid var(--color-border); }
+  .btn-cancel:hover { color: var(--color-text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-card">
+  <h2>Are you sure?</h2>
+  <p>
+    This will permanently delete <span class="name">{{ candidate.full_name }}</span>'s
+    application for <strong>{{ candidate.position }}</strong>.
+  </p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="actions-bar">
+      <button type="submit" class="btn btn-del">Yes, Delete</button>
+      <a href="{% url 'candidate_list' %}" class="btn btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Candidates — SolarSolutions Pipeline{% endblock %}
+{% block page_title %}Candidates{% endblock %}
+
+{% block extra_head %}
+<style>
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .toolbar form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .toolbar input, .toolbar select {
+    padding: 8px 12px; font-size: 0.8125rem; font-family: inherit;
+    color: var(--color-text); background: var(--color-bg-input, #334155);
+    border: 1px solid var(--color-border); border-radius: 6px; outline: none;
+  }
+  .toolbar input:focus, .toolbar select:focus { border-color: var(--color-primary); }
+  .btn-primary {
+    padding: 8px 16px; font-size: 0.8125rem; font-weight: 600; font-family: inherit;
+    background: var(--color-primary); color: #0f172a; border: none; border-radius: 6px;
+    cursor: pointer; transition: 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-sm {
+    padding: 4px 10px; font-size: 0.75rem; font-weight: 500; font-family: inherit;
+    border: none; border-radius: 4px; cursor: pointer; transition: 0.15s; text-decoration: none;
+  }
+  .btn-view { background: rgba(245,158,11,0.15); color: var(--color-primary); }
+  .btn-view:hover { background: rgba(245,158,11,0.25); }
+  .btn-edit { background: rgba(148,163,184,0.15); color: var(--color-text-muted); }
+  .btn-edit:hover { background: rgba(148,163,184,0.25); }
+  .btn-del { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .btn-del:hover { background: rgba(239,68,68,0.25); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-border); font-size: 0.8125rem; }
+  th { color: var(--color-text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .status-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 0.6875rem; font-weight: 500;
+  }
+  .status-new { background: rgba(148,163,184,0.15); color: var(--color-text-muted); }
+  .status-positive { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .status-warn { background: rgba(245,158,11,0.15); color: var(--color-primary); }
+  .status-rejected { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .actions { display: flex; gap: 4px; }
+  .empty-state { text-align: center; padding: 60px 0; color: var(--color-text-muted); }
+  .messages { margin-bottom: 16px; }
+  .messages div {
+    padding: 10px 14px; border-radius: 6px; font-size: 0.8125rem; margin-bottom: 8px;
+  }
+  .msg-success { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .msg-error { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .card-wrap {
+    background: var(--color-bg-card); border: 1px solid var(--color-border);
+    border-radius: var(--radius); padding: 20px; overflow-x: auto;
+  }
+  a { color: inherit; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+  <div class="messages">
+    {% for msg in messages %}
+      <div class="msg-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="toolbar">
+  <form method="get">
+    <input type="text" name="q" placeholder="Search name, email, position…" value="{{ q }}" />
+    <select name="status">
+      <option value="">All statuses</option>
+      {% for s in stages %}
+        <option value="{{ s.key }}" {% if status_filter == s.key %}selected{% endif %}>{{ s.label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-primary" style="padding:8px 14px;">Search</button>
+    {% if q or status_filter %}
+      <a href="{% url 'candidate_list' %}" class="btn-primary" style="background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border);">Clear</a>
+    {% endif %}
+  </form>
+  <a href="{% url 'candidate_create' %}" class="btn-primary">+ Add Candidate</a>
+</div>
+
+<div class="card-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Position</th>
+        <th>Exp</th>
+        <th>Status</th>
+        <th>CV</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in candidates %}
+        <tr>
+          <td><strong>{{ c.full_name }}</strong></td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.phone }}</td>
+          <td>{{ c.position }}</td>
+          <td>{{ c.experience }}yr</td>
+          <td>
+            {% with s=c.status %}
+            <span class="status-tag
+              {% if s == 'selected' or s == 'accepted' or s == 'onboarded' %}status-positive
+              {% elif s == 'rejected' %}status-rejected
+              {% elif s == 'new' or s == 'screening' %}status-new
+              {% else %}status-warn{% endif %}">
+              {{ c.status_label }}
+            </span>
+            {% endwith %}
+          </td>
+          <td>
+            {% if c.resume %}
+              <a href="{{ c.resume.url }}" target="_blank" style="color:var(--color-primary);">View</a>
+            {% else %}
+              <span style="color:var(--color-text-muted);">—</span>
+            {% endif %}
+          </td>
+          <td style="white-space:nowrap;">{{ c.submitted_at|date:"M d, Y" }}</td>
+          <td>
+            <div class="actions">
+              <a href="{% url 'candidate_detail' c.pk %}" class="btn-sm btn-view">View</a>
+              <a href="{% url 'candidate_edit' c.pk %}" class="btn-sm btn-edit">Edit</a>
+              <a href="{% url 'candidate_delete' c.pk %}" class="btn-sm btn-del">Del</a>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="9" class="empty-state">No candidates found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

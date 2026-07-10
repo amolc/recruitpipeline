@@ -1,0 +1,115 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}{% if candidate %}Edit {{ candidate.full_name }}{% else %}Add Candidate{% endif %} — Candidates{% endblock %}
+{% block page_title %}{% if candidate %}Edit: {{ candidate.full_name }}{% else %}Add Candidate{% endif %}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .form-card {
+    background: var(--color-bg-card); border: 1px solid var(--color-border);
+    border-radius: var(--radius); padding: 32px; max-width: 640px;
+  }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 0.8125rem; font-weight: 500; margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 10px 12px; font-size: 0.875rem; font-family: inherit;
+    color: var(--color-text); background: var(--color-bg-input, #334155);
+    border: 1px solid var(--color-border); border-radius: 6px; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--color-primary);
+  }
+  .form-group textarea { resize: vertical; min-height: 100px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .file-input { position: relative; }
+  .file-input input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
+  .file-placeholder {
+    display: block; padding: 10px 12px; font-size: 0.875rem;
+    color: var(--color-text-muted); background: var(--color-bg-input, #334155);
+    border: 1px solid var(--color-border); border-radius: 6px; pointer-events: none;
+  }
+  .file-input:hover .file-placeholder { border-color: var(--color-primary); }
+  .actions-bar { margin-top: 24px; display: flex; gap: 10px; }
+  .btn {
+    padding: 10px 24px; font-size: 0.8125rem; font-weight: 600; font-family: inherit;
+    border: none; border-radius: 6px; cursor: pointer; transition: 0.15s; text-decoration: none;
+  }
+  .btn-primary { background: var(--color-primary); color: #0f172a; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-cancel { background: transparent; color: var(--color-text-muted); border: 1px solid var(--color-border); }
+  .btn-cancel:hover { color: var(--color-text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="full_name">Full Name</label>
+        <input id="full_name" name="full_name" type="text" value="{{ candidate.full_name|default:'' }}" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" value="{{ candidate.email|default:'' }}" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="text" value="{{ candidate.phone|default:'' }}" required />
+      </div>
+      <div class="form-group">
+        <label for="position">Position</label>
+        <input id="position" name="position" type="text" value="{{ candidate.position|default:'' }}" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="experience">Years of Experience</label>
+        <input id="experience" name="experience" type="number" min="0" value="{{ candidate.experience|default:'0' }}" required />
+      </div>
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          {% for s in stages %}
+            <option value="{{ s.key }}" {% if candidate.status == s.key %}selected{% endif %}>{{ s.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="resume">Resume / CV</label>
+      <div class="file-input">
+        <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx" />
+        <span class="file-placeholder" id="resumeLabel">
+          {% if candidate.resume %}{{ candidate.resume.name }}{% else %}Upload file (PDF, DOC){% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="cover_letter">Why join us?</label>
+      <textarea id="cover_letter" name="cover_letter" rows="4">{{ candidate.cover_letter|default:'' }}</textarea>
+    </div>
+
+    <div class="actions-bar">
+      <button type="submit" class="btn btn-primary">
+        {% if candidate %}Save Changes{% else %}Add Candidate{% endif %}
+      </button>
+      <a href="{% url 'candidate_list' %}" class="btn btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.getElementById('resume').addEventListener('change', function() {
+    document.getElementById('resumeLabel').textContent = this.files[0] ? this.files[0].name : 'Upload file (PDF, DOC)';
+  });
+</script>
+{% endblock %}

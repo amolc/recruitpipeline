@@ -1,0 +1,12 @@
+{
+  "name": "solarsolutions-recruitment",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node recruit.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.1.1"
+  }
+}

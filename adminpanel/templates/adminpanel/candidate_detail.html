@@ -1,0 +1,106 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}{{ candidate.full_name }} — Candidates{% endblock %}
+{% block page_title %}{{ candidate.full_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .detail-card {
+    background: var(--color-bg-card); border: 1px solid var(--color-border);
+    border-radius: var(--radius); padding: 32px; max-width: 720px;
+  }
+  .detail-card h2 { font-size: 1.25rem; margin-bottom: 24px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); margin-bottom: 2px; }
+  .field .value { font-size: 0.9375rem; }
+  .field .value a { color: var(--color-primary); }
+  .status-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 500;
+  }
+  .status-new { background: rgba(148,163,184,0.15); color: var(--color-text-muted); }
+  .status-positive { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .status-warn { background: rgba(245,158,11,0.15); color: var(--color-primary); }
+  .status-rejected { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .actions-bar { margin-top: 28px; display: flex; gap: 10px; }
+  .btn {
+    padding: 10px 20px; font-size: 0.8125rem; font-weight: 600; font-family: inherit;
+    border: none; border-radius: 6px; cursor: pointer; transition: 0.15s; text-decoration: none;
+  }
+  .btn-edit { background: var(--color-primary); color: #0f172a; }
+  .btn-edit:hover { opacity: 0.85; }
+  .btn-del { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .btn-del:hover { background: rgba(239,68,68,0.25); }
+  .btn-back { background: transparent; color: var(--color-text-muted); border: 1px solid var(--color-border); }
+  .btn-back:hover { color: var(--color-text); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-card">
+  <div class="grid">
+    <div class="field">
+      <label>Full Name</label>
+      <div class="value">{{ candidate.full_name }}</div>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <div class="value">
+        {% with s=candidate.status %}
+        <span class="status-tag
+          {% if s == 'selected' or s == 'accepted' or s == 'onboarded' %}status-positive
+          {% elif s == 'rejected' %}status-rejected
+          {% elif s == 'new' or s == 'screening' %}status-new
+          {% else %}status-warn{% endif %}">
+          {{ candidate.get_status_display }}
+        </span>
+        {% endwith %}
+      </div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <div class="value">{{ candidate.email }}</div>
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <div class="value">{{ candidate.phone }}</div>
+    </div>
+    <div class="field">
+      <label>Position</label>
+      <div class="value">{{ candidate.position }}</div>
+    </div>
+    <div class="field">
+      <label>Experience</label>
+      <div class="value">{{ candidate.experience }} years</div>
+    </div>
+    <div class="field">
+      <label>Resume / CV</label>
+      <div class="value">
+        {% if candidate.resume %}
+          <a href="{{ candidate.resume.url }}" target="_blank">Download CV</a>
+        {% else %}
+          <span style="color:var(--color-text-muted);">Not provided</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="field">
+      <label>Submitted</label>
+      <div class="value">{{ candidate.submitted_at|date:"F d, Y" }}</div>
+    </div>
+  </div>
+
+  <div class="field" style="margin-top:16px;">
+    <label>Why join us?</label>
+    <div class="value" style="white-space:pre-wrap;color:var(--color-text-muted);">
+      {{ candidate.cover_letter }}
+    </div>
+  </div>
+
+  <div class="actions-bar">
+    <a href="{% url 'candidate_list' %}" class="btn btn-back">← Back</a>
+    <a href="{% url 'candidate_edit' candidate.pk %}" class="btn btn-edit">✎ Edit</a>
+    <a href="{% url 'candidate_delete' candidate.pk %}" class="btn btn-del">✕ Delete</a>
+  </div>
+</div>
+{% endblock %}

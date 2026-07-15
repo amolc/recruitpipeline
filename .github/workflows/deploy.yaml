@@ -1,0 +1,40 @@
+name: Deploy of algotrading to main /home/ubuntu/expressit
+
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Deploy to Server (Git Pull)
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: forecast.quantbots.co
+          USER_NAME: ubuntu
+          TARGET_DIR: /home/ubuntu/expressit
+        run: |
+          # 1. Setup SSH Key
+          if [ -z "$PRIVATE_KEY" ]; then
+            echo "Error: SSH_PRIVATE_KEY secret is not set in GitHub Secrets."
+            exit 1
+          fi
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          
+          # 2. Pull latest code on remote server
+          ssh -i private_key -o StrictHostKeyChecking=no ${USER_NAME}@${HOSTNAME} << 'EOF'
+            cd /home/ubuntu/expressit
+            git pull origin main
+            chmod +x runcpr.sh
+            source venv/bin/activate
+            python manage.py migrate
+            echo "Restarting services..."
+            pm2 restart runcpr
+            echo "Deployment completed successfully!"
+          EOF

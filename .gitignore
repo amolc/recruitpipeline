@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pid
+*.log
+logs/
+staticfiles/
+.qodo/
+.vscode/
+.idea/
+.env
+.DS_Store

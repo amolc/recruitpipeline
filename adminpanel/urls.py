@@ -1,5 +1,4 @@
 from django.urls import path
-from django.views.generic.base import RedirectView
 from . import views
 
 urlpatterns = [
@@ -23,5 +22,5 @@ urlpatterns = [
     path('pipeline/add/', views.add_stage, name='add_stage'),
     path('pipeline/<str:stage_key>/delete/', views.delete_stage, name='delete_stage'),
     path('pipeline/<str:stage>/', views.update_global_automation, name='update_global_automation'),
-    path('', RedirectView.as_view(pattern_name='candidate_list')),
+    path('', views.company_home, name='company_home'),
 ]

@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+
 
 STAGES = [
     ('new', 'New'),
@@ -18,13 +20,50 @@ STAGES = [
 
 STAGE_KEYS = [s[0] for s in STAGES]
 
+
+class Company(models.Model):
+    name = models.CharField('Company Name', max_length=200)
+    slug = models.SlugField('Slug', max_length=100, unique=True, help_text='Used in URL: /slug/...')
+    brand_color = models.CharField('Brand Color', max_length=7, default='#f59e0b', help_text='Hex color for branding')
+    logo_url = models.URLField('Logo URL', blank=True)
+    logo = models.ImageField('Logo', upload_to='company_logos/', blank=True)
+    is_active = models.BooleanField('Active', default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Company'
+        verbose_name_plural = 'Companies'
+
+    def __str__(self):
+        return self.name
+
+
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('recruiter', 'Recruiter'),
+        ('hiring_manager', 'Hiring Manager'),
+    ]
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='members')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='recruiter')
+
+    class Meta:
+        verbose_name = 'User Profile'
+
+    def __str__(self):
+        return f'{self.user.username} @ {self.company.name}'
+
+
 class Stage(models.Model):
-    key = models.CharField('Key', max_length=30, unique=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='stages')
+    key = models.CharField('Key', max_length=30)
     label = models.CharField('Label', max_length=100)
     order = models.IntegerField('Order', default=0)
 
     class Meta:
         ordering = ['order']
+        unique_together = ('company', 'key')
         verbose_name = 'Pipeline Stage'
         verbose_name_plural = 'Pipeline Stages'
 
@@ -33,6 +72,7 @@ class Stage(models.Model):
 
 
 class Application(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='applications')
     full_name = models.CharField('Full Name', max_length=200)
     email = models.EmailField('Email Address')
     phone = models.CharField('Phone Number', max_length=30)
@@ -57,8 +97,10 @@ class Application(models.Model):
         except Stage.DoesNotExist:
             return self.status
 
+
 class JobPosition(models.Model):
-    title = models.CharField('Job Title', max_length=200, unique=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='job_positions')
+    title = models.CharField('Job Title', max_length=200)
     description = models.TextField('Job Description', blank=True)
     base_salary = models.DecimalField('Base Salary ($)', max_digits=10, decimal_places=2, null=True, blank=True)
     hourly_rate = models.DecimalField('Per Hour ($)', max_digits=8, decimal_places=2, null=True, blank=True)
@@ -69,11 +111,12 @@ class JobPosition(models.Model):
 
     class Meta:
         ordering = ['title']
+        unique_together = ('company', 'title')
         verbose_name = 'Job Position'
         verbose_name_plural = 'Job Positions'
 
     def __str__(self):
-        return self.title
+        return f'{self.title} ({self.company.name})'
 
 DEFAULT_AUTOMATIONS = {
     'new': '- Send acknowledgement email\n- Parse resume for skills/experience\n- Auto-tag by position match',
@@ -92,6 +135,7 @@ DEFAULT_AUTOMATIONS = {
 }
 
 class Automation(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='automations')
     position = models.ForeignKey(JobPosition, on_delete=models.CASCADE, related_name='automations')
     stage = models.CharField('Stage', max_length=30)
     description = models.TextField('Description', blank=True)

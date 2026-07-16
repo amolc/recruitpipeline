@@ -1,6 +1,6 @@
 {% extends 'adminpanel/base.html' %}
 
-{% block title %}Delete {{ candidate.full_name }} — Candidates{% endblock %}
+{% block title %}Delete {{ candidate.full_name }} — {{ company.name }} Candidates{% endblock %}
 {% block page_title %}Delete Candidate{% endblock %}
 
 {% block extra_head %}
@@ -35,7 +35,7 @@
     {% csrf_token %}
     <div class="actions-bar">
       <button type="submit" class="btn btn-del">Yes, Delete</button>
-      <a href="{% url 'candidate_list' %}" class="btn btn-cancel">Cancel</a>
+      <a href="{% url 'candidate_list' company_slug=company.slug %}" class="btn btn-cancel">Cancel</a>
     </div>
   </form>
 </div>

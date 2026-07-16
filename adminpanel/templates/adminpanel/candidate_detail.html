@@ -1,6 +1,6 @@
 {% extends 'adminpanel/base.html' %}
 
-{% block title %}{{ candidate.full_name }} — Candidates{% endblock %}
+{% block title %}{{ candidate.full_name }} — {{ company.name }} Candidates{% endblock %}
 {% block page_title %}{{ candidate.full_name }}{% endblock %}
 
 {% block extra_head %}
@@ -98,9 +98,9 @@
   </div>
 
   <div class="actions-bar">
-    <a href="{% url 'candidate_list' %}" class="btn btn-back">← Back</a>
-    <a href="{% url 'candidate_edit' candidate.pk %}" class="btn btn-edit">✎ Edit</a>
-    <a href="{% url 'candidate_delete' candidate.pk %}" class="btn btn-del">✕ Delete</a>
+    <a href="{% url 'candidate_list' company_slug=company.slug %}" class="btn btn-back">← Back</a>
+    <a href="{% url 'candidate_edit' company_slug=company.slug pk=candidate.pk %}" class="btn btn-edit">✎ Edit</a>
+    <a href="{% url 'candidate_delete' company_slug=company.slug pk=candidate.pk %}" class="btn btn-del">✕ Delete</a>
   </div>
 </div>
 {% endblock %}

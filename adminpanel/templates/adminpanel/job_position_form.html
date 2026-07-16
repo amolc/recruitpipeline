@@ -1,6 +1,6 @@
 {% extends 'adminpanel/base.html' %}
 
-{% block title %}Edit {{ position.title }} — Job Positions{% endblock %}
+{% block title %}Edit {{ position.title }} — {{ company.name }} Jobs{% endblock %}
 {% block page_title %}Edit: {{ position.title }}{% endblock %}
 
 {% block extra_head %}
@@ -73,7 +73,7 @@
     </div>
     <div class="actions-bar">
       <button type="submit" class="btn btn-primary">Save</button>
-      <a href="{% url 'job_position_detail' position.pk %}" class="btn btn-cancel">Cancel</a>
+      <a href="{% url 'job_position_detail' company_slug=company.slug pk=position.pk %}" class="btn btn-cancel">Cancel</a>
     </div>
   </form>
 </div>

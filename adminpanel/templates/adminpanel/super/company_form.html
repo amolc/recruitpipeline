@@ -1,0 +1,64 @@
+{% extends 'adminpanel/super/super_base.html' %}
+{% block title %}{% if company %}Edit {{ company.name }}{% else %}New Company{% endif %} — Super Admin{% endblock %}
+{% block page_title %}{% if company %}Edit Company: {{ company.name }}{% else %}New Company{% endif %}{% endblock %}
+{% block content %}
+
+<style>
+  .form-card { max-width: 500px; }
+  .form-card label { display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; color: var(--color-text-muted); }
+  .form-card input, .form-card select, .form-card textarea {
+    width: 100%; padding: 10px 12px; margin-bottom: 16px; border-radius: 6px;
+    background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text);
+    font-family: inherit; font-size: 0.875rem;
+  }
+  .form-card input:focus { outline: none; border-color: var(--color-primary); }
+  .form-card .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .form-card .checkbox-group input { width: auto; margin-bottom: 0; }
+  .btn-save {
+    padding: 10px 24px; background: var(--color-primary); color: #fff; border: none; border-radius: 6px;
+    font-family: inherit; font-weight: 600; font-size: 0.875rem; cursor: pointer;
+  }
+  .btn-save:hover { opacity: 0.9; }
+  .btn-cancel {
+    padding: 10px 24px; background: transparent; border: 1px solid var(--color-border); border-radius: 6px;
+    font-family: inherit; font-weight: 500; font-size: 0.875rem; color: var(--color-text-muted); cursor: pointer;
+    margin-left: 8px;
+  }
+  .btn-cancel:hover { color: var(--color-text); }
+</style>
+
+<div class="stat-card form-card">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="name">Company Name *</label>
+    <input type="text" id="name" name="name" value="{{ company.name|default:'' }}" required>
+
+    <label for="brand_color">Brand Color</label>
+    <input type="color" id="brand_color" name="brand_color" value="{{ company.brand_color|default:'#f59e0b' }}">
+
+    <label for="logo">Upload Logo</label>
+    <input type="file" id="logo" name="logo" accept="image/*">
+    {% if company.logo %}
+      <div style="margin: -8px 0 16px 0; font-size: 0.75rem; color: var(--color-text-muted);">
+        Current: <a href="{{ company.logo.url }}" target="_blank" style="color: var(--color-primary);">{{ company.logo.name }}</a>
+      </div>
+    {% endif %}
+
+    <label for="logo_url">Logo URL (external link)</label>
+    <input type="url" id="logo_url" name="logo_url" value="{{ company.logo_url|default:'' }}" placeholder="https://example.com/logo.png">
+
+    {% if company %}
+    <div class="checkbox-group">
+      <input type="checkbox" id="is_active" name="is_active" {% if company.is_active %}checked{% endif %}>
+      <label for="is_active" style="margin-bottom: 0;">Active</label>
+    </div>
+    {% endif %}
+
+    <div>
+      <button type="submit" class="btn-save">{% if company %}Save Changes{% else %}Create Company{% endif %}</button>
+      <a href="{% url 'super_companies' %}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

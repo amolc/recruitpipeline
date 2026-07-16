@@ -1,0 +1,51 @@
+{% extends 'adminpanel/super/super_base.html' %}
+{% block title %}Companies — Super Admin{% endblock %}
+{% block page_title %}Companies{% endblock %}
+{% block content %}
+
+<style>
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .btn-primary {
+    padding: 8px 18px; background: var(--color-primary); color: #fff; border-radius: 6px; font-weight: 600; font-size: 0.8125rem; border: none; cursor: pointer;
+    font-family: inherit; display: inline-block;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+  th { text-align: left; padding: 10px 12px; color: var(--color-text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--color-border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--color-border); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge-active { color: #22c55e; }
+  .badge-inactive { color: var(--color-text-muted); }
+  .action-link { color: var(--color-text-muted); margin-right: 10px; font-size: 0.8125rem; }
+  .action-link:hover { color: var(--color-text); }
+  .color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
+</style>
+
+<div class="toolbar">
+  <span style="color: var(--color-text-muted); font-size: 0.8125rem;">{{ companies|length }} company{{ companies|length|pluralize }}</span>
+  <a href="{% url 'super_company_create' %}" class="btn-primary">+ New Company</a>
+</div>
+
+<div class="stat-card" style="padding: 0; overflow-x: auto;">
+  <table>
+        <thead><tr><th>Name</th><th>Brand</th><th>Positions</th><th>Candidates</th><th>Users</th><th>Status</th><th>Created</th><th></th></tr></thead>
+    <tbody>
+      {% for c in companies %}
+      <tr>
+        <td><strong>{{ c.name }}</strong></td>
+        <td><span class="color-dot" style="background: {{ c.brand_color }};"></span><span style="color: var(--color-text-muted); font-size: 0.75rem;">{{ c.brand_color }}</span></td>
+        <td>{{ c.position_count }}</td>
+        <td>{{ c.candidate_count }}</td>
+        <td>{{ c.user_count }}</td>
+        <td>{% if c.is_active %}<span class="badge-active">● Active</span>{% else %}<span class="badge-inactive">● Inactive</span>{% endif %}</td>
+        <td style="color: var(--color-text-muted);">{{ c.created_at|date:"d M Y" }}</td>
+        <td style="text-align: right; white-space: nowrap;">
+          <a href="{% url 'super_company_detail' pk=c.id %}" class="action-link">View</a>
+          <a href="{% url 'super_company_edit' pk=c.id %}" class="action-link">Edit</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

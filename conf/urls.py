@@ -1,33 +1,26 @@
-"""
-URL configuration for conf project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from adminpanel import views as admin_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
-    path('adminpanel/', include('adminpanel.urls')),
-    path('agents/', include('agents.urls')),
+    path('adminpanel/', admin_views.super_dashboard, name='super_dashboard'),
+    path('adminpanel/companies/', admin_views.super_companies, name='super_companies'),
+    path('adminpanel/companies/create/', admin_views.super_company_create, name='super_company_create'),
+    path('adminpanel/companies/<int:pk>/', admin_views.super_company_detail, name='super_company_detail'),
+    path('adminpanel/companies/<int:pk>/edit/', admin_views.super_company_edit, name='super_company_edit'),
+    path('adminpanel/candidates/', admin_views.super_candidates, name='super_candidates'),
+    path('adminpanel/positions/', admin_views.super_positions, name='super_positions'),
+    path('adminpanel/users/', admin_views.super_users, name='super_users'),
+    path('adminpanel/users/create/', admin_views.super_user_create, name='super_user_create'),
+    path('<slug:company_slug>/', include('adminpanel.urls')),
+    path('<slug:company_slug>/', include('frontend.urls')),
+    path('<slug:company_slug>/api/', include('api.urls')),
+    path('<slug:company_slug>/api/', include('agents.urls')),
     path('', include('frontend.urls')),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-    # this is a test

@@ -1,0 +1,66 @@
+{% extends 'adminpanel/super/super_base.html' %}
+{% block title %}New User — Super Admin{% endblock %}
+{% block page_title %}Create User{% endblock %}
+{% block content %}
+
+<style>
+  .form-card { max-width: 480px; }
+  .form-card label { display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; color: var(--color-text-muted); }
+  .form-card input, .form-card select {
+    width: 100%; padding: 10px 12px; margin-bottom: 16px; border-radius: 6px;
+    background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text);
+    font-family: inherit; font-size: 0.875rem;
+  }
+  .form-card input:focus, .form-card select:focus { outline: none; border-color: var(--color-primary); }
+  .form-card .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .form-card .checkbox-group input { width: auto; margin-bottom: 0; }
+  .btn-save {
+    padding: 10px 24px; background: var(--color-primary); color: #fff; border: none; border-radius: 6px;
+    font-family: inherit; font-weight: 600; font-size: 0.875rem; cursor: pointer;
+  }
+  .btn-save:hover { opacity: 0.9; }
+  .btn-cancel {
+    padding: 10px 24px; background: transparent; border: 1px solid var(--color-border); border-radius: 6px;
+    font-family: inherit; font-weight: 500; font-size: 0.875rem; color: var(--color-text-muted); cursor: pointer;
+    margin-left: 8px;
+  }
+  .btn-cancel:hover { color: var(--color-text); }
+</style>
+
+<div class="stat-card form-card">
+  <form method="post">
+    {% csrf_token %}
+    <label for="username">Username *</label>
+    <input type="text" id="username" name="username" required>
+
+    <label for="password">Password *</label>
+    <input type="password" id="password" name="password" required>
+
+    <label for="company">Company *</label>
+    <select id="company" name="company" required>
+      <option value="">— Select Company —</option>
+      {% for c in companies %}
+        <option value="{{ c.id }}">{{ c.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="role">Role</label>
+    <select id="role" name="role">
+      <option value="recruiter">Recruiter</option>
+      <option value="admin">Company Admin</option>
+      <option value="viewer">Viewer</option>
+    </select>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="is_superuser" name="is_superuser">
+      <label for="is_superuser" style="margin-bottom: 0;">Super Admin (full access)</label>
+    </div>
+
+    <div>
+      <button type="submit" class="btn-save">Create User</button>
+      <a href="{% url 'super_users' %}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

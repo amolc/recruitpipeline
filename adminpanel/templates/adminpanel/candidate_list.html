@@ -1,6 +1,6 @@
 {% extends 'adminpanel/base.html' %}
 
-{% block title %}Candidates — SolarSolutions Pipeline{% endblock %}
+{% block title %}Candidates — {{ company.name }} Pipeline{% endblock %}
 {% block page_title %}Candidates{% endblock %}
 
 {% block extra_head %}
@@ -76,11 +76,11 @@
       {% endfor %}
     </select>
     <button type="submit" class="btn-primary" style="padding:8px 14px;">Search</button>
-    {% if q or status_filter %}
-      <a href="{% url 'candidate_list' %}" class="btn-primary" style="background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border);">Clear</a>
+      {% if q or status_filter %}
+      <a href="{% url 'candidate_list' company_slug=company.slug %}" class="btn-primary" style="background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border);">Clear</a>
     {% endif %}
   </form>
-  <a href="{% url 'candidate_create' %}" class="btn-primary">+ Add Candidate</a>
+  <a href="{% url 'candidate_create' company_slug=company.slug %}" class="btn-primary">+ Add Candidate</a>
 </div>
 
 <div class="card-wrap">
@@ -127,9 +127,9 @@
           <td style="white-space:nowrap;">{{ c.submitted_at|date:"M d, Y" }}</td>
           <td>
             <div class="actions">
-              <a href="{% url 'candidate_detail' c.pk %}" class="btn-sm btn-view">View</a>
-              <a href="{% url 'candidate_edit' c.pk %}" class="btn-sm btn-edit">Edit</a>
-              <a href="{% url 'candidate_delete' c.pk %}" class="btn-sm btn-del">Del</a>
+              <a href="{% url 'candidate_detail' company_slug=company.slug pk=c.pk %}" class="btn-sm btn-view">View</a>
+              <a href="{% url 'candidate_edit' company_slug=company.slug pk=c.pk %}" class="btn-sm btn-edit">Edit</a>
+              <a href="{% url 'candidate_delete' company_slug=company.slug pk=c.pk %}" class="btn-sm btn-del">Del</a>
             </div>
           </td>
         </tr>

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SolarSolutions — Pipeline Login</title>
+  <title>{{ company.name }} — Pipeline Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --color-primary: #f59e0b;
+      --color-primary: {{ company.brand_color|default:'#f59e0b' }};
       --color-bg: #0f172a;
       --color-bg-card: #1e293b;
       --color-bg-input: #334155;
@@ -43,7 +43,7 @@
       text-align: center;
       margin-bottom: 8px;
     }
-    .login-card p {
+    .login-card .company-subtitle {
       text-align: center;
       color: var(--color-text-muted);
       font-size: 0.875rem;
@@ -84,7 +84,7 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    .btn:hover { background: #d97706; }
+    .btn:hover { opacity: 0.85; }
     .error {
       background: rgba(239, 68, 68, 0.12);
       color: var(--color-error);
@@ -99,7 +99,7 @@
 <body>
   <div class="login-card">
     <h1>Recruitment Pipeline</h1>
-    <p>SolarSolutions — Heartbeat Development</p>
+    <p class="company-subtitle">{{ company.name }}</p>
     {% if error %}
       <div class="error">{{ error }}</div>
     {% endif %}
@@ -107,7 +107,7 @@
       {% csrf_token %}
       <div class="form-group">
         <label for="username">Username</label>
-        <input id="username" name="username" type="text" placeholder="admin" required autofocus />
+        <input id="username" name="username" type="text" placeholder="Username" required autofocus />
       </div>
       <div class="form-group">
         <label for="password">Password</label>

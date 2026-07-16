@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RecruitPipeline — Multi-Tenant ATS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-primary: #f59e0b;
+      --color-bg: #0f172a;
+      --color-bg-card: #1e293b;
+      --color-bg-input: #334155;
+      --color-border: #475569;
+      --color-text: #f1f5f9;
+      --color-text-muted: #94a3b8;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 24px;
+    }
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+    .hero .highlight { color: var(--color-primary); }
+    .hero p {
+      color: var(--color-text-muted);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    .company-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .company-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s;
+    }
+    .company-card:hover {
+      border-color: var(--color-primary);
+    }
+    .company-card .name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .company-card .links {
+      display: flex;
+      gap: 8px;
+    }
+    .company-card .links a {
+      padding: 6px 14px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: inherit;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.15s;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--color-primary);
+      color: #0f172a;
+      border: none;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .btn-ghost:hover { color: var(--color-text); }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--color-text-muted);
+    }
+    .footer {
+      margin-top: 48px;
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.8125rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1><span class="highlight">Recruit</span>Pipeline</h1>
+      <p>Multi-tenant recruitment management system. Select your company to get started.</p>
+    </div>
+
+    {% if companies %}
+      <div class="company-grid">
+        {% for c in companies %}
+          <div class="company-card">
+            <span class="name">{{ c.name }}</span>
+            <div class="links">
+              <a href="{% url 'apply' company_slug=c.slug %}" class="btn-ghost">Apply</a>
+              <a href="{% url 'admin_login' company_slug=c.slug %}" class="btn-primary">Login</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>No companies registered yet. Create one via the Django admin panel at <code>/admin/</code>.</p>
+      </div>
+    {% endif %}
+
+    <div class="footer">
+      RecruitPipeline &mdash; Open Source ATS
+    </div>
+  </div>
+</body>
+</html>

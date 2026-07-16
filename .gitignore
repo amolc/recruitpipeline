@@ -12,3 +12,5 @@ staticfiles/
 .idea/
 .env
 .DS_Store
+db.sqlite3
+uploads/resumes/

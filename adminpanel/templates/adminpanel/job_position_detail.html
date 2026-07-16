@@ -1,7 +1,7 @@
 {% extends 'adminpanel/base.html' %}
 {% load pipeline_extras %}
 
-{% block title %}{{ position.title }} — Job Positions{% endblock %}
+{% block title %}{{ position.title }} — {{ company.name }} Jobs{% endblock %}
 {% block page_title %}{{ position.title }}{% endblock %}
 
 {% block extra_head %}
@@ -141,8 +141,8 @@
     {% endif %}
   </div>
   <div class="actions-bar">
-    <a href="{% url 'job_positions' %}" class="btn btn-back">← All Positions</a>
-    <a href="{% url 'job_position_edit' position.pk %}" class="btn btn-edit">✎ Edit</a>
+    <a href="{% url 'job_positions' company_slug=company.slug %}" class="btn btn-back">← All Positions</a>
+    <a href="{% url 'job_position_edit' company_slug=company.slug pk=position.pk %}" class="btn btn-edit">✎ Edit</a>
   </div>
 </div>
 
@@ -180,6 +180,7 @@
 <div id="csrfContainer" style="display:none">{% csrf_token %}</div>
 
 <script>
+  const slug = '{{ company.slug }}';
   const posPk = {{ position.pk }};
 
   function getCSRF() {
@@ -211,7 +212,7 @@
     form.append('description', desc);
     form.append('csrfmiddlewaretoken', getCSRF());
 
-    fetch(`/adminpanel/job-positions/${posPk}/automation/${stage}/`, { method: 'POST', body: form })
+    fetch(`/${slug}/job-positions/${posPk}/automation/${stage}/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) {
@@ -288,7 +289,7 @@
 
       const form = new FormData();
       form.append('status', newStage);
-      fetch(`/api/apply/${dragSrcId}/status/`, { method: 'POST', body: form })
+      fetch(`/${slug}/api/apply/${dragSrcId}/status/`, { method: 'POST', body: form })
         .then(r => r.json())
         .then(data => {
           if (data.success) location.reload();

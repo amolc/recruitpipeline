@@ -1,0 +1,77 @@
+{% extends 'adminpanel/super/super_base.html' %}
+{% block title %}{{ company.name }} — Super Admin{% endblock %}
+{% block page_title %}{{ company.name }}{% endblock %}
+{% block content %}
+
+<style>
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .mini-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 14px 16px; }
+  .mini-card .num { font-size: 1.3rem; font-weight: 800; color: var(--color-primary); }
+  .mini-card .label { font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .section-title { font-weight: 700; font-size: 0.875rem; margin-bottom: 12px; margin-top: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+  th { text-align: left; padding: 8px 12px; color: var(--color-text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--color-border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--color-border); }
+  .member-role { font-size: 0.75rem; color: var(--color-text-muted); }
+  .brand-bar {
+    height: 4px; border-radius: 2px; margin-bottom: 16px;
+  }
+</style>
+
+<div class="brand-bar" style="background: {{ company.brand_color }};"></div>
+
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+  <a href="{% url 'super_company_edit' pk=company.id %}" style="padding: 6px 14px; background: var(--color-primary); color: #fff; border-radius: 6px; font-weight: 600; font-size: 0.8125rem;">Edit Company</a>
+  <span style="font-size: 0.75rem; color: var(--color-text-muted);">Color: <span style="color: {{ company.brand_color }};">{{ company.brand_color }}</span> &middot; {% if company.is_active %}<span style="color: #22c55e;">Active</span>{% else %}<span style="color: var(--color-text-muted);">Inactive</span>{% endif %}</span>
+</div>
+
+<div class="grid">
+  <div class="mini-card"><div class="num">{{ stats.candidates }}</div><div class="label">Candidates</div></div>
+  <div class="mini-card"><div class="num">{{ stats.positions }}</div><div class="label">Positions</div></div>
+  <div class="mini-card"><div class="num">{{ stats.stages }}</div><div class="label">Stages</div></div>
+  <div class="mini-card"><div class="num">{{ stats.members }}</div><div class="label">Users</div></div>
+</div>
+
+<div class="stat-card">
+  <div class="section-title">Job Positions</div>
+  {% if positions %}
+  <table>
+    <thead><tr><th>Title</th><th>Location</th><th>Openings</th><th>Active</th></tr></thead>
+    <tbody>
+      {% for p in positions %}
+      <tr><td>{{ p.title }}</td><td style="color: var(--color-text-muted);">{{ p.location|default:'—' }}</td><td>{{ p.openings }}</td><td>{% if p.is_active %}● Active{% else %}○ Inactive{% endif %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p style="color: var(--color-text-muted);">No positions.</p>{% endif %}
+</div>
+
+<div class="stat-card">
+  <div class="section-title">Recent Candidates</div>
+  {% if candidates %}
+  <table>
+    <thead><tr><th>Name</th><th>Position</th><th>Email</th><th>Date</th></tr></thead>
+    <tbody>
+      {% for app in candidates %}
+      <tr><td>{{ app.full_name }}</td><td>{{ app.position_name }}</td><td style="color: var(--color-text-muted);">{{ app.email }}</td><td style="color: var(--color-text-muted);">{{ app.submitted_at|date:"d M Y" }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p style="color: var(--color-text-muted);">No candidates yet.</p>{% endif %}
+</div>
+
+<div class="stat-card">
+  <div class="section-title">Team Members</div>
+  {% if members %}
+  <table>
+    <thead><tr><th>Username</th><th>Role</th><th>Superuser</th></tr></thead>
+    <tbody>
+      {% for m in members %}
+      <tr><td>{{ m.user.username }}</td><td class="member-role">{{ m.role|title }}</td><td>{% if m.user.is_superuser %}★ Yes{% else %}—{% endif %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p style="color: var(--color-text-muted);">No members.</p>{% endif %}
+</div>
+
+{% endblock %}

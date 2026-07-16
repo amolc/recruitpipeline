@@ -10,7 +10,10 @@ from agents.extractor import process_cv
 
 @csrf_exempt
 @require_POST
-def extract_cv(request):
+def extract_cv(request, company_slug=None):
+    if not request.company:
+        return JsonResponse({'error': 'Company not found'}, status=404)
+
     application_id = request.POST.get('application_id')
     resume_file = request.FILES.get('resume')
 
@@ -22,7 +25,7 @@ def extract_cv(request):
 
     if application_id:
         try:
-            application = Application.objects.get(id=application_id)
+            application = Application.objects.get(company=request.company, id=application_id)
         except Application.DoesNotExist:
             return JsonResponse({'error': f'Application {application_id} not found'}, status=404)
 
@@ -42,6 +45,7 @@ def extract_cv(request):
 
         full_name = request.POST.get('full_name', resume_file.name)
         application = Application.objects.create(
+            company=request.company,
             full_name=full_name,
             email=request.POST.get('email', ''),
             phone=request.POST.get('phone', ''),

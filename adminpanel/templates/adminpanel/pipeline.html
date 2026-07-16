@@ -1,7 +1,7 @@
 {% extends 'adminpanel/base.html' %}
 {% load pipeline_extras %}
 
-{% block title %}Pipeline — SolarSolutions{% endblock %}
+{% block title %}Pipeline — {{ company.name }}{% endblock %}
 {% block page_title %}Pipeline Stages{% endblock %}
 
 {% block extra_head %}
@@ -56,7 +56,6 @@
   .auto-text { display: block; }
   .empty-state { text-align: center; padding: 60px 0; color: var(--color-text-muted); }
 
-  /* Add Stage Modal */
   .modal-overlay {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     align-items: center; justify-content: center; z-index: 100;
@@ -87,6 +86,7 @@
 
 {% block content %}
 <div id="csrfContainer" style="display:none">{% csrf_token %}</div>
+<div id="companySlug" style="display:none">{{ company.slug }}</div>
 
 <div class="toolbar">
   <p class="desc">Editable automation descriptions apply per-stage across all positions.</p>
@@ -111,7 +111,6 @@
   {% endfor %}
 </div>
 
-<!-- Add Stage Modal -->
 <div class="modal-overlay" id="addStageModal">
   <div class="modal">
     <h2>Add Pipeline Stage</h2>
@@ -119,9 +118,9 @@
     <input id="stageLabel" type="text" placeholder="e.g. Reference Check" autofocus />
     <label for="stageAfter">Insert After</label>
     <select id="stageAfter">
-      <option value="">— At the beginning —</option>
+      <option value="">— At the end —</option>
       {% for auto in automations %}
-        <option value="{{ auto.key }}" {% if forloop.last %}selected{% endif %}>{{ auto.label }}</option>
+        <option value="{{ auto.key }}">{{ auto.label }}</option>
       {% endfor %}
     </select>
     <div class="modal-actions">
@@ -132,6 +131,8 @@
 </div>
 
 <script>
+  const slug = document.getElementById('companySlug').textContent.trim();
+
   function getCSRF() {
     return document.querySelector('#csrfContainer input').value;
   }
@@ -153,7 +154,7 @@
     form.append('after', after);
     form.append('csrfmiddlewaretoken', getCSRF());
 
-    fetch('/adminpanel/pipeline/add/', { method: 'POST', body: form })
+    fetch(`/${slug}/pipeline/add/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -165,7 +166,7 @@
     if (!confirm('Delete stage "' + label + '"?\nApplications in this stage will be moved to "New".')) return;
     const form = new FormData();
     form.append('csrfmiddlewaretoken', getCSRF());
-    fetch('/adminpanel/pipeline/' + key + '/delete/', { method: 'POST', body: form })
+    fetch(`/${slug}/pipeline/${key}/delete/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -198,7 +199,7 @@
     form.append('description', desc);
     form.append('csrfmiddlewaretoken', getCSRF());
 
-    fetch('/adminpanel/pipeline/' + stage + '/', { method: 'POST', body: form })
+    fetch(`/${slug}/pipeline/${stage}/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) {

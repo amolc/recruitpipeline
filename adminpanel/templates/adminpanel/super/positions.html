@@ -1,0 +1,61 @@
+{% extends 'adminpanel/super/super_base.html' %}
+{% block title %}All Positions — Super Admin{% endblock %}
+{% block page_title %}All Positions{% endblock %}
+{% block content %}
+
+<style>
+  .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .filter-bar select {
+    padding: 8px 12px; border-radius: 6px; background: var(--color-bg); border: 1px solid var(--color-border);
+    color: var(--color-text); font-family: inherit; font-size: 0.8125rem;
+  }
+  .filter-bar select:focus { outline: none; border-color: var(--color-primary); }
+  .filter-bar button {
+    padding: 8px 16px; background: var(--color-primary); color: #fff; border: none; border-radius: 6px;
+    font-family: inherit; font-weight: 600; font-size: 0.8125rem; cursor: pointer;
+  }
+  .filter-bar .clear-link { color: var(--color-text-muted); font-size: 0.8125rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+  th { text-align: left; padding: 10px 12px; color: var(--color-text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--color-border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--color-border); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .company-badge {
+    display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 500;
+  }
+</style>
+
+<div class="stat-card" style="padding: 16px;">
+  <form method="get" class="filter-bar">
+    <select name="company">
+      <option value="">All Companies</option>
+      {% for c in companies %}
+        <option value="{{ c.slug }}" {% if company_filter == c.slug %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+    {% if company_filter %}
+      <a href="{% url 'super_positions' %}" class="clear-link">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<div class="stat-card" style="padding: 0; overflow-x: auto;">
+  <table>
+    <thead><tr><th>Title</th><th>Company</th><th>Location</th><th>Openings</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for p in positions %}
+      <tr>
+        <td>{{ p.title }}</td>
+        <td><span class="company-badge" style="background: {{ p.company.brand_color }}22; color: {{ p.company.brand_color }};">{{ p.company.name }}</span></td>
+        <td style="color: var(--color-text-muted);">{{ p.location|default:'—' }}</td>
+        <td>{{ p.openings }}</td>
+        <td>{% if p.is_active %}● Active{% else %}○ Inactive{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="color: var(--color-text-muted); text-align: center; padding: 20px;">No positions found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

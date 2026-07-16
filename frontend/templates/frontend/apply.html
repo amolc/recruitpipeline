@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Join {{ company.name }} — Apply now" />
+  <title>{{ company.name }} — Careers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --color-primary: {{ company.brand_color|default:'#f59e0b' }};
+      --color-primary-dark: #d97706;
+      --color-bg: #0f172a;
+      --color-bg-card: #1e293b;
+      --color-bg-input: #334155;
+      --color-text: #f1f5f9;
+      --color-text-muted: #94a3b8;
+      --color-border: #475569;
+      --color-success: #22c55e;
+      --color-error: #ef4444;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page { display: flex; flex-direction: column; min-height: 100vh; }
+    .container { width: 100%; max-width: 820px; margin: 0 auto; padding: 0 24px; }
+
+    .header {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--color-border);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--color-primary);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+    .highlight { color: var(--color-primary); }
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: var(--color-text-muted);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .main { flex: 1; padding-bottom: 80px; }
+    .form-section {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 40px;
+    }
+    .form-header { margin-bottom: 32px; }
+    .form-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .form-header p {
+      color: var(--color-text-muted);
+      font-size: 0.9375rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--color-text);
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: var(--color-text-muted); }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+    }
+    .form-group input.error,
+    .form-group select.error,
+    .form-group textarea.error { border-color: var(--color-error); }
+    .form-group select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .field-error {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--color-error);
+      margin-top: 4px;
+    }
+
+    .file-input { position: relative; }
+    .file-input input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .file-placeholder {
+      display: block;
+      padding: 12px 14px;
+      font-size: 0.9375rem;
+      color: var(--color-text-muted);
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      pointer-events: none;
+    }
+    .file-input:hover .file-placeholder { border-color: var(--color-primary); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 32px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary {
+      width: 100%;
+      background: var(--color-primary);
+      color: #0f172a;
+      margin-top: 8px;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+
+    .success-card {
+      display: none;
+      text-align: center;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 60px 40px;
+      margin-top: 60px;
+    }
+    .success-card.visible { display: block; }
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--color-success);
+      font-size: 1.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .success-card h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .success-card p {
+      color: var(--color-text-muted);
+      max-width: 480px;
+      margin: 0 auto 32px;
+      font-size: 0.9375rem;
+    }
+    .success-card .btn {
+      background: var(--color-primary);
+      color: #0f172a;
+    }
+    .success-card .btn:hover { opacity: 0.85; }
+
+    .footer {
+      text-align: center;
+      padding: 24px 0;
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      font-size: 0.8125rem;
+    }
+
+    @media (max-width: 640px) {
+      .hero { padding: 48px 0 40px; }
+      .hero h1 { font-size: 1.75rem; }
+      .hero-subtitle { font-size: 1rem; }
+      .form-section { padding: 24px; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="container">
+        <span class="logo">{{ company.name }}</span>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <span class="hero-badge">Now Hiring</span>
+          <h1>Join the <span class="highlight">{{ company.name }}</span> Team</h1>
+          <p class="hero-subtitle">
+            We are looking for talented individuals to join our growing team.
+            Apply below and we will be in touch.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <main class="main">
+      <div class="container">
+        <div class="form-section" id="formSection">
+          <div class="form-header">
+            <h2>Apply Now</h2>
+            <p>Fill out the form below to apply for a position at {{ company.name }}.</p>
+          </div>
+
+          <form id="recruitForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input id="fullName" name="fullName" type="text" placeholder="John Doe" />
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input id="email" name="email" type="email" placeholder="john@company.com" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input id="phone" name="phone" type="tel" placeholder="+1 (555) 123-4567" />
+              </div>
+              <div class="form-group">
+                <label for="position">Position</label>
+                <select id="position" name="position">
+                  <option value="">Select a position</option>
+                  {% for pos in positions %}
+                    <option value="{{ pos.title }}">{{ pos.title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="experience">Years of Experience</label>
+                <input id="experience" name="experience" type="number" min="0" max="50" placeholder="0" />
+              </div>
+              <div class="form-group">
+                <label for="resume">Resume / CV (optional)</label>
+                <div class="file-input">
+                  <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx" />
+                  <span class="file-placeholder" id="resumeLabel">Upload file (PDF, DOC)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="coverLetter">Why do you want to join us?</label>
+              <textarea id="coverLetter" name="coverLetter" rows="5"
+                placeholder="Tell us about your experience and what you would bring to the team..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Application</button>
+          </form>
+        </div>
+
+        <div class="success-card" id="successCard">
+          <div class="success-icon">&#10003;</div>
+          <h2>Application Received</h2>
+          <p>
+            Thank you for applying to <strong>{{ company.name }}</strong>.
+            We will review your application and get back to you within 5–7 business days.
+          </p>
+          <button class="btn" id="resetBtn">Submit Another Application</button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; <span id="year"></span> {{ company.name }}. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const slug = '{{ company.slug }}';
+    const form = document.getElementById('recruitForm');
+    const formSection = document.getElementById('formSection');
+    const successCard = document.getElementById('successCard');
+    const resetBtn = document.getElementById('resetBtn');
+    const resumeInput = document.getElementById('resume');
+    const resumeLabel = document.getElementById('resumeLabel');
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    resumeInput.addEventListener('change', () => {
+      resumeLabel.textContent = resumeInput.files[0]
+        ? resumeInput.files[0].name
+        : 'Upload file (PDF, DOC)';
+    });
+
+    const fields = [
+      { id: 'fullName', label: 'Full name is required' },
+      { id: 'email', label: 'Email is required', validate: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Invalid email address' },
+      { id: 'phone', label: 'Phone number is required' },
+      { id: 'position', label: 'Please select a position' },
+      { id: 'experience', label: 'Years of experience is required' },
+      { id: 'coverLetter', label: 'Please tell us about yourself' },
+    ];
+
+    function showError(id, msg) {
+      const input = document.getElementById(id);
+      const existing = input.parentElement.querySelector('.field-error');
+      if (existing) existing.remove();
+      input.classList.add('error');
+      if (msg) {
+        const el = document.createElement('span');
+        el.className = 'field-error';
+        el.textContent = msg;
+        input.parentElement.appendChild(el);
+      }
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.field-error').forEach((e) => e.remove());
+      document.querySelectorAll('.error').forEach((e) => e.classList.remove('error'));
+    }
+
+    function validate() {
+      clearErrors();
+      let valid = true;
+      for (const field of fields) {
+        const input = document.getElementById(field.id);
+        const value = input.value.trim();
+        if (!value) {
+          showError(field.id, field.label);
+          valid = false;
+        } else if (field.validate) {
+          const result = field.validate(value);
+          if (result !== true) {
+            showError(field.id, result);
+            valid = false;
+          }
+        }
+      }
+      return valid;
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!validate()) return;
+
+      const data = new FormData(form);
+      fetch(`/${slug}/api/apply/`, { method: 'POST', body: data })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.success) {
+            form.reset();
+            resumeLabel.textContent = 'Upload file (PDF, DOC)';
+            clearErrors();
+            formSection.style.display = 'none';
+            successCard.classList.add('visible');
+          }
+        })
+        .catch(() => {
+          form.reset();
+          resumeLabel.textContent = 'Upload file (PDF, DOC)';
+          clearErrors();
+          formSection.style.display = 'none';
+          successCard.classList.add('visible');
+        });
+    });
+
+    resetBtn.addEventListener('click', () => {
+      successCard.classList.remove('visible');
+      formSection.style.display = 'block';
+    });
+  </script>
+</body>
+</html>

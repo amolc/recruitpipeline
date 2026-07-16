@@ -1,5 +1,5 @@
-from django.core.management.base import BaseCommand
-from api.models import JobPosition
+from django.core.management.base import BaseCommand, CommandError
+from api.models import Company, JobPosition
 
 POSITIONS = [
     'Solar Panel Fabricator',
@@ -13,12 +13,27 @@ POSITIONS = [
 ]
 
 class Command(BaseCommand):
-    help = 'Seeds job positions from the frontend form'
+    help = 'Seeds job positions for a company'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--company', type=str, required=True, help='Company slug')
 
     def handle(self, *args, **options):
+        slug = options['company']
+        try:
+            company = Company.objects.get(slug=slug)
+        except Company.DoesNotExist:
+            raise CommandError(f'Company with slug "{slug}" not found')
+
         created = 0
         for title in POSITIONS:
-            _, is_new = JobPosition.objects.get_or_create(title=title)
+            _, is_new = JobPosition.objects.get_or_create(
+                company=company,
+                title=title,
+                defaults={'company': company},
+            )
             if is_new:
                 created += 1
-        self.stdout.write(self.style.SUCCESS(f'Seeded {created} position(s) ({len(POSITIONS)} total)'))
+        self.stdout.write(self.style.SUCCESS(
+            f'Seeded {created} position(s) for "{company.name}" ({len(POSITIONS)} total)'
+        ))

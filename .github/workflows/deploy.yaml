@@ -18,7 +18,7 @@ jobs:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           HOSTNAME: forecast.quantbots.co
           USER_NAME: ubuntu
-          TARGET_DIR: /home/ubuntu/expressit
+          TARGET_DIR: /home/ubuntu/recruitpipeline
         run: |
           # 1. Setup SSH Key
           if [ -z "$PRIVATE_KEY" ]; then
@@ -29,12 +29,12 @@ jobs:
           
           # 2. Pull latest code on remote server
           ssh -i private_key -o StrictHostKeyChecking=no ${USER_NAME}@${HOSTNAME} << 'EOF'
-            cd /home/ubuntu/expressit
+            cd /home/ubuntu/recruitpipeline
             git pull origin main
-            chmod +x runcpr.sh
+            chmod +x runpipeline.sh
             source venv/bin/activate
             python manage.py migrate
             echo "Restarting services..."
-            pm2 restart runcpr
+            pm2 restart runpipeline.sh
             echo "Deployment completed successfully!"
           EOF

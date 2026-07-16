@@ -1,0 +1,275 @@
+{
+  "info": {
+    "name": "Recruit Pipeline",
+    "description": "API collection for the Recruit Pipeline — CV extraction, applications, job positions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "CV Extraction",
+      "item": [
+        {
+          "name": "Extract by Application ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/agents/extract/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agents",
+                "extract",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "application_id",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"application_id\": 1,\n  \"candidate_name\": \"John Doe\",\n  \"summary\": \"Experienced software engineer with 8+ years building scalable web applications.\",\n  \"skills\": [\n    { \"name\": \"Python\", \"category\": \"Technical\", \"level\": \"expert\" },\n    { \"name\": \"Django\", \"category\": \"Technical\", \"level\": \"expert\" },\n    { \"name\": \"JavaScript\", \"category\": \"Technical\", \"level\": \"advanced\" }\n  ],\n  \"experience\": [\n    {\n      \"company\": \"Tech Corp\",\n      \"title\": \"Senior Developer\",\n      \"start_date\": \"Jan 2020\",\n      \"end_date\": \"Present\",\n      \"description\": \"Leading backend development team.\",\n      \"technologies\": [\"Python\", \"Django\", \"PostgreSQL\"]\n    }\n  ],\n  \"education\": [\n    {\n      \"institution\": \"MIT\",\n      \"degree\": \"B.Sc\",\n      \"field\": \"Computer Science\",\n      \"graduation_year\": \"2015\",\n      \"gpa\": null\n    }\n  ],\n  \"certifications\": [\n    { \"name\": \"AWS Solutions Architect\", \"issuer\": \"Amazon\", \"year\": \"2021\" }\n  ],\n  \"languages\": [\n    { \"language\": \"English\", \"proficiency\": \"native\" }\n  ],\n  \"contact\": {\n    \"email\": \"john@example.com\",\n    \"phone\": \"+1-555-0100\",\n    \"linkedin\": \"https://linkedin.com/in/johndoe\",\n    \"location\": \"San Francisco, CA\"\n  },\n  \"total_experience_years\": 8,\n  \"extracted_at\": \"2026-07-15T12:00:00+00:00\"\n}"
+            },
+            {
+              "name": "Application Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\"error\": \"Application 999 not found\"}"
+            },
+            {
+              "name": "No Text Extracted",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\"error\": \"Could not extract text from file\", \"raw_text\": \"[No text extracted]\"}"
+            }
+          ]
+        },
+        {
+          "name": "Extract by Uploading Resume",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/agents/extract/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agents",
+                "extract",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "resume",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select a PDF, DOCX, or TXT file"
+                },
+                {
+                  "key": "full_name",
+                  "value": "Jane Smith",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "jane@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "+1-555-0200",
+                  "type": "text"
+                },
+                {
+                  "key": "position",
+                  "value": "Backend Engineer",
+                  "type": "text"
+                },
+                {
+                  "key": "experience",
+                  "value": "5",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 2,\n  \"application_id\": 2,\n  \"candidate_name\": \"Jane Smith\",\n  \"summary\": \"...\",\n  \"skills\": [],\n  \"experience\": [],\n  \"education\": [],\n  \"certifications\": [],\n  \"languages\": [],\n  \"contact\": {},\n  \"total_experience_years\": null,\n  \"extracted_at\": \"2026-07-15T12:00:00+00:00\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Endpoints to extract structured data from CV/resume files using AI or rule-based parsing."
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Submit Application",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/apply/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "apply",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fullName",
+                  "value": "John Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "john@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "+1-555-0100",
+                  "type": "text"
+                },
+                {
+                  "key": "position",
+                  "value": "Senior Developer",
+                  "type": "text"
+                },
+                {
+                  "key": "experience",
+                  "value": "8",
+                  "type": "text"
+                },
+                {
+                  "key": "coverLetter",
+                  "value": "I am excited to apply...",
+                  "type": "text"
+                },
+                {
+                  "key": "resume",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "code": 200,
+              "body": "{\"success\": true, \"id\": 1}"
+            }
+          ]
+        },
+        {
+          "name": "Update Status",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/apply/1/status/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "apply",
+                "1",
+                "status",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "status",
+                  "value": "screening",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "code": 200,
+              "body": "{\"success\": true, \"status\": \"screening\"}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Job Positions",
+      "item": [
+        {
+          "name": "List Active Positions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/positions/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "positions",
+                ""
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "code": 200,
+              "body": "[{\"id\": 1, \"title\": \"Senior Developer\"}]"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8500",
+      "type": "string"
+    }
+  ]
+}

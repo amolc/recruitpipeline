@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'frontend',
     'adminpanel',
     'api',
+    'agents',
 ]
 
 MIDDLEWARE = [

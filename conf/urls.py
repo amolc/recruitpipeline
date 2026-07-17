@@ -19,6 +19,7 @@ urlpatterns = [
     path('adminpanel/users/create/', admin_views.super_user_create, name='super_user_create'),
     path('candidate/', include('frontend.candidate_urls')),
     path('recruitpanel/', include('recruitpanel.urls')),
+    path('login/', frontend_views.login_view, name='login'),
     path('choose-role/', frontend_views.choose_role, name='choose_role'),
     path('register/', frontend_views.register_company, name='register_company'),
     path('<slug:company_slug>/', include('adminpanel.urls')),

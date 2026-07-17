@@ -2,7 +2,7 @@ from django.http import Http404
 from api.models import Company
 
 
-EXCLUDED_PREFIXES = ('admin', 'super', 'superadmin', 'panel', 'candidate', 'api', 'static', 'media', 'register', 'recruitpanel', 'choose-role')
+EXCLUDED_PREFIXES = ('admin', 'super', 'superadmin', 'panel', 'candidate', 'api', 'static', 'media', 'register', 'recruitpanel', 'choose-role', 'login')
 
 
 class CompanyMiddleware:

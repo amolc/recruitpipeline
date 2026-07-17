@@ -9,6 +9,61 @@ from api.models import Company, JobPosition, UserAuth, UserRole
 User = get_user_model()
 
 
+def login_view(request):
+    if request.user.is_authenticated:
+        roles = request.user.roles.filter(is_active=True)
+        if roles.filter(role='recruiter').exists():
+            return redirect('recruitpanel:recruitpanel_dashboard')
+        if roles.filter(role='candidate').exists():
+            return redirect('candidate_dashboard')
+        if roles.filter(role='superadmin').exists():
+            return redirect('superadmin:superadmin_dashboard')
+        logout(request)
+
+    error = None
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        pin = request.POST.get('pin', '').strip()
+
+        if not phone or not pin:
+            error = 'Phone number and PIN are required.'
+        else:
+            user = authenticate(request, phone=phone, pin=pin)
+            if user is None:
+                if UserAuth.objects.filter(phone=phone).exists():
+                    error = 'Invalid PIN.'
+                else:
+                    username = phone
+                    base_username = username
+                    counter = 1
+                    while User.objects.filter(username=username).exists():
+                        username = f'{base_username}-{counter}'
+                        counter += 1
+
+                    secretname = f'user{phone[-4:]}'
+                    user = User.objects.create_user(username=username)
+                    user_auth = UserAuth.objects.create(user=user, phone=phone, secretname=secretname)
+                    user_auth.set_pin(pin)
+                    user_auth.save()
+                    user = authenticate(request, phone=phone, pin=pin)
+
+            if user:
+                login(request, user)
+                active_roles = user.roles.filter(is_active=True)
+                count = active_roles.count()
+
+                if count == 1:
+                    role = active_roles.first()
+                    request.session['role'] = role.role
+                    if role.company:
+                        request.session['company_id'] = role.company.id
+                    return redirect(role_redirect_url(role.role))
+                else:
+                    return redirect('choose_role')
+
+    return render(request, 'frontend/login.html', {'error': error})
+
+
 def role_redirect_url(role):
     from django.urls import reverse
     mapping = {
@@ -41,57 +96,13 @@ def landing(request):
             return redirect('superadmin:superadmin_dashboard')
         logout(request)
 
-    error = None
-    if request.method == 'POST':
-        phone = request.POST.get('phone', '').strip()
-        pin = request.POST.get('pin', '').strip()
-
-        if not phone or not pin:
-            error = 'Phone number and PIN are required.'
-        else:
-            user = authenticate(request, phone=phone, pin=pin)
-            if user is None:
-                auth_exists = UserAuth.objects.filter(phone=phone).exists()
-                if auth_exists:
-                    error = 'Invalid PIN.'
-                else:
-                    username = phone
-                    base_username = username
-                    counter = 1
-                    while User.objects.filter(username=username).exists():
-                        username = f'{base_username}-{counter}'
-                        counter += 1
-
-                    secretname = f'user{phone[-4:]}'
-                    user = User.objects.create_user(username=username)
-                    user_auth = UserAuth.objects.create(user=user, phone=phone, secretname=secretname)
-                    user_auth.set_pin(pin)
-                    user_auth.save()
-                    user = authenticate(request, phone=phone, pin=pin)
-
-            if user:
-                login(request, user)
-                active_roles = user.roles.filter(is_active=True)
-                count = active_roles.count()
-
-                if count == 1:
-                    role = active_roles.first()
-                    request.session['role'] = role.role
-                    if role.company:
-                        request.session['company_id'] = role.company.id
-                    return redirect(role_redirect_url(role.role))
-                else:
-                    return redirect('choose_role')
-
-    return render(request, 'frontend/landing.html', {
-        'error': error,
-        'companies': Company.objects.filter(is_active=True),
-    })
+    companies = Company.objects.filter(is_active=True)
+    return render(request, 'frontend/landing.html', {'companies': companies})
 
 
 def choose_role(request):
     if not request.user.is_authenticated:
-        return redirect('landing')
+        return redirect('login')
 
     error = None
     if request.method == 'POST':
@@ -120,7 +131,7 @@ def register_company(request):
 
         if not phone or not name:
             messages.error(request, 'Phone number and company name are required.')
-            return redirect('landing')
+            return redirect('register_company')
 
         slug = re.sub(r'[^a-z0-9-]+', '-', name.lower()).strip('-')
         if not slug:
@@ -142,9 +153,9 @@ def register_company(request):
             user = request.user
         else:
             if UserAuth.objects.filter(phone=phone).exists():
-                messages.error(request, 'This phone number is already registered.')
+                messages.error(request, 'This phone number is already registered. Please sign in.')
                 company.delete()
-                return redirect('landing')
+                return redirect('login')
 
             username = phone
             base_username = username

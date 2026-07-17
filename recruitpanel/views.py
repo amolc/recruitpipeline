@@ -75,7 +75,7 @@ def dashboard(request):
 
 def logout_view(request):
     logout(request)
-    return redirect(RECRUIT_LOGIN)
+    return redirect('landing')
 
 
 # ── Registration ──

@@ -21,8 +21,44 @@ def candidate_required(view_func):
 
 
 def landing(request):
-    companies = Company.objects.filter(is_active=True)
-    return render(request, 'frontend/landing.html', {'companies': companies})
+    if request.user.is_authenticated:
+        roles = request.user.roles.filter(is_active=True)
+        if roles.filter(role='recruiter').exists():
+            return redirect('recruitpanel:recruitpanel_dashboard')
+        if roles.filter(role='candidate').exists():
+            return redirect('candidate_dashboard')
+        if roles.filter(role='superadmin').exists():
+            return redirect('superadmin:superadmin_dashboard')
+        logout(request)
+
+    error = None
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        pin = request.POST.get('pin', '').strip()
+        portal = request.POST.get('portal', '')
+        user = authenticate(request, phone=phone, pin=pin)
+        if user:
+            if portal == 'recruiter' and user.roles.filter(role='recruiter', is_active=True).exists():
+                login(request, user)
+                request.session['role'] = 'recruiter'
+                role = user.roles.filter(role='recruiter', is_active=True).first()
+                if role.company:
+                    request.session['company_id'] = role.company.id
+                return redirect('recruitpanel:recruitpanel_dashboard')
+            elif portal == 'candidate' and user.roles.filter(role='candidate', is_active=True).exists():
+                login(request, user)
+                request.session['role'] = 'candidate'
+                return redirect('candidate_dashboard')
+            elif portal == 'superadmin' and user.roles.filter(role='superadmin', is_active=True).exists():
+                login(request, user)
+                request.session['role'] = 'superadmin'
+                return redirect('superadmin:superadmin_dashboard')
+            else:
+                error = f'You do not have {portal} access.'
+        else:
+            error = 'Invalid phone or PIN.'
+
+    return render(request, 'frontend/landing.html', {'error': error})
 
 
 def register_company(request):
@@ -89,7 +125,7 @@ def register_company(request):
         )
         return redirect('recruitpanel:recruitpanel_dashboard')
 
-    return redirect('landing')
+    return render(request, 'frontend/register.html')
 
 
 def apply(request, company_slug=None):
@@ -131,4 +167,4 @@ def candidate_dashboard(request, company_slug=None):
 
 def candidate_logout(request, company_slug=None):
     logout(request)
-    return redirect('candidate_login')
+    return redirect('landing')

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Recruitme — Login</title>
+  <title>Recruitme — Register</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -45,7 +45,7 @@
       border-radius: var(--radius);
       padding: 40px;
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       box-shadow: var(--shadow-md);
     }
 
@@ -79,7 +79,7 @@
     }
 
     .form-group input,
-    .form-group select {
+    .form-group textarea {
       width: 100%;
       padding: 11px 13px;
       font-size: 0.9375rem;
@@ -93,10 +93,12 @@
     }
 
     .form-group input:focus,
-    .form-group select:focus {
+    .form-group textarea:focus {
       border-color: var(--color-primary);
       box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
     }
+
+    .form-group textarea { resize: vertical; }
 
     .btn-submit {
       width: 100%;
@@ -156,7 +158,7 @@
 <body>
   <div class="card">
     <a href="{% url 'landing' %}" class="logo">recruit<span>me</span></a>
-    <p class="subtitle">Sign in to access your portal</p>
+    <p class="subtitle">Register your company to get started</p>
 
     {% if messages %}
       {% for m in messages %}
@@ -164,34 +166,25 @@
       {% endfor %}
     {% endif %}
 
-    {% if error %}
-      <div class="msg msg-error">{{ error }}</div>
-    {% endif %}
-
-    <form method="post" action="{% url 'landing' %}">
+    <form method="post" action="{% url 'register_company' %}">
       {% csrf_token %}
       <div class="form-group">
-        <label for="phone">Phone Number</label>
-        <input id="phone" name="phone" type="tel" placeholder="+919876543210" required autocomplete="tel" />
+        <label for="phone">Mobile Number *</label>
+        <input id="phone" name="phone" type="tel" placeholder="+919876543210" required />
       </div>
       <div class="form-group">
-        <label for="pin">Secret PIN</label>
-        <input id="pin" name="pin" type="password" placeholder="Enter your 4-digit PIN" required autocomplete="off" />
+        <label for="name">Company Name *</label>
+        <input id="name" name="name" type="text" placeholder="e.g. Acme Corp" required />
       </div>
       <div class="form-group">
-        <label for="portal">I want to go to</label>
-        <select id="portal" name="portal" required>
-          <option value="">— Select portal —</option>
-          <option value="recruiter">Recruiter Panel</option>
-          <option value="candidate">Candidate Portal</option>
-          <option value="superadmin">Admin Panel</option>
-        </select>
+        <label for="address">Address <span style="font-weight:400;color:var(--color-text-muted);">(optional)</span></label>
+        <textarea id="address" name="address" rows="2" placeholder="Street, city, state, zip"></textarea>
       </div>
-      <button type="submit" class="btn-submit">Sign In</button>
+      <button type="submit" class="btn-submit">Register Company</button>
     </form>
 
     <div class="footer-links">
-      New company? <a href="{% url 'register_company' %}">Register here</a>
+      Already have an account? <a href="{% url 'landing' %}">Sign in</a>
     </div>
   </div>
 </body>

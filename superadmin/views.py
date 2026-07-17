@@ -58,4 +58,4 @@ def dashboard(request):
 
 def logout_view(request):
     logout(request)
-    return redirect(SUPERADMIN_LOGIN)
+    return redirect('landing')

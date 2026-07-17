@@ -3,8 +3,10 @@ import re
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from api.models import Company, JobPosition
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from api.models import Company, JobPosition, UserAuth, UserRole
+
+User = get_user_model()
 
 
 def candidate_required(view_func):
@@ -25,12 +27,20 @@ def landing(request):
 
 def register_company(request):
     if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
         name = request.POST.get('name', '').strip()
-        if not name:
-            messages.error(request, 'Company name is required.')
+
+        if not phone or not name:
+            messages.error(request, 'Phone number and company name are required.')
+            return redirect('landing')
+
+        if UserAuth.objects.filter(phone=phone).exists():
+            messages.error(request, 'This phone number is already registered.')
             return redirect('landing')
 
         slug = re.sub(r'[^a-z0-9-]+', '-', name.lower()).strip('-')
+        if not slug:
+            slug = 'company'
         original_slug = slug
         counter = 1
         while Company.objects.filter(slug=slug).exists():
@@ -43,8 +53,35 @@ def register_company(request):
             address=request.POST.get('address', '').strip(),
             summary=request.POST.get('summary', '').strip(),
         )
-        messages.success(request, f'"{name}" registered! You can now log in.')
-        return redirect('landing')
+
+        username = phone
+        base_username = username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f'{base_username}-{counter}'
+            counter += 1
+
+        pin = phone[-4:]
+        secretname = re.sub(r'[^a-z0-9]', '', name.lower())[:20] or 'recruiter'
+
+        user = User.objects.create_user(username=username)
+        user_auth = UserAuth.objects.create(user=user, phone=phone, secretname=secretname)
+        user_auth.set_pin(pin)
+        user_auth.save()
+
+        UserRole.objects.create(
+            user=user,
+            role='recruiter',
+            company=company,
+            sub_role='admin',
+            is_active=True,
+        )
+
+        messages.success(
+            request,
+            f'Company "{name}" registered! Your login PIN is <strong>{pin}</strong>.',
+        )
+        return redirect('recruitpanel:recruitpanel_login', company_slug=company.slug)
 
     return redirect('landing')
 

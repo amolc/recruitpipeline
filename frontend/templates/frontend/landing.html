@@ -783,23 +783,26 @@
     <div class="container">
       <div class="register-card">
         <h2>Register Your Company</h2>
-        <p class="subtitle">Get started with Recruitme and start hiring top talent.</p>
+        <p class="subtitle">Enter your mobile number and company name to get started.</p>
         <form method="post" action="{% url 'register_company' %}">
           {% csrf_token %}
+          <div class="form-group">
+            <label for="reg_phone">Mobile Number *</label>
+            <input id="reg_phone" name="phone" type="tel" placeholder="+919876543210" required />
+          </div>
           <div class="form-group">
             <label for="reg_name">Company Name *</label>
             <input id="reg_name" name="name" type="text" placeholder="e.g. Acme Corp" required />
           </div>
-          <div class="form-group">
-            <label for="reg_address">Address</label>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label for="reg_address">Address <span style="font-weight:400;color:var(--color-text-muted);">(optional)</span></label>
             <textarea id="reg_address" name="address" rows="2" placeholder="Street, city, state, zip"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="reg_summary">Summary</label>
-            <textarea id="reg_summary" name="summary" rows="3" placeholder="Tell candidates what makes your company great…"></textarea>
           </div>
           <button type="submit" class="btn-submit">Register Company</button>
         </form>
+        <p style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--color-text-muted);">
+          Your login PIN will be the last 4 digits of your phone number.
+        </p>
       </div>
     </div>
   </section>

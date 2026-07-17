@@ -1,5 +1,5 @@
 from django.http import Http404
-from api.models import Company
+from api.models import Company, UserRole
 
 
 EXCLUDED_PREFIXES = ('admin', 'super', 'superadmin', 'panel', 'candidate', 'api', 'static', 'media', 'register', 'recruitpanel', 'choose-role', 'login')
@@ -23,4 +23,14 @@ class CompanyMiddleware:
                 request.company = Company.objects.get(pk=request.session['company_id'])
             except Company.DoesNotExist:
                 pass
+
+        # Expose companies the current user is a recruiter for (used in recruitpanel header)
+        request.user_companies = []
+        if request.user.is_authenticated:
+            request.user_companies = list(Company.objects.filter(
+                userrole__user=request.user,
+                userrole__role='recruiter',
+                userrole__is_active=True,
+            ).distinct())
+
         return self.get_response(request)

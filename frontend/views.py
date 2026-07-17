@@ -117,6 +117,9 @@ def choose_role(request):
             request.session['role'] = 'candidate'
             return redirect('candidate_dashboard')
         elif selected == 'recruiter':
+            if request.user.roles.filter(role='recruiter', is_active=True).exists():
+                request.session['role'] = 'recruiter'
+                return redirect('recruitpanel:recruitpanel_dashboard')
             return redirect('register_company')
         else:
             error = 'Please select a role.'

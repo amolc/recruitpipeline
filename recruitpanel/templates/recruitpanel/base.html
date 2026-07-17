@@ -269,8 +269,27 @@
   </div>
 
   <div class="header">
-    <div class="header-title">{% block page_title %}Dashboard{% endblock %}</div>
+    <div class="header-title">
+      {% block page_title %}Dashboard{% endblock %}
+      {% if company %}
+        <span style="font-weight:400;font-size:0.8125rem;color:var(--text-muted);margin-left:8px;">{{ company.name }}</span>
+      {% endif %}
+    </div>
     <div class="header-right">
+      {% if request.user_companies %}
+      <select id="companySelect" onchange="switchCompany(this.value)" style="max-width:200px;padding:6px 10px;font-size:0.8125rem;">
+        {% for c in request.user_companies %}
+          <option value="{{ c.id }}" {% if company and c.id == company.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+        <option value="__add__">+ Add Company</option>
+      </select>
+      <script>
+        function switchCompany(val) {
+          if (val === '__add__') { window.location.href = "{% url 'recruitpanel:add_company' %}"; return; }
+          window.location.href = '/recruitpanel/switch-company/' + val + '/';
+        }
+      </script>
+      {% endif %}
       <span>{{ user.get_username }}</span>
       <a href="{% url 'recruitpanel:recruitpanel_logout' %}" class="logout-btn">Sign Out</a>
     </div>

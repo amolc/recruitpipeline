@@ -1,0 +1,32 @@
+{% extends 'recruitpanel/base.html' %}
+{% block title %}Add Company — RecruitPanel{% endblock %}
+{% block page_title %}Add Company{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Add Company</h1>
+</div>
+
+<div class="card" style="max-width:560px;">
+  <div class="card-body">
+    <form method="post" action="{% url 'recruitpanel:add_company' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="name">Company Name *</label>
+        <input id="name" name="name" type="text" placeholder="e.g. Acme Corp" required />
+      </div>
+      <div class="form-group">
+        <label for="address">Address <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+        <textarea id="address" name="address" rows="2" placeholder="Street, city, state, zip"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="summary">Summary <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+        <textarea id="summary" name="summary" rows="3" placeholder="Brief description of the company"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <a href="{% url 'recruitpanel:recruitpanel_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Create Company</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

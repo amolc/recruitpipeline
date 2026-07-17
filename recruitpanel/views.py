@@ -31,6 +31,17 @@ def recruiter_required(view_func):
     return wrapper
 
 
+def recruiter_active(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect(RECRUIT_LOGIN)
+        if not request.user.roles.filter(role='recruiter', is_active=True).exists():
+            return redirect(RECRUIT_LOGIN)
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
 def login_view(request):
     if request.user.is_authenticated:
         if request.user.roles.filter(role='recruiter', is_active=True).exists():
@@ -43,12 +54,12 @@ def login_view(request):
         pin = request.POST.get('pin', '').strip()
         user = authenticate(request, phone=phone, pin=pin)
         if user:
-            roles = user.roles.filter(role='recruiter', is_active=True).select_related('company')
-            if roles.exists():
+            roles = list(user.roles.filter(role='recruiter', is_active=True).select_related('company'))
+            if roles:
                 login(request, user)
                 request.session['role'] = 'recruiter'
-                company = roles.first().company
-                request.session['company_id'] = company.id
+                if len(roles) == 1:
+                    request.session['company_id'] = roles[0].company.id
                 return redirect(RECRUIT_DASHBOARD)
             error = 'You do not have recruiter access.'
         else:
@@ -59,23 +70,87 @@ def login_view(request):
     })
 
 
-@recruiter_required
+@recruiter_active
 def dashboard(request):
     company = request.company
-    stats = {
-        'candidates': Application.objects.filter(company=company).count(),
-        'positions': JobPosition.objects.filter(company=company).count(),
-        'active_positions': JobPosition.objects.filter(company=company, is_active=True).count(),
-    }
+    user_companies = Company.objects.filter(
+        userrole__user=request.user,
+        userrole__role='recruiter',
+        userrole__is_active=True,
+    ).distinct()
+
+    if company:
+        stats = {
+            'candidates': Application.objects.filter(company=company).count(),
+            'positions': JobPosition.objects.filter(company=company).count(),
+            'active_positions': JobPosition.objects.filter(company=company, is_active=True).count(),
+        }
+    else:
+        stats = None
+
     return render(request, 'recruitpanel/dashboard.html', {
         'stats': stats,
         'company': company,
+        'user_companies': user_companies,
     })
 
 
 def logout_view(request):
     logout(request)
     return redirect('landing')
+
+
+# ── Company Switching & Creation ──
+
+
+@recruiter_active
+def switch_company(request, company_id):
+    company = get_object_or_404(Company, pk=company_id)
+    if not request.user.roles.filter(role='recruiter', company=company, is_active=True).exists():
+        messages.error(request, 'You do not have access to that company.')
+        return redirect(RECRUIT_DASHBOARD)
+    request.session['company_id'] = company.id
+    messages.success(request, f'Switched to {company.name}.')
+    return redirect(RECRUIT_DASHBOARD)
+
+
+@recruiter_active
+def add_company(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if not name:
+            messages.error(request, 'Company name is required.')
+            return redirect('recruitpanel:add_company')
+
+        slug = re.sub(r'[^a-z0-9-]+', '-', name.lower()).strip('-')
+        if not slug:
+            slug = 'company'
+        original_slug = slug
+        counter = 1
+        while Company.objects.filter(slug=slug).exists():
+            slug = f'{original_slug}-{counter}'
+            counter += 1
+
+        company = Company.objects.create(
+            name=name,
+            slug=slug,
+            address=request.POST.get('address', '').strip(),
+            summary=request.POST.get('summary', '').strip(),
+        )
+
+        UserRole.objects.create(
+            user=request.user,
+            role='recruiter',
+            company=company,
+            sub_role='admin',
+            is_active=True,
+        )
+
+        request.session['company_id'] = company.id
+        messages.success(request, f'Company "{name}" created and selected.')
+        return redirect(RECRUIT_DASHBOARD)
+
+    return render(request, 'recruitpanel/company_form.html')
 
 
 # ── Registration ──

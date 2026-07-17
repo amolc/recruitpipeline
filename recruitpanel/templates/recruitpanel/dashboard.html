@@ -1,9 +1,12 @@
 {% extends 'recruitpanel/base.html' %}
-{% block title %}Dashboard — {{ company.name }}{% endblock %}
+{% block title %}Dashboard{% endblock %}
 {% block content %}
+
+{% if company %}
+
 <div class="page-header">
-  <h1>Dashboard</h1>
-  <p style="color:var(--text-muted);font-size:0.875rem;">Welcome back, {{ request.user.username }} — {{ company.name }}</p>
+  <h1>{{ company.name }}</h1>
+  <p style="color:var(--text-muted);font-size:0.875rem;">Welcome back, {{ request.user.username }}</p>
 </div>
 
 <div class="stat-grid">
@@ -20,4 +23,32 @@
     <div class="stat-label">Active Positions</div>
   </div>
 </div>
+
+{% else %}
+
+<div class="page-header">
+  <h1>Welcome, {{ request.user.username }}</h1>
+  <p style="color:var(--text-muted);font-size:0.875rem;">Select a company to get started.</p>
+</div>
+
+{% if request.user_companies %}
+<div class="card" style="max-width:480px;">
+  <div class="card-body">
+    <p style="font-weight:600;margin-bottom:12px;">Your Companies</p>
+    {% for c in request.user_companies %}
+    <a href="{% url 'recruitpanel:switch_company' c.id %}" style="display:block;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;transition:0.15s;text-decoration:none;color:var(--text);">
+      <span style="font-weight:600;">{{ c.name }}</span>
+      {% if c.summary %}<br><span style="font-size:0.8125rem;color:var(--text-muted);">{{ c.summary|truncatewords:20 }}</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top:16px;">
+  <a href="{% url 'recruitpanel:add_company' %}" class="btn btn-primary">+ Add Company</a>
+</div>
+
+{% endif %}
+
 {% endblock %}

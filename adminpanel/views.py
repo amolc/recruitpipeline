@@ -408,7 +408,13 @@ def super_company_create(request):
             while Company.objects.filter(slug=slug).exists():
                 slug = f'{original_slug}-{counter}'
                 counter += 1
-            company = Company.objects.create(name=name, slug=slug, brand_color=color)
+            company = Company.objects.create(
+                name=name,
+                slug=slug,
+                brand_color=color,
+                address=request.POST.get('address', '').strip(),
+                summary=request.POST.get('summary', '').strip(),
+            )
             if request.FILES.get('logo'):
                 company.logo = request.FILES['logo']
                 company.save()
@@ -436,6 +442,8 @@ def super_company_edit(request, pk):
         company.logo_url = request.POST.get('logo_url', '').strip()
         if request.FILES.get('logo'):
             company.logo = request.FILES['logo']
+        company.address = request.POST.get('address', '').strip()
+        company.summary = request.POST.get('summary', '').strip()
         company.is_active = request.POST.get('is_active') == 'on'
         company.save()
         messages.success(request, f'Company "{company.name}" updated.')

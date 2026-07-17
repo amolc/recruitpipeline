@@ -7,16 +7,14 @@
 <style>
   .form-card {
     background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 28px; max-width: 720px;
+    border-radius: var(--radius); padding: 28px; max-width: 760px;
     box-shadow: var(--shadow);
   }
   .form-card h2 {
     font-size: 1rem; font-weight: 700; margin-bottom: 20px;
     padding-bottom: 12px; border-bottom: 1px solid var(--border);
   }
-  .form-section {
-    margin-bottom: 24px;
-  }
+  .form-section { margin-bottom: 24px; }
   .form-section-title {
     font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 12px;
@@ -32,6 +30,17 @@
     margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border);
     display: flex; gap: 10px; align-items: center;
   }
+
+  .new-company-fields {
+    display: none;
+    margin-top: 12px; padding: 16px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--bg-elevated);
+  }
+  .new-company-fields.open { display: block; }
+  .new-company-fields h4 {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 12px;
+  }
 </style>
 {% endblock %}
 
@@ -42,6 +51,38 @@
   <form method="post">
     {% csrf_token %}
 
+    {% if not position %}
+    <div class="form-section">
+      <div class="form-section-title">Company</div>
+      <div class="form-group">
+        <label for="company">Hiring Company *</label>
+        <select id="company" name="company" onchange="toggleNewCompany(this)">
+          {% for c in companies %}
+            <option value="{{ c.pk }}" {% if c == company %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+          <option value="__new__">+ Create new company…</option>
+        </select>
+        <div class="form-hint">Select the company this position is for, or create a new one.</div>
+      </div>
+
+      <div class="new-company-fields" id="newCompanyFields">
+        <h4>New Company Details</h4>
+        <div class="form-group">
+          <label for="new_company_name">Company Name *</label>
+          <input id="new_company_name" name="new_company_name" type="text" placeholder="e.g. Acme Corp" value="{{ request.POST.new_company_name|default:'' }}" />
+        </div>
+        <div class="form-group">
+          <label for="new_company_address">Address</label>
+          <textarea id="new_company_address" name="new_company_address" rows="2" placeholder="Street, city, state, zip">{{ request.POST.new_company_address|default:'' }}</textarea>
+        </div>
+        <div class="form-group">
+          <label for="new_company_summary">Summary</label>
+          <textarea id="new_company_summary" name="new_company_summary" rows="3" placeholder="Brief description of the company…">{{ request.POST.new_company_summary|default:'' }}</textarea>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="form-section">
       <div class="form-section-title">Basic Information</div>
       <div class="form-group">
@@ -50,7 +91,6 @@
           <input id="title" value="{{ position.title }}" disabled style="opacity:0.6;" />
         {% else %}
           <input id="title" name="title" type="text" value="{{ request.POST.title|default:'' }}" placeholder="e.g. Senior Software Engineer" required />
-          <div class="form-hint">Give the position a clear, descriptive title.</div>
         {% endif %}
       </div>
 
@@ -109,4 +149,15 @@
     </div>
   </form>
 </div>
+
+<script>
+  function toggleNewCompany(sel) {
+    var fields = document.getElementById('newCompanyFields');
+    if (sel.value === '__new__') {
+      fields.classList.add('open');
+    } else {
+      fields.classList.remove('open');
+    }
+  }
+</script>
 {% endblock %}

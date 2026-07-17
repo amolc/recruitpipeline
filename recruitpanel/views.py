@@ -1,4 +1,5 @@
 from functools import wraps
+import re
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -208,8 +209,13 @@ def job_positions(request, company_slug=None):
     })
 
 
+import re
+
+
 @recruiter_required
 def job_position_add(request, company_slug=None):
+    companies = Company.objects.filter(is_active=True).order_by('name')
+
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
         if not title:
@@ -217,9 +223,39 @@ def job_position_add(request, company_slug=None):
             return render(request, 'recruitpanel/job_position_form.html', {
                 'position': None,
                 'company': request.company,
+                'companies': companies,
             })
+
+        company_id = request.POST.get('company')
+        if company_id == '__new__':
+            new_name = request.POST.get('new_company_name', '').strip()
+            if not new_name:
+                messages.error(request, 'Company name is required for a new company.')
+                return render(request, 'recruitpanel/job_position_form.html', {
+                    'position': None,
+                    'company': request.company,
+                    'companies': companies,
+                })
+            slug = re.sub(r'[^a-z0-9-]+', '-', new_name.lower()).strip('-')
+            original_slug = slug
+            counter = 1
+            while Company.objects.filter(slug=slug).exists():
+                slug = f'{original_slug}-{counter}'
+                counter += 1
+            target_company = Company.objects.create(
+                name=new_name,
+                slug=slug,
+                address=request.POST.get('new_company_address', '').strip(),
+                summary=request.POST.get('new_company_summary', '').strip(),
+            )
+            messages.success(request, f'Company "{new_name}" created.')
+        elif company_id:
+            target_company = get_object_or_404(Company, pk=company_id)
+        else:
+            target_company = request.company
+
         position = JobPosition.objects.create(
-            company=request.company,
+            company=target_company,
             title=title,
             description=request.POST.get('description', '').strip(),
             base_salary=request.POST.get('base_salary') or None,
@@ -228,18 +264,19 @@ def job_position_add(request, company_slug=None):
             requirements=request.POST.get('requirements', '').strip(),
             is_active=request.POST.get('is_active') == 'on',
         )
-        messages.success(request, f'"{position.title}" created.')
+        messages.success(request, f'"{position.title}" created for {target_company.name}.')
         return redirect('recruitpanel:job_position_detail', company_slug=company_slug, pk=position.pk)
 
     return render(request, 'recruitpanel/job_position_form.html', {
         'position': None,
         'company': request.company,
+        'companies': companies,
     })
 
 
 @recruiter_required
 def job_position_detail(request, pk, company_slug=None):
-    position = get_object_or_404(JobPosition, company=request.company, pk=pk)
+    position = get_object_or_404(JobPosition, pk=pk)
     stages = Stage.objects.filter(company=request.company)
     columns = []
     for s in stages:

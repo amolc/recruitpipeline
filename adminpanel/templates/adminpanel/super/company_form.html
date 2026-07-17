@@ -4,7 +4,7 @@
 {% block content %}
 
 <style>
-  .form-card { max-width: 500px; }
+  .form-card { max-width: 600px; }
   .form-card label { display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; color: var(--color-text-muted); }
   .form-card input, .form-card select, .form-card textarea {
     width: 100%; padding: 10px 12px; margin-bottom: 16px; border-radius: 6px;
@@ -35,6 +35,12 @@
 
     <label for="brand_color">Brand Color</label>
     <input type="color" id="brand_color" name="brand_color" value="{{ company.brand_color|default:'#f59e0b' }}">
+
+    <label for="address">Address</label>
+    <textarea id="address" name="address" rows="2" style="resize:vertical;">{{ company.address|default:'' }}</textarea>
+
+    <label for="summary">Summary</label>
+    <textarea id="summary" name="summary" rows="3" style="resize:vertical;" placeholder="Brief description of the company">{{ company.summary|default:'' }}</textarea>
 
     <label for="logo">Upload Logo</label>
     <input type="file" id="logo" name="logo" accept="image/*">

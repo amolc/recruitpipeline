@@ -174,6 +174,8 @@ def register_company(request):
         company = Company.objects.create(
             name=name,
             slug=slug,
+            website=request.POST.get('website', '').strip(),
+            email=request.POST.get('email', '').strip(),
             address=request.POST.get('address', '').strip(),
             summary=request.POST.get('summary', '').strip(),
         )

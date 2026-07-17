@@ -1,30 +1,39 @@
 {% extends 'recruitpanel/base.html' %}
-{% block title %}Add Company — RecruitPanel{% endblock %}
-{% block page_title %}Add Company{% endblock %}
+{% block title %}{% if editing %}Edit{% else %}Add{% endif %} Company — RecruitPanel{% endblock %}
+{% block page_title %}{% if editing %}Edit Company{% else %}Add Company{% endif %}{% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>Add Company</h1>
+  <h1>{% if editing %}Edit {{ company.name }}{% else %}Add Company{% endif %}</h1>
 </div>
 
-<div class="card" style="max-width:560px;">
+<div class="card" style="max-width:600px;">
   <div class="card-body">
-    <form method="post" action="{% url 'recruitpanel:add_company' %}">
+    <form method="post" action="{% if editing %}{% url 'recruitpanel:company_edit' %}{% else %}{% url 'recruitpanel:add_company' %}{% endif %}">
       {% csrf_token %}
       <div class="form-group">
         <label for="name">Company Name *</label>
-        <input id="name" name="name" type="text" placeholder="e.g. Acme Corp" required />
+        <input id="name" name="name" type="text" placeholder="e.g. Acme Corp" required value="{{ company.name|default:'' }}" />
       </div>
       <div class="form-group">
-        <label for="address">Address <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
-        <textarea id="address" name="address" rows="2" placeholder="Street, city, state, zip"></textarea>
+        <label for="website">Website</label>
+        <input id="website" name="website" type="url" placeholder="https://acme.com" value="{{ company.website|default:'' }}" />
       </div>
       <div class="form-group">
-        <label for="summary">Summary <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
-        <textarea id="summary" name="summary" rows="3" placeholder="Brief description of the company"></textarea>
+        <label for="email">Company Email</label>
+        <input id="email" name="email" type="email" placeholder="hr@acme.com" value="{{ company.email|default:'' }}" />
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Must match the website domain (e.g. @acme.com)</p>
+      </div>
+      <div class="form-group">
+        <label for="address">Address</label>
+        <textarea id="address" name="address" rows="2" placeholder="Street, city, state, zip">{{ company.address|default:'' }}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="summary">Summary</label>
+        <textarea id="summary" name="summary" rows="3" placeholder="Brief description of the company">{{ company.summary|default:'' }}</textarea>
       </div>
       <div style="display:flex;gap:10px;">
-        <a href="{% url 'recruitpanel:recruitpanel_dashboard' %}" class="btn btn-secondary">Cancel</a>
-        <button type="submit" class="btn btn-primary">Create Company</button>
+        <a href="{% if editing %}{% url 'recruitpanel:company_detail' %}{% else %}{% url 'recruitpanel:recruitpanel_dashboard' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">{% if editing %}Save Changes{% else %}Create Company{% endif %}</button>
       </div>
     </form>
   </div>

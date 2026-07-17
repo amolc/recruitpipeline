@@ -115,11 +115,29 @@ def switch_company(request, company_id):
 
 
 @recruiter_active
+def validate_company_email(email, website):
+    if not email or not website:
+        return True
+    from urllib.parse import urlparse
+    parsed = urlparse(website)
+    domain = parsed.netloc or parsed.path
+    domain = domain.lower().removeprefix('www.')
+    email_domain = email.split('@')[-1].lower()
+    return email_domain == domain or email_domain == f'www.{domain}'
+
+
 def add_company(request):
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
+        website = request.POST.get('website', '').strip()
+        email = request.POST.get('email', '').strip()
+
         if not name:
             messages.error(request, 'Company name is required.')
+            return redirect('recruitpanel:add_company')
+
+        if email and website and not validate_company_email(email, website):
+            messages.error(request, 'Email domain must match the website domain.')
             return redirect('recruitpanel:add_company')
 
         slug = re.sub(r'[^a-z0-9-]+', '-', name.lower()).strip('-')
@@ -134,6 +152,8 @@ def add_company(request):
         company = Company.objects.create(
             name=name,
             slug=slug,
+            website=website,
+            email=email,
             address=request.POST.get('address', '').strip(),
             summary=request.POST.get('summary', '').strip(),
         )
@@ -151,6 +171,53 @@ def add_company(request):
         return redirect(RECRUIT_DASHBOARD)
 
     return render(request, 'recruitpanel/company_form.html')
+
+
+@recruiter_required
+def company_detail(request):
+    company = request.company
+    if not company:
+        messages.error(request, 'No company selected.')
+        return redirect(RECRUIT_DASHBOARD)
+    return render(request, 'recruitpanel/company_detail.html', {'company': company})
+
+
+@recruiter_required
+def company_edit(request):
+    company = request.company
+    if not company:
+        messages.error(request, 'No company selected.')
+        return redirect(RECRUIT_DASHBOARD)
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        website = request.POST.get('website', '').strip()
+        email = request.POST.get('email', '').strip()
+        address = request.POST.get('address', '').strip()
+        summary = request.POST.get('summary', '').strip()
+
+        if not name:
+            messages.error(request, 'Company name is required.')
+            return redirect('recruitpanel:company_edit')
+
+        if email and website and not validate_company_email(email, website):
+            messages.error(request, 'Email domain must match the website domain.')
+            return redirect('recruitpanel:company_edit')
+
+        company.name = name
+        company.website = website
+        company.email = email
+        company.address = address
+        company.summary = summary
+        company.save()
+
+        messages.success(request, 'Company updated.')
+        return redirect('recruitpanel:company_detail')
+
+    return render(request, 'recruitpanel/company_form.html', {
+        'company': company,
+        'editing': True,
+    })
 
 
 # ── Registration ──
@@ -180,6 +247,8 @@ def register_company(request):
         company = Company.objects.create(
             name=name,
             slug=slug,
+            website=request.POST.get('website', '').strip(),
+            email=request.POST.get('email', '').strip(),
             address=request.POST.get('address', '').strip(),
             summary=request.POST.get('summary', '').strip(),
         )
@@ -447,6 +516,8 @@ def job_position_add(request):
             target_company = Company.objects.create(
                 name=new_name,
                 slug=slug,
+                website=request.POST.get('new_company_website', '').strip(),
+                email=request.POST.get('new_company_email', '').strip(),
                 address=request.POST.get('new_company_address', '').strip(),
                 summary=request.POST.get('new_company_summary', '').strip(),
             )

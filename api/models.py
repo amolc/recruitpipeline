@@ -29,6 +29,8 @@ class Company(models.Model):
     brand_color = models.CharField('Brand Color', max_length=7, default='#f59e0b', help_text='Hex color for branding')
     logo_url = models.URLField('Logo URL', blank=True)
     logo = models.ImageField('Logo', upload_to='company_logos/', blank=True)
+    website = models.URLField('Website', blank=True, help_text='Company website (e.g. https://acme.com)')
+    email = models.EmailField('Company Email', blank=True, help_text='Email address matching the website domain')
     address = models.TextField('Address', blank=True, help_text='Street, city, state, zip')
     summary = models.TextField('Summary', blank=True, help_text='Brief description of the company')
     is_active = models.BooleanField('Active', default=True)

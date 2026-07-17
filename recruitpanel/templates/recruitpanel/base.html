@@ -265,6 +265,9 @@
       <a href="{% url 'recruitpanel:user_list' %}" class="{% if 'user' in request.resolver_match.url_name %}active{% endif %}">
         <span class="nav-icon">⊕</span> Users
       </a>
+      <a href="{% url 'recruitpanel:company_detail' %}" class="{% if 'company' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="nav-icon">▣</span> Company
+      </a>
     </nav>
   </div>
 

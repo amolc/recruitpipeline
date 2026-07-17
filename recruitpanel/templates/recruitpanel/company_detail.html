@@ -1,0 +1,48 @@
+{% extends 'recruitpanel/base.html' %}
+{% block title %}{{ company.name }} — RecruitPanel{% endblock %}
+{% block page_title %}Company{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ company.name }}</h1>
+  <a href="{% url 'recruitpanel:company_edit' %}" class="btn btn-secondary">Edit Company</a>
+</div>
+
+<div class="card" style="max-width:600px;">
+  <div class="card-body">
+    <table>
+      <tr>
+        <td style="font-weight:600;width:140px;">Name</td>
+        <td>{{ company.name }}</td>
+      </tr>
+      {% if company.website %}
+      <tr>
+        <td style="font-weight:600;">Website</td>
+        <td><a href="{{ company.website }}" target="_blank" rel="noopener" style="color:var(--primary);">{{ company.website }}</a></td>
+      </tr>
+      {% endif %}
+      {% if company.email %}
+      <tr>
+        <td style="font-weight:600;">Email</td>
+        <td><a href="mailto:{{ company.email }}" style="color:var(--primary);">{{ company.email }}</a></td>
+      </tr>
+      {% endif %}
+      {% if company.address %}
+      <tr>
+        <td style="font-weight:600;">Address</td>
+        <td>{{ company.address|linebreaksbr }}</td>
+      </tr>
+      {% endif %}
+      {% if company.summary %}
+      <tr>
+        <td style="font-weight:600;">Summary</td>
+        <td>{{ company.summary|linebreaksbr }}</td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td style="font-weight:600;">Created</td>
+        <td>{{ company.created_at|date:"M d, Y" }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+{% endblock %}

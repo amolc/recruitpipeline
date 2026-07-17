@@ -74,9 +74,9 @@ def login_view(request):
 def dashboard(request):
     company = request.company
     user_companies = Company.objects.filter(
-        userrole__user=request.user,
-        userrole__role='recruiter',
-        userrole__is_active=True,
+        user_roles__user=request.user,
+        user_roles__role='recruiter',
+        user_roles__is_active=True,
     ).distinct()
 
     if company:

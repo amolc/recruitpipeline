@@ -125,8 +125,6 @@
 </div>
 
 <script>
-  const slug = '{{ company.slug }}';
-
   function getCSRF() {
     return document.querySelector('#csrfContainer input').value;
   }
@@ -148,7 +146,7 @@
     form.append('after', after);
     form.append('csrfmiddlewaretoken', getCSRF());
 
-    fetch(`/${slug}/panel/pipeline/add/`, { method: 'POST', body: form })
+    fetch(`/recruitpanel/pipeline/add/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -160,7 +158,7 @@
     if (!confirm('Delete stage "' + label + '"?\nApplications in this stage will be moved to "New".')) return;
     const form = new FormData();
     form.append('csrfmiddlewaretoken', getCSRF());
-    fetch(`/${slug}/panel/pipeline/${key}/delete/`, { method: 'POST', body: form })
+    fetch(`/recruitpanel/pipeline/${key}/delete/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -193,7 +191,7 @@
     form.append('description', desc);
     form.append('csrfmiddlewaretoken', getCSRF());
 
-    fetch(`/${slug}/panel/pipeline/${stage}/`, { method: 'POST', body: form })
+    fetch(`/recruitpanel/pipeline/${stage}/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) {

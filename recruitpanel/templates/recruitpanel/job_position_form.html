@@ -142,9 +142,9 @@
         {% if position %}Save Changes{% else %}Create Position{% endif %}
       </button>
       {% if position %}
-        <a href="{% url 'recruitpanel:job_position_detail' company_slug=company.slug pk=position.pk %}" class="btn btn-secondary">Cancel</a>
+        <a href="{% url 'recruitpanel:job_position_detail' pk=position.pk %}" class="btn btn-secondary">Cancel</a>
       {% else %}
-        <a href="{% url 'recruitpanel:job_positions' company_slug=company.slug %}" class="btn btn-secondary">Cancel</a>
+        <a href="{% url 'recruitpanel:job_positions' %}" class="btn btn-secondary">Cancel</a>
       {% endif %}
     </div>
   </form>

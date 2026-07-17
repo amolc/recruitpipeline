@@ -1,23 +1,23 @@
 {% extends 'recruitpanel/base.html' %}
 {% block title %}Dashboard — {{ company.name }}{% endblock %}
 {% block content %}
-<div class="header">
+<div class="page-header">
   <h1>Dashboard</h1>
-  <p>Welcome back, {{ request.user.username }} — {{ company.name }}</p>
+  <p style="color:var(--text-muted);font-size:0.875rem;">Welcome back, {{ request.user.username }} — {{ company.name }}</p>
 </div>
 
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
-  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)">
-    <div style="font-size:2rem;font-weight:800;color:var(--primary)">{{ stats.candidates }}</div>
-    <div style="color:var(--text-muted);font-size:0.875rem;margin-top:4px">Total Candidates</div>
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-number">{{ stats.candidates }}</div>
+    <div class="stat-label">Total Candidates</div>
   </div>
-  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)">
-    <div style="font-size:2rem;font-weight:800;color:var(--primary)">{{ stats.positions }}</div>
-    <div style="color:var(--text-muted);font-size:0.875rem;margin-top:4px">Job Positions</div>
+  <div class="stat-card">
+    <div class="stat-number">{{ stats.positions }}</div>
+    <div class="stat-label">Job Positions</div>
   </div>
-  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)">
-    <div style="font-size:2rem;font-weight:800;color:var(--primary)">{{ stats.active_positions }}</div>
-    <div style="color:var(--text-muted);font-size:0.875rem;margin-top:4px">Active Positions</div>
+  <div class="stat-card">
+    <div class="stat-number">{{ stats.active_positions }}</div>
+    <div class="stat-label">Active Positions</div>
   </div>
 </div>
 {% endblock %}

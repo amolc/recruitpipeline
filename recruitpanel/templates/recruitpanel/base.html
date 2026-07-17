@@ -241,26 +241,29 @@
   <div class="sidebar">
     <div class="sidebar-logo">recruit<span>me</span></div>
     <nav class="sidebar-nav">
-      <a href="{% url 'recruitpanel:recruitpanel_dashboard' company_slug=company.slug %}" class="{% if request.resolver_match.url_name == 'recruitpanel_dashboard' %}active{% endif %}">
+      <a href="{% url 'recruitpanel:recruitpanel_dashboard' %}" class="{% if request.resolver_match.url_name == 'recruitpanel_dashboard' %}active{% endif %}">
         <span class="nav-icon">▦</span> Dashboard
       </a>
-      <a href="{% url 'recruitpanel:board' company_slug=company.slug %}" class="{% if request.resolver_match.url_name == 'board' %}active{% endif %}">
+      <a href="{% url 'recruitpanel:board' %}" class="{% if request.resolver_match.url_name == 'board' %}active{% endif %}">
         <span class="nav-icon">⬡</span> Board
       </a>
-      <a href="{% url 'recruitpanel:candidate_list' company_slug=company.slug %}" class="{% if 'candidate' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="{% url 'recruitpanel:candidate_list' %}" class="{% if 'candidate' in request.resolver_match.url_name %}active{% endif %}">
         <span class="nav-icon">◉</span> Candidates
       </a>
-      <a href="{% url 'recruitpanel:job_positions' company_slug=company.slug %}" class="{% if 'position' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="{% url 'recruitpanel:job_positions' %}" class="{% if 'position' in request.resolver_match.url_name %}active{% endif %}">
         <span class="nav-icon">⚑</span> Positions
       </a>
-      <a href="{% url 'recruitpanel:pipeline' company_slug=company.slug %}" class="{% if request.resolver_match.url_name == 'pipeline' %}active{% endif %}">
+      <a href="{% url 'recruitpanel:pipeline' %}" class="{% if request.resolver_match.url_name == 'pipeline' %}active{% endif %}">
         <span class="nav-icon">⚙</span> Pipeline
       </a>
-      <a href="{% url 'recruitpanel:panelist' company_slug=company.slug %}" class="{% if request.resolver_match.url_name == 'panelist' %}active{% endif %}">
+      <a href="{% url 'recruitpanel:panelist' %}" class="{% if request.resolver_match.url_name == 'panelist' %}active{% endif %}">
         <span class="nav-icon">⊕</span> Panelist
       </a>
-      <a href="{% url 'recruitpanel:screenings' company_slug=company.slug %}" class="{% if request.resolver_match.url_name == 'screenings' %}active{% endif %}">
+      <a href="{% url 'recruitpanel:screenings' %}" class="{% if request.resolver_match.url_name == 'screenings' %}active{% endif %}">
         <span class="nav-icon">◎</span> Screenings
+      </a>
+      <a href="{% url 'recruitpanel:user_list' %}" class="{% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="nav-icon">⊕</span> Users
       </a>
     </nav>
   </div>
@@ -269,7 +272,7 @@
     <div class="header-title">{% block page_title %}Dashboard{% endblock %}</div>
     <div class="header-right">
       <span>{{ user.get_username }}</span>
-      <a href="{% url 'recruitpanel:recruitpanel_logout' company_slug=company.slug %}" class="logout-btn">Sign Out</a>
+      <a href="{% url 'recruitpanel:recruitpanel_logout' %}" class="logout-btn">Sign Out</a>
     </div>
   </div>
 

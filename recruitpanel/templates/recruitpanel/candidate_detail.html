@@ -88,9 +88,9 @@
   </div>
 
   <div class="actions-bar">
-    <a href="{% url 'recruitpanel:candidate_list' company_slug=company.slug %}" class="btn btn-secondary">← Back</a>
-    <a href="{% url 'recruitpanel:candidate_edit' company_slug=company.slug pk=candidate.pk %}" class="btn btn-primary">✎ Edit</a>
-    <a href="{% url 'recruitpanel:candidate_delete' company_slug=company.slug pk=candidate.pk %}" class="btn btn-danger">✕ Delete</a>
+    <a href="{% url 'recruitpanel:candidate_list' %}" class="btn btn-secondary">← Back</a>
+    <a href="{% url 'recruitpanel:candidate_edit' pk=candidate.pk %}" class="btn btn-primary">✎ Edit</a>
+    <a href="{% url 'recruitpanel:candidate_delete' pk=candidate.pk %}" class="btn btn-danger">✕ Delete</a>
   </div>
 </div>
 {% endblock %}

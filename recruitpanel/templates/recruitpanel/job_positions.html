@@ -24,12 +24,12 @@
 
 {% block content %}
 <div class="toolbar">
-  <form class="add-form" method="post" action="{% url 'recruitpanel:job_position_add' company_slug=company.slug %}">
+  <form class="add-form" method="post" action="{% url 'recruitpanel:job_position_add' %}">
     {% csrf_token %}
     <input type="text" name="title" placeholder="New position title…" required />
     <button type="submit" class="btn btn-primary btn-sm">Quick Add</button>
   </form>
-  <a href="{% url 'recruitpanel:job_position_add' company_slug=company.slug %}" class="btn btn-primary btn-sm">+ Create Position</a>
+  <a href="{% url 'recruitpanel:job_position_add' %}" class="btn btn-primary btn-sm">+ Create Position</a>
 </div>
 
 <div class="card-wrap">
@@ -45,7 +45,7 @@
     <tbody>
       {% for pos in positions %}
         <tr>
-          <td><strong><a href="{% url 'recruitpanel:job_position_detail' company_slug=company.slug pk=pos.pk %}" style="color:var(--primary);text-decoration:none;">{{ pos.title }}</a></strong></td>
+          <td><strong><a href="{% url 'recruitpanel:job_position_detail' pk=pos.pk %}" style="color:var(--primary);text-decoration:none;">{{ pos.title }}</a></strong></td>
           <td>
             <span class="active-tag {% if pos.is_active %}active-yes{% else %}active-no{% endif %}">
               {{ pos.is_active|yesno:"Active,Inactive" }}
@@ -53,7 +53,7 @@
           </td>
           <td style="white-space:nowrap;">{{ pos.created_at|date:"M d, Y" }}</td>
           <td>
-            <form method="post" action="{% url 'recruitpanel:job_position_delete' company_slug=company.slug pk=pos.pk %}" style="display:inline;">
+            <form method="post" action="{% url 'recruitpanel:job_position_delete' pk=pos.pk %}" style="display:inline;">
               {% csrf_token %}
               <button type="submit" class="btn btn-danger btn-sm">Delete</button>
             </form>

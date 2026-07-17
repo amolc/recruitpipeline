@@ -129,8 +129,8 @@
     {% endif %}
   </div>
   <div class="actions-bar">
-    <a href="{% url 'recruitpanel:job_positions' company_slug=company.slug %}" class="btn btn-secondary">← All Positions</a>
-    <a href="{% url 'recruitpanel:job_position_edit' company_slug=company.slug pk=position.pk %}" class="btn btn-primary">✎ Edit</a>
+    <a href="{% url 'recruitpanel:job_positions' %}" class="btn btn-secondary">← All Positions</a>
+    <a href="{% url 'recruitpanel:job_position_edit' pk=position.pk %}" class="btn btn-primary">✎ Edit</a>
   </div>
 </div>
 
@@ -168,7 +168,6 @@
 <div id="csrfContainer" style="display:none">{% csrf_token %}</div>
 
 <script>
-  const slug = '{{ company.slug }}';
   const posPk = {{ position.pk }};
 
   function getCSRF() {
@@ -200,7 +199,7 @@
     form.append('description', desc);
     form.append('csrfmiddlewaretoken', getCSRF());
 
-    fetch(`/${slug}/panel/positions/${posPk}/automation/${stage}/`, { method: 'POST', body: form })
+    fetch(`/recruitpanel/positions/${posPk}/automation/${stage}/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) {
@@ -277,7 +276,7 @@
 
       const form = new FormData();
       form.append('status', newStage);
-      fetch(`/${slug}/api/apply/${dragSrcId}/status/`, { method: 'POST', body: form })
+      fetch(`/api/apply/${dragSrcId}/status/`, { method: 'POST', body: form })
         .then(r => r.json())
         .then(data => {
           if (data.success) location.reload();

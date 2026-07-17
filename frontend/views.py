@@ -77,11 +77,17 @@ def register_company(request):
             is_active=True,
         )
 
+        user = authenticate(request, phone=phone, pin=pin)
+        if user:
+            login(request, user)
+            request.session['role'] = 'recruiter'
+            request.session['company_id'] = company.id
+
         messages.success(
             request,
             f'Company "{name}" registered! Your login PIN is <strong>{pin}</strong>.',
         )
-        return redirect('recruitpanel:recruitpanel_login', company_slug=company.slug)
+        return redirect('recruitpanel:recruitpanel_dashboard')
 
     return redirect('landing')
 

@@ -1,12 +1,14 @@
 from functools import wraps
 import re
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.db import models
 from django.http import JsonResponse, Http404
 from django.db.models import Count
-from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, Company, UserRole
+from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, Company, UserRole, UserAuth
+
+User = get_user_model()
 
 RECRUIT_LOGIN = 'recruitpanel:recruitpanel_login'
 RECRUIT_DASHBOARD = 'recruitpanel:recruitpanel_dashboard'
@@ -19,19 +21,20 @@ def recruiter_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect(RECRUIT_LOGIN, company_slug=kwargs.get('company_slug'))
-        if not request.user.roles.filter(role='recruiter', company=request.company, is_active=True).exists():
-            return redirect(RECRUIT_LOGIN, company_slug=kwargs.get('company_slug'))
+            return redirect(RECRUIT_LOGIN)
+        if not request.user.roles.filter(role='recruiter', is_active=True).exists():
+            return redirect(RECRUIT_LOGIN)
+        if not request.company:
+            messages.error(request, 'No company selected.')
+            return redirect(RECRUIT_LOGIN)
         return view_func(request, *args, **kwargs)
     return wrapper
 
 
-def login_view(request, company_slug=None):
-    company = get_object_or_404(Company, slug=company_slug)
-
+def login_view(request):
     if request.user.is_authenticated:
-        if request.user.roles.filter(role='recruiter', company=company, is_active=True).exists():
-            return redirect(RECRUIT_DASHBOARD, company_slug=company_slug)
+        if request.user.roles.filter(role='recruiter', is_active=True).exists():
+            return redirect(RECRUIT_DASHBOARD)
         logout(request)
 
     error = None
@@ -39,24 +42,25 @@ def login_view(request, company_slug=None):
         phone = request.POST.get('phone', '').strip()
         pin = request.POST.get('pin', '').strip()
         user = authenticate(request, phone=phone, pin=pin)
-        if user and user.roles.filter(role='recruiter', company=company, is_active=True).exists():
-            login(request, user)
-            request.session['role'] = 'recruiter'
-            request.session['company_id'] = company.id
-            return redirect(RECRUIT_DASHBOARD, company_slug=company_slug)
         if user:
-            error = 'You do not have access to this company panel.'
+            roles = user.roles.filter(role='recruiter', is_active=True).select_related('company')
+            if roles.exists():
+                login(request, user)
+                request.session['role'] = 'recruiter'
+                company = roles.first().company
+                request.session['company_id'] = company.id
+                return redirect(RECRUIT_DASHBOARD)
+            error = 'You do not have recruiter access.'
         else:
             error = 'Invalid phone or PIN.'
 
     return render(request, 'recruitpanel/login.html', {
         'error': error,
-        'company': company,
     })
 
 
 @recruiter_required
-def dashboard(request, company_slug=None):
+def dashboard(request):
     company = request.company
     stats = {
         'candidates': Application.objects.filter(company=company).count(),
@@ -69,15 +73,141 @@ def dashboard(request, company_slug=None):
     })
 
 
-def logout_view(request, company_slug=None):
+def logout_view(request):
     logout(request)
-    return redirect(RECRUIT_LOGIN, company_slug=company_slug)
+    return redirect(RECRUIT_LOGIN)
+
+
+# ── Registration ──
+
+def register_company(request):
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        name = request.POST.get('name', '').strip()
+
+        if not phone or not name:
+            messages.error(request, 'Phone number and company name are required.')
+            return redirect('recruitpanel:register')
+
+        if UserAuth.objects.filter(phone=phone).exists():
+            messages.error(request, 'This phone number is already registered.')
+            return redirect('recruitpanel:register')
+
+        slug = re.sub(r'[^a-z0-9-]+', '-', name.lower()).strip('-')
+        if not slug:
+            slug = 'company'
+        original_slug = slug
+        counter = 1
+        while Company.objects.filter(slug=slug).exists():
+            slug = f'{original_slug}-{counter}'
+            counter += 1
+
+        company = Company.objects.create(
+            name=name,
+            slug=slug,
+            address=request.POST.get('address', '').strip(),
+            summary=request.POST.get('summary', '').strip(),
+        )
+
+        username = phone
+        base_username = username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f'{base_username}-{counter}'
+            counter += 1
+
+        pin = phone[-4:]
+        secretname = re.sub(r'[^a-z0-9]', '', name.lower())[:20] or 'recruiter'
+
+        user = User.objects.create_user(username=username)
+        user_auth = UserAuth.objects.create(user=user, phone=phone, secretname=secretname)
+        user_auth.set_pin(pin)
+        user_auth.save()
+
+        UserRole.objects.create(
+            user=user,
+            role='recruiter',
+            company=company,
+            sub_role='admin',
+            is_active=True,
+        )
+
+        user = authenticate(request, phone=phone, pin=pin)
+        if user:
+            login(request, user)
+            request.session['role'] = 'recruiter'
+            request.session['company_id'] = company.id
+
+        messages.success(request, f'Company "{name}" registered! Your login PIN is <strong>{pin}</strong>.')
+        return redirect(RECRUIT_DASHBOARD)
+
+    return render(request, 'recruitpanel/register.html')
+
+
+# ── User Management ──
+
+@recruiter_required
+def user_list(request):
+    users = UserRole.objects.filter(
+        company=request.company,
+        role='recruiter',
+    ).select_related('user', 'user__auth')
+    return render(request, 'recruitpanel/user_list.html', {
+        'users': users,
+        'company': request.company,
+    })
+
+
+@recruiter_required
+def user_create(request):
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        name = request.POST.get('name', '').strip()
+        sub_role = request.POST.get('sub_role', 'recruiter')
+
+        if not phone or not name:
+            messages.error(request, 'Phone and name are required.')
+            return redirect('recruitpanel:user_create')
+
+        if UserAuth.objects.filter(phone=phone).exists():
+            messages.error(request, 'This phone number is already registered.')
+            return redirect('recruitpanel:user_create')
+
+        username = phone
+        base_username = username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f'{base_username}-{counter}'
+            counter += 1
+
+        pin = phone[-4:]
+        secretname = re.sub(r'[^a-z0-9]', '', name.lower())[:20] or 'user'
+
+        user = User.objects.create_user(username=username)
+        user_auth = UserAuth.objects.create(user=user, phone=phone, secretname=secretname)
+        user_auth.set_pin(pin)
+        user_auth.save()
+
+        UserRole.objects.create(
+            user=user,
+            role='recruiter',
+            company=request.company,
+            sub_role=sub_role,
+            is_active=True,
+        )
+
+        messages.success(request, f'User "{name}" created. PIN is <strong>{pin}</strong>.')
+        return redirect('recruitpanel:user_list')
+
+    return render(request, 'recruitpanel/user_form.html', {
+        'company': request.company,
+    })
 
 
 # ── Board (Kanban) ──
 
 @recruiter_required
-def board(request, company_slug=None):
+def board(request):
     stages = Stage.objects.filter(company=request.company)
     columns = []
     first_pos = JobPosition.objects.filter(company=request.company, is_active=True).first()
@@ -101,7 +231,7 @@ def board(request, company_slug=None):
 # ── Candidates ──
 
 @recruiter_required
-def candidate_list(request, company_slug=None):
+def candidate_list(request):
     q = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '')
     queryset = Application.objects.filter(company=request.company)
@@ -124,7 +254,7 @@ def candidate_list(request, company_slug=None):
 
 
 @recruiter_required
-def candidate_detail(request, pk, company_slug=None):
+def candidate_detail(request, pk):
     candidate = get_object_or_404(Application, company=request.company, pk=pk)
     return render(request, 'recruitpanel/candidate_detail.html', {
         'candidate': candidate,
@@ -133,7 +263,7 @@ def candidate_detail(request, pk, company_slug=None):
 
 
 @recruiter_required
-def candidate_create(request, company_slug=None):
+def candidate_create(request):
     if request.method == 'POST':
         try:
             app = Application.objects.create(
@@ -148,7 +278,7 @@ def candidate_create(request, company_slug=None):
                 status=request.POST.get('status', 'new'),
             )
             messages.success(request, f'{app.full_name} added.')
-            return redirect(RECRUIT_CANDIDATES, company_slug=company_slug)
+            return redirect(RECRUIT_CANDIDATES)
         except (ValueError, TypeError) as e:
             messages.error(request, str(e))
     return render(request, 'recruitpanel/candidate_form.html', {
@@ -159,7 +289,7 @@ def candidate_create(request, company_slug=None):
 
 
 @recruiter_required
-def candidate_edit(request, pk, company_slug=None):
+def candidate_edit(request, pk):
     candidate = get_object_or_404(Application, company=request.company, pk=pk)
     if request.method == 'POST':
         try:
@@ -174,7 +304,7 @@ def candidate_edit(request, pk, company_slug=None):
                 candidate.resume = request.FILES['resume']
             candidate.save()
             messages.success(request, f'{candidate.full_name} updated.')
-            return redirect(RECRUIT_CANDIDATES, company_slug=company_slug)
+            return redirect(RECRUIT_CANDIDATES)
         except (ValueError, TypeError) as e:
             messages.error(request, str(e))
     return render(request, 'recruitpanel/candidate_form.html', {
@@ -185,13 +315,13 @@ def candidate_edit(request, pk, company_slug=None):
 
 
 @recruiter_required
-def candidate_delete(request, pk, company_slug=None):
+def candidate_delete(request, pk):
     candidate = get_object_or_404(Application, company=request.company, pk=pk)
     if request.method == 'POST':
         name = candidate.full_name
         candidate.delete()
         messages.success(request, f'{name} deleted.')
-        return redirect(RECRUIT_CANDIDATES, company_slug=company_slug)
+        return redirect(RECRUIT_CANDIDATES)
     return render(request, 'recruitpanel/candidate_confirm_delete.html', {
         'candidate': candidate,
         'company': request.company,
@@ -201,7 +331,7 @@ def candidate_delete(request, pk, company_slug=None):
 # ── Job Positions ──
 
 @recruiter_required
-def job_positions(request, company_slug=None):
+def job_positions(request):
     positions = JobPosition.objects.filter(company=request.company)
     return render(request, 'recruitpanel/job_positions.html', {
         'positions': positions,
@@ -209,11 +339,8 @@ def job_positions(request, company_slug=None):
     })
 
 
-import re
-
-
 @recruiter_required
-def job_position_add(request, company_slug=None):
+def job_position_add(request):
     companies = Company.objects.filter(is_active=True).order_by('name')
 
     if request.method == 'POST':
@@ -265,7 +392,7 @@ def job_position_add(request, company_slug=None):
             is_active=request.POST.get('is_active') == 'on',
         )
         messages.success(request, f'"{position.title}" created for {target_company.name}.')
-        return redirect('recruitpanel:job_position_detail', company_slug=company_slug, pk=position.pk)
+        return redirect('recruitpanel:job_position_detail', pk=position.pk)
 
     return render(request, 'recruitpanel/job_position_form.html', {
         'position': None,
@@ -275,7 +402,7 @@ def job_position_add(request, company_slug=None):
 
 
 @recruiter_required
-def job_position_detail(request, pk, company_slug=None):
+def job_position_detail(request, pk):
     position = get_object_or_404(JobPosition, pk=pk)
     stages = Stage.objects.filter(company=request.company)
     columns = []
@@ -300,7 +427,7 @@ def job_position_detail(request, pk, company_slug=None):
 
 
 @recruiter_required
-def job_position_edit(request, pk, company_slug=None):
+def job_position_edit(request, pk):
     position = get_object_or_404(JobPosition, company=request.company, pk=pk)
     if request.method == 'POST':
         position.description = request.POST.get('description', '').strip()
@@ -311,7 +438,7 @@ def job_position_edit(request, pk, company_slug=None):
         position.is_active = request.POST.get('is_active') == 'on'
         position.save()
         messages.success(request, f'"{position.title}" updated.')
-        return redirect('recruitpanel:job_position_detail', company_slug=company_slug, pk=position.pk)
+        return redirect('recruitpanel:job_position_detail', pk=position.pk)
     return render(request, 'recruitpanel/job_position_form.html', {
         'position': position,
         'company': request.company,
@@ -319,18 +446,18 @@ def job_position_edit(request, pk, company_slug=None):
 
 
 @recruiter_required
-def job_position_delete(request, pk, company_slug=None):
+def job_position_delete(request, pk):
     pos = get_object_or_404(JobPosition, company=request.company, pk=pk)
     if request.method == 'POST':
         pos.delete()
         messages.success(request, f'"{pos.title}" deleted.')
-    return redirect(RECRUIT_POSITIONS, company_slug=company_slug)
+    return redirect(RECRUIT_POSITIONS)
 
 
 # ── Pipeline ──
 
 @recruiter_required
-def pipeline(request, company_slug=None):
+def pipeline(request):
     stages = Stage.objects.filter(company=request.company)
     automations = []
     for s in stages:
@@ -344,7 +471,7 @@ def pipeline(request, company_slug=None):
 
 
 @recruiter_required
-def add_stage(request, company_slug=None):
+def add_stage(request):
     if request.method == 'POST':
         label = request.POST.get('label', '').strip()
         after_key = request.POST.get('after', '')
@@ -373,7 +500,7 @@ def add_stage(request, company_slug=None):
 
 
 @recruiter_required
-def delete_stage(request, stage_key, company_slug=None):
+def delete_stage(request, stage_key):
     if request.method == 'POST':
         stage = get_object_or_404(Stage, company=request.company, key=stage_key)
         stage.delete()
@@ -384,7 +511,7 @@ def delete_stage(request, stage_key, company_slug=None):
 
 
 @recruiter_required
-def update_global_automation(request, stage, company_slug=None):
+def update_global_automation(request, stage):
     if request.method == 'POST':
         desc = request.POST.get('description', '').strip()
         count = 0
@@ -402,7 +529,7 @@ def update_global_automation(request, stage, company_slug=None):
 
 
 @recruiter_required
-def update_automation(request, position_pk, stage, company_slug=None):
+def update_automation(request, position_pk, stage):
     if request.method == 'POST':
         position = get_object_or_404(JobPosition, company=request.company, pk=position_pk)
         desc = request.POST.get('description', '').strip()
@@ -420,10 +547,10 @@ def update_automation(request, position_pk, stage, company_slug=None):
 # ── Panelist & Screenings (stubs) ──
 
 @recruiter_required
-def panelist(request, company_slug=None):
+def panelist(request):
     return render(request, 'recruitpanel/panelist.html', {'company': request.company})
 
 
 @recruiter_required
-def screenings(request, company_slug=None):
+def screenings(request):
     return render(request, 'recruitpanel/screenings.html', {'company': request.company})

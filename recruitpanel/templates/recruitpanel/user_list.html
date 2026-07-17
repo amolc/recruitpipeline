@@ -1,0 +1,52 @@
+{% extends 'recruitpanel/base.html' %}
+
+{% block title %}Users — {{ company.name }}{% endblock %}
+{% block page_title %}Users{% endblock %}
+
+{% block extra_head %}
+<style>
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .card-wrap {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; overflow-x: auto;
+    box-shadow: var(--shadow);
+  }
+  .sub-role-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.6875rem;
+    background: var(--bg-elevated); color: var(--text-muted);
+  }
+  .empty-state { text-align: center; padding: 40px 0; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <span style="color:var(--text-muted);font-size:0.875rem;">{{ users|length }} user{{ users|length|pluralize }}</span>
+  <a href="{% url 'recruitpanel:user_create' %}" class="btn btn-primary btn-sm">+ Add User</a>
+</div>
+
+<div class="card-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Role</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ur in users %}
+        <tr>
+          <td><strong>{{ ur.user.auth.secretname|default:ur.user.username }}</strong></td>
+          <td>{{ ur.user.auth.phone|default:'—' }}</td>
+          <td><span class="sub-role-tag">{{ ur.get_sub_role_display|default:'Recruiter' }}</span></td>
+          <td>{% if ur.is_active %}<span style="color:#16a34a;">Active</span>{% else %}<span style="color:var(--text-muted);">Inactive</span>{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="empty-state">No users yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

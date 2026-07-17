@@ -202,7 +202,7 @@
 </div>
 
 <script>
-  const slug = '{{ company.slug }}';
+  const panelPath = '/recruitpanel';
   const stages = [
     {% for s in stages %}
       '{{ s.key }}'{% if not forloop.last %},{% endif %}
@@ -238,7 +238,7 @@
     form.append('description', desc);
     form.append('csrfmiddlewaretoken', getCSRF());
 
-    fetch(`/${slug}/panel/pipeline/${stage}/`, { method: 'POST', body: form })
+    fetch(`/recruitpanel/pipeline/${stage}/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) {
@@ -291,7 +291,7 @@
 
       const form = new FormData();
       form.append('status', newStage);
-      fetch(`/${slug}/api/apply/${dragSrcId}/status/`, { method: 'POST', body: form })
+      fetch(`/api/apply/${dragSrcId}/status/`, { method: 'POST', body: form })
         .then(r => r.json())
         .then(data => {
           if (data.success) location.reload();
@@ -310,7 +310,7 @@
     const form = new FormData();
     form.append('status', stages[newIdx]);
 
-    fetch(`/${slug}/api/apply/${id}/status/`, { method: 'POST', body: form })
+    fetch(`/api/apply/${id}/status/`, { method: 'POST', body: form })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();

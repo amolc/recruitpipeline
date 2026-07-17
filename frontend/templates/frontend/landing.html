@@ -672,7 +672,7 @@
       <a href="{% url 'landing' %}" class="logo">recruit<span>me</span></a>
       <div class="nav-actions">
         <a href="{% url 'candidate_login' %}" class="nav-btn nav-btn-outline">Candidate</a>
-        <a href="#login" class="nav-btn nav-btn-outline">Recruiter</a>
+        <a href="{% url 'recruitpanel:recruitpanel_login' %}" class="nav-btn nav-btn-outline">Recruiter</a>
         <a href="#register" class="nav-btn nav-btn-primary">Register Company</a>
       </div>
     </div>
@@ -700,11 +700,7 @@
           <h3>Candidate</h3>
           <p>Find your next role</p>
         </a>
-        {% if companies.0 %}
-          <a href="{% url 'recruitpanel:recruitpanel_login' company_slug=companies.0.slug %}" class="portal-card">
-        {% else %}
-          <a href="#companies" class="portal-card">
-        {% endif %}
+                  <a href="{% url 'recruitpanel:recruitpanel_login' %}" class="portal-card">
           <div class="portal-icon">&#x1f3e2;</div>
           <h3>Recruiter</h3>
           <p>Manage your pipeline</p>
@@ -815,29 +811,14 @@
         <p>Select your company to access your recruitment panel.</p>
       </div>
       {% if companies %}
-      <div class="login-selector">
-        <select id="companySelect">
-          <option value="">Choose your company…</option>
-          {% for c in companies %}
-            <option value="{{ c.slug }}">{{ c.name }}</option>
-          {% endfor %}
-        </select>
-        <button class="btn-go" onclick="goToCompanyLogin()">Go to Login</button>
+      <div class="login-selector" style="text-align:center;">
+        <p style="color:var(--text-muted);margin-bottom:12px;">Visit the <a href="{% url 'recruitpanel:recruitpanel_login' %}" style="color:var(--color-primary);font-weight:600;">RecruitPanel login</a> to access your company dashboard.</p>
       </div>
       {% else %}
       <div class="empty-state"><p>No companies registered yet.</p></div>
       {% endif %}
     </div>
   </section>
-
-  <script>
-    function goToCompanyLogin() {
-      var slug = document.getElementById('companySelect').value;
-      if (slug) {
-        window.location.href = '/' + slug + '/panel/login/';
-      }
-    }
-  </script>
 
   <!-- ─── Companies ─── -->
   <section class="company-section" id="companies">
@@ -857,7 +838,7 @@
               </div>
               <div class="links">
                 <a href="{% url 'apply' company_slug=c.slug %}" class="btn-apply">Apply</a>
-                <a href="{% url 'recruitpanel:recruitpanel_login' company_slug=c.slug %}" class="btn-login">Login</a>
+                <a href="{% url 'recruitpanel:recruitpanel_login' %}" class="btn-login">Login</a>
               </div>
             </div>
           {% endfor %}

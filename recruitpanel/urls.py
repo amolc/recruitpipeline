@@ -6,6 +6,7 @@ app_name = 'recruitpanel'
 urlpatterns = [
     path('login/', views.login_view, name='recruitpanel_login'),
     path('logout/', views.logout_view, name='recruitpanel_logout'),
+    path('register/', views.register_company, name='register'),
     path('dashboard/', views.dashboard, name='recruitpanel_dashboard'),
     path('board/', views.board, name='board'),
     path('candidates/', views.candidate_list, name='candidate_list'),
@@ -25,5 +26,7 @@ urlpatterns = [
     path('pipeline/add/', views.add_stage, name='add_stage'),
     path('pipeline/<str:stage_key>/delete/', views.delete_stage, name='delete_stage'),
     path('pipeline/<str:stage>/', views.update_global_automation, name='update_global_automation'),
+    path('users/', views.user_list, name='user_list'),
+    path('users/create/', views.user_create, name='user_create'),
     path('', views.dashboard, name='recruitpanel_home'),
 ]

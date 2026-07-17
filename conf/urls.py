@@ -3,10 +3,12 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from adminpanel import views as admin_views
+from frontend import views as frontend_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('superadmin/', include('superadmin.urls')),
+    path('register/', frontend_views.register_company, name='register_company'),
     path('adminpanel/', admin_views.super_dashboard, name='super_dashboard'),
     path('adminpanel/companies/', admin_views.super_companies, name='super_companies'),
     path('adminpanel/companies/create/', admin_views.super_company_create, name='super_company_create'),

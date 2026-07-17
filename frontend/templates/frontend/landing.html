@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Recruitme — Login</title>
+  <meta name="description" content="Recruitme — The leading recruitment platform connecting top talent with great companies." />
+  <title>Recruitme — Your Career Starts Here</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -13,11 +14,14 @@
     :root {
       --color-primary: #059669;
       --color-primary-dark: #047857;
+      --color-accent: #d97706;
       --color-bg: #f8fafc;
       --color-bg-card: #ffffff;
+      --color-bg-elevated: #f1f5f9;
       --color-border: #e2e8f0;
       --color-text: #0f172a;
       --color-text-muted: #64748b;
+      --color-success: #16a34a;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
       --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
       --radius: 16px;
@@ -25,61 +29,148 @@
       --radius-xs: 6px;
     }
 
+    html { scroll-behavior: smooth; }
+
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--color-bg);
       color: var(--color-text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
     }
 
-    .card {
-      background: var(--color-bg-card);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius);
-      padding: 40px;
+    .container {
       width: 100%;
-      max-width: 420px;
-      box-shadow: var(--shadow-md);
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--color-border);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
 
     .logo {
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       font-weight: 800;
       letter-spacing: -0.03em;
       text-decoration: none;
       color: var(--color-text);
-      display: block;
-      text-align: center;
-      margin-bottom: 8px;
     }
 
     .logo span { color: var(--color-primary); }
 
-    .subtitle {
+    .hero {
+      padding: 80px 0;
       text-align: center;
-      color: var(--color-text-muted);
-      font-size: 0.875rem;
-      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .form-group { margin-bottom: 16px; }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: 50%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(5, 150, 105, 0.06) 0%, transparent 70%);
+      transform: translate(-50%, 0);
+      pointer-events: none;
+    }
 
-    .form-group label {
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(5, 150, 105, 0.08);
+      color: var(--color-primary);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 28px;
+      letter-spacing: 0.03em;
+    }
+
+    .hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+      margin-bottom: 20px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero .highlight { color: var(--color-primary); }
+    .hero .highlight-accent { color: var(--color-accent); }
+
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: var(--color-text-muted);
+      max-width: 560px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    .auth-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 420px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .auth-card .auth-subtitle {
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+      margin-bottom: 20px;
+    }
+
+    .auth-card .form-group { margin-bottom: 14px; text-align: left; }
+
+    .auth-card label {
       display: block;
       font-size: 0.8125rem;
       font-weight: 600;
       margin-bottom: 5px;
     }
 
-    .form-group input,
-    .form-group select {
+    .auth-card input {
       width: 100%;
       padding: 11px 13px;
       font-size: 0.9375rem;
@@ -92,15 +183,14 @@
       color: var(--color-text);
     }
 
-    .form-group input:focus,
-    .form-group select:focus {
+    .auth-card input:focus {
       border-color: var(--color-primary);
       box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
     }
 
-    .btn-submit {
+    .auth-card .btn-submit {
       width: 100%;
-      padding: 13px;
+      padding: 12px;
       font-size: 0.9375rem;
       font-weight: 600;
       font-family: inherit;
@@ -110,89 +200,431 @@
       background: var(--color-primary);
       color: #fff;
       transition: background 0.2s;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
-    .btn-submit:hover { background: var(--color-primary-dark); }
-    .btn-submit:active { transform: scale(0.98); }
+    .auth-card .btn-submit:hover { background: var(--color-primary-dark); }
+    .auth-card .btn-submit:active { transform: scale(0.97); }
 
+    .auth-card .auth-footer {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .stats {
+      padding: 0 0 80px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .stat-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-number {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+
+    .how-it-works {
+      padding: 0 0 80px;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .section-header h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .section-header p {
+      color: var(--color-text-muted);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .step {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      text-align: center;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .step:hover { border-color: var(--color-primary); box-shadow: var(--shadow-md); }
+
+    .step-number {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(5, 150, 105, 0.08);
+      color: var(--color-primary);
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .step h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .step p {
+      font-size: 0.9375rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    .company-section {
+      padding: 0 0 80px;
+    }
+
+    .company-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .company-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .company-card:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .company-card .info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .company-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-xs);
+      background: rgba(5, 150, 105, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    .company-card .name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .company-card .links {
+      display: flex;
+      gap: 10px;
+    }
+
+    .company-card .links a {
+      padding: 8px 18px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: inherit;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-apply {
+      background: rgba(5, 150, 105, 0.08);
+      color: var(--color-primary);
+      border: none;
+    }
+
+    .btn-apply:hover { background: rgba(5, 150, 105, 0.15); }
+
+    .btn-login {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-login:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      background: var(--color-bg-card);
+      border: 2px dashed var(--color-border);
+      border-radius: var(--radius);
+      color: var(--color-text-muted);
+    }
+
+    .empty-state p { font-size: 0.9375rem; }
+
+    .msg-container {
+      max-width: 700px;
+      margin: 0 auto 20px;
+    }
     .msg {
       padding: 11px 15px;
       border-radius: var(--radius-sm);
       font-size: 0.8125rem;
       font-weight: 500;
-      margin-bottom: 16px;
-      text-align: center;
+      margin-bottom: 10px;
     }
-
+    .msg-success {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
     .msg-error {
       background: #fef2f2;
       color: #dc2626;
       border: 1px solid #fecaca;
     }
 
-    .msg-success {
-      background: #f0fdf4;
-      color: #16a34a;
-      border: 1px solid #bbf7d0;
+    footer {
+      border-top: 1px solid var(--color-border);
+      padding: 32px 0;
+      background: var(--color-bg-elevated);
     }
 
-    .footer-links {
-      text-align: center;
-      margin-top: 20px;
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       font-size: 0.8125rem;
       color: var(--color-text-muted);
     }
 
-    .footer-links a {
-      color: var(--color-primary);
-      text-decoration: none;
-      font-weight: 600;
+    .footer-links {
+      display: flex;
+      gap: 20px;
     }
 
-    .footer-links a:hover { text-decoration: underline; }
+    .footer-links a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--color-text); }
+
+    @media (max-width: 768px) {
+      .hero { padding: 50px 0 60px; }
+      .hero h1 { font-size: 2rem; }
+      .hero-subtitle { font-size: 1rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps { grid-template-columns: 1fr; }
+      .company-card { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .company-card .links { width: 100%; }
+      .company-card .links a { flex: 1; text-align: center; }
+      .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 1.65rem; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <a href="{% url 'landing' %}" class="logo">recruit<span>me</span></a>
-    <p class="subtitle">Sign in to access your portal</p>
 
-    {% if messages %}
-      {% for m in messages %}
-        <div class="msg msg-{{ m.tags }}">{{ m }}</div>
-      {% endfor %}
-    {% endif %}
-
-    {% if error %}
-      <div class="msg msg-error">{{ error }}</div>
-    {% endif %}
-
-    <form method="post" action="{% url 'landing' %}">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="phone">Phone Number</label>
-        <input id="phone" name="phone" type="tel" placeholder="+919876543210" required autocomplete="tel" />
-      </div>
-      <div class="form-group">
-        <label for="pin">Secret PIN</label>
-        <input id="pin" name="pin" type="password" placeholder="Enter your 4-digit PIN" required autocomplete="off" />
-      </div>
-      <div class="form-group">
-        <label for="portal">I want to go to</label>
-        <select id="portal" name="portal" required>
-          <option value="">— Select portal —</option>
-          <option value="recruiter">Recruiter Panel</option>
-          <option value="candidate">Candidate Portal</option>
-          <option value="superadmin">Admin Panel</option>
-        </select>
-      </div>
-      <button type="submit" class="btn-submit">Sign In</button>
-    </form>
-
-    <div class="footer-links">
-      New company? <a href="{% url 'register_company' %}">Register here</a>
+  <nav>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <a href="{% url 'landing' %}" class="logo">recruit<span>me</span></a>
     </div>
-  </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        10,000+ Jobs Available
+      </div>
+      <h1>
+        The <span class="highlight">Leading Platform</span><br />
+        for <span class="highlight-accent">Every</span> Career Move
+      </h1>
+      <p class="hero-subtitle">
+        Recruitme connects top talent with the world&rsquo;s best companies.
+        Sign in with your phone &amp; PIN — or join for free.
+      </p>
+
+      {% if messages %}
+      <div class="msg-container">
+        {% for m in messages %}
+          <div class="msg msg-{{ m.tags }}">{{ m }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if error %}
+        <div class="msg msg-error" style="max-width:420px;margin:0 auto 16px;">{{ error }}</div>
+      {% endif %}
+
+      <div class="auth-card">
+        <h2>Welcome</h2>
+        <p class="auth-subtitle">Enter your phone &amp; PIN to sign in or create an account</p>
+        <form method="post" action="{% url 'landing' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input id="phone" name="phone" type="tel" placeholder="+919876543210" required autocomplete="tel" />
+          </div>
+          <div class="form-group">
+            <label for="pin">PIN</label>
+            <input id="pin" name="pin" type="password" placeholder="4-digit PIN" required autocomplete="off" />
+          </div>
+          <button type="submit" class="btn-submit">Continue</button>
+        </form>
+        <p class="auth-footer">
+          New here? Just enter your phone and a PIN — we&rsquo;ll create your account.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">10K+</div>
+          <div class="stat-label">Active Listings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Partner Companies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">50K+</div>
+          <div class="stat-label">Hires Made</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">98%</div>
+          <div class="stat-label">Satisfaction Rate</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <h2>How It Works</h2>
+        <p>From application to offer — we make hiring seamless for everyone.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Browse &amp; Apply</h3>
+          <p>Explore thousands of verified job listings from leading companies and apply in minutes.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Get Discovered</h3>
+          <p>Companies review your profile and reach out directly. No endless follow-ups needed.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Land the Job</h3>
+          <p>Interview, negotiate, and accept — all through one streamlined platform.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="company-section" id="companies">
+    <div class="container">
+      <div class="section-header">
+        <h2>Featured Companies</h2>
+        <p>Join thousands of professionals working at these organizations.</p>
+      </div>
+
+      {% if companies %}
+        <div class="company-grid">
+          {% for c in companies %}
+            <div class="company-card">
+              <div class="info">
+                <div class="company-avatar">{{ c.name|first }}</div>
+                <span class="name">{{ c.name }}</span>
+              </div>
+              <div class="links">
+                <a href="{% url 'apply' company_slug=c.slug %}" class="btn-apply">Apply</a>
+                <a href="{% url 'landing' %}" class="btn-login">Login</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <p>No companies registered yet.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <span>&copy; <span id="year"></span> Recruitme. All rights reserved.</span>
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
 </body>
 </html>

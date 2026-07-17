@@ -9,6 +9,16 @@ from api.models import Company, JobPosition, UserAuth, UserRole
 User = get_user_model()
 
 
+def role_redirect_url(role):
+    from django.urls import reverse
+    mapping = {
+        'recruiter': 'recruitpanel:recruitpanel_dashboard',
+        'candidate': 'candidate_dashboard',
+        'superadmin': 'superadmin:superadmin_dashboard',
+    }
+    return reverse(mapping.get(role, 'landing'))
+
+
 def candidate_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
@@ -35,30 +45,72 @@ def landing(request):
     if request.method == 'POST':
         phone = request.POST.get('phone', '').strip()
         pin = request.POST.get('pin', '').strip()
-        portal = request.POST.get('portal', '')
-        user = authenticate(request, phone=phone, pin=pin)
-        if user:
-            if portal == 'recruiter' and user.roles.filter(role='recruiter', is_active=True).exists():
-                login(request, user)
-                request.session['role'] = 'recruiter'
-                role = user.roles.filter(role='recruiter', is_active=True).first()
-                if role.company:
-                    request.session['company_id'] = role.company.id
-                return redirect('recruitpanel:recruitpanel_dashboard')
-            elif portal == 'candidate' and user.roles.filter(role='candidate', is_active=True).exists():
-                login(request, user)
-                request.session['role'] = 'candidate'
-                return redirect('candidate_dashboard')
-            elif portal == 'superadmin' and user.roles.filter(role='superadmin', is_active=True).exists():
-                login(request, user)
-                request.session['role'] = 'superadmin'
-                return redirect('superadmin:superadmin_dashboard')
-            else:
-                error = f'You do not have {portal} access.'
-        else:
-            error = 'Invalid phone or PIN.'
 
-    return render(request, 'frontend/landing.html', {'error': error})
+        if not phone or not pin:
+            error = 'Phone number and PIN are required.'
+        else:
+            user = authenticate(request, phone=phone, pin=pin)
+            if user is None:
+                auth_exists = UserAuth.objects.filter(phone=phone).exists()
+                if auth_exists:
+                    error = 'Invalid PIN.'
+                else:
+                    username = phone
+                    base_username = username
+                    counter = 1
+                    while User.objects.filter(username=username).exists():
+                        username = f'{base_username}-{counter}'
+                        counter += 1
+
+                    secretname = f'user{phone[-4:]}'
+                    user = User.objects.create_user(username=username)
+                    user_auth = UserAuth.objects.create(user=user, phone=phone, secretname=secretname)
+                    user_auth.set_pin(pin)
+                    user_auth.save()
+                    user = authenticate(request, phone=phone, pin=pin)
+
+            if user:
+                login(request, user)
+                active_roles = user.roles.filter(is_active=True)
+                count = active_roles.count()
+
+                if count == 1:
+                    role = active_roles.first()
+                    request.session['role'] = role.role
+                    if role.company:
+                        request.session['company_id'] = role.company.id
+                    return redirect(role_redirect_url(role.role))
+                else:
+                    return redirect('choose_role')
+
+    return render(request, 'frontend/landing.html', {
+        'error': error,
+        'companies': Company.objects.filter(is_active=True),
+    })
+
+
+def choose_role(request):
+    if not request.user.is_authenticated:
+        return redirect('landing')
+
+    error = None
+    if request.method == 'POST':
+        selected = request.POST.get('role', '')
+        if selected == 'candidate':
+            if not request.user.roles.filter(role='candidate', is_active=True).exists():
+                UserRole.objects.create(
+                    user=request.user,
+                    role='candidate',
+                    is_active=True,
+                )
+            request.session['role'] = 'candidate'
+            return redirect('candidate_dashboard')
+        elif selected == 'recruiter':
+            return redirect('register_company')
+        else:
+            error = 'Please select a role.'
+
+    return render(request, 'frontend/choose_role.html', {'error': error})
 
 
 def register_company(request):
@@ -68,10 +120,6 @@ def register_company(request):
 
         if not phone or not name:
             messages.error(request, 'Phone number and company name are required.')
-            return redirect('landing')
-
-        if UserAuth.objects.filter(phone=phone).exists():
-            messages.error(request, 'This phone number is already registered.')
             return redirect('landing')
 
         slug = re.sub(r'[^a-z0-9-]+', '-', name.lower()).strip('-')
@@ -90,39 +138,47 @@ def register_company(request):
             summary=request.POST.get('summary', '').strip(),
         )
 
-        username = phone
-        base_username = username
-        counter = 1
-        while User.objects.filter(username=username).exists():
-            username = f'{base_username}-{counter}'
-            counter += 1
+        if request.user.is_authenticated:
+            user = request.user
+        else:
+            if UserAuth.objects.filter(phone=phone).exists():
+                messages.error(request, 'This phone number is already registered.')
+                company.delete()
+                return redirect('landing')
 
-        pin = phone[-4:]
-        secretname = re.sub(r'[^a-z0-9]', '', name.lower())[:20] or 'recruiter'
+            username = phone
+            base_username = username
+            c = 1
+            while User.objects.filter(username=username).exists():
+                username = f'{base_username}-{c}'
+                c += 1
 
-        user = User.objects.create_user(username=username)
-        user_auth = UserAuth.objects.create(user=user, phone=phone, secretname=secretname)
-        user_auth.set_pin(pin)
-        user_auth.save()
+            pin = phone[-4:]
+            secretname = re.sub(r'[^a-z0-9]', '', name.lower())[:20] or 'recruiter'
 
-        UserRole.objects.create(
-            user=user,
-            role='recruiter',
-            company=company,
-            sub_role='admin',
-            is_active=True,
-        )
+            user = User.objects.create_user(username=username)
+            user_auth = UserAuth.objects.create(user=user, phone=phone, secretname=secretname)
+            user_auth.set_pin(pin)
+            user_auth.save()
 
-        user = authenticate(request, phone=phone, pin=pin)
-        if user:
+            user = authenticate(request, phone=phone, pin=pin)
+
+        if not user.roles.filter(role='recruiter', company=company).exists():
+            UserRole.objects.create(
+                user=user,
+                role='recruiter',
+                company=company,
+                sub_role='admin',
+                is_active=True,
+            )
+
+        if user and not request.user.is_authenticated:
             login(request, user)
-            request.session['role'] = 'recruiter'
-            request.session['company_id'] = company.id
 
-        messages.success(
-            request,
-            f'Company "{name}" registered! Your login PIN is <strong>{pin}</strong>.',
-        )
+        request.session['role'] = 'recruiter'
+        request.session['company_id'] = company.id
+
+        messages.success(request, f'Company "{name}" registered!')
         return redirect('recruitpanel:recruitpanel_dashboard')
 
     return render(request, 'frontend/register.html')

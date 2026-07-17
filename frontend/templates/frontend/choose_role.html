@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruitme — Choose Your Role</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-primary: #059669;
+      --color-primary-dark: #047857;
+      --color-accent: #d97706;
+      --color-bg: #f8fafc;
+      --color-bg-card: #ffffff;
+      --color-border: #e2e8f0;
+      --color-text: #0f172a;
+      --color-text-muted: #64748b;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-xs: 6px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      text-decoration: none;
+      color: var(--color-text);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .logo span { color: var(--color-primary); }
+
+    .subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 28px;
+    }
+
+    .role-option {
+      display: block;
+      width: 100%;
+      padding: 20px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--color-bg-card);
+      color: var(--color-text);
+      transition: all 0.2s;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .role-option:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .role-option .role-desc {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      margin-top: 4px;
+    }
+
+    .msg-error {
+      padding: 11px 15px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .footer-links {
+      margin-top: 20px;
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+    }
+
+    .footer-links a {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <a href="{% url 'landing' %}" class="logo">recruit<span>me</span></a>
+    <p class="subtitle">Welcome! Choose how you&rsquo;d like to use Recruitme.</p>
+
+    {% if error %}
+      <div class="msg-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{% url 'choose_role' %}">
+      {% csrf_token %}
+      <button type="submit" name="role" value="candidate" class="role-option">
+        I&rsquo;m a Candidate
+        <span class="role-desc">Browse jobs, apply, and track your applications</span>
+      </button>
+      <button type="submit" name="role" value="recruiter" class="role-option">
+        I&rsquo;m a Recruiter
+        <span class="role-desc">Manage job postings, review candidates, and build your pipeline</span>
+      </button>
+    </form>
+
+    <div class="footer-links">
+      <a href="{% url 'landing' %}">Back to home</a>
+    </div>
+  </div>
+</body>
+</html>

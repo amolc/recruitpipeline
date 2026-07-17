@@ -1,0 +1,68 @@
+{% extends 'recruitpanel/base.html' %}
+
+{% block title %}Job Positions — {{ company.name }} Pipeline{% endblock %}
+{% block page_title %}Job Positions{% endblock %}
+
+{% block extra_head %}
+<style>
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .card-wrap {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; overflow-x: auto;
+    box-shadow: var(--shadow);
+  }
+  .active-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.6875rem;
+  }
+  .active-yes { background: #f0fdf4; color: #16a34a; }
+  .active-no { background: var(--bg-elevated); color: var(--text-muted); }
+  .add-form { display: flex; gap: 8px; align-items: center; }
+  .add-form input { width: 280px; }
+  .empty-state { text-align: center; padding: 40px 0; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <form class="add-form" method="post" action="{% url 'recruitpanel:job_position_add' company_slug=company.slug %}">
+    {% csrf_token %}
+    <input type="text" name="title" placeholder="New position title…" required />
+    <button type="submit" class="btn btn-primary btn-sm">Quick Add</button>
+  </form>
+  <a href="{% url 'recruitpanel:job_position_add' company_slug=company.slug %}" class="btn btn-primary btn-sm">+ Create Position</a>
+</div>
+
+<div class="card-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pos in positions %}
+        <tr>
+          <td><strong><a href="{% url 'recruitpanel:job_position_detail' company_slug=company.slug pk=pos.pk %}" style="color:var(--primary);text-decoration:none;">{{ pos.title }}</a></strong></td>
+          <td>
+            <span class="active-tag {% if pos.is_active %}active-yes{% else %}active-no{% endif %}">
+              {{ pos.is_active|yesno:"Active,Inactive" }}
+            </span>
+          </td>
+          <td style="white-space:nowrap;">{{ pos.created_at|date:"M d, Y" }}</td>
+          <td>
+            <form method="post" action="{% url 'recruitpanel:job_position_delete' company_slug=company.slug pk=pos.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="empty-state">No positions yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

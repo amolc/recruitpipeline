@@ -1,0 +1,27 @@
+{% extends 'superadmin/base.html' %}
+{% block title %}Dashboard — Recruitme Super Admin{% endblock %}
+{% block content %}
+<div class="header">
+  <h1>Dashboard</h1>
+  <p>Welcome back, {{ request.user.username }}</p>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)">
+    <div style="font-size:2rem;font-weight:800;color:var(--primary)">{{ stats.companies }}</div>
+    <div style="color:var(--text-muted);font-size:0.875rem;margin-top:4px">Companies</div>
+  </div>
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)">
+    <div style="font-size:2rem;font-weight:800;color:var(--primary)">{{ stats.candidates }}</div>
+    <div style="color:var(--text-muted);font-size:0.875rem;margin-top:4px">Candidates</div>
+  </div>
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)">
+    <div style="font-size:2rem;font-weight:800;color:var(--primary)">{{ stats.positions }}</div>
+    <div style="color:var(--text-muted);font-size:0.875rem;margin-top:4px">Positions</div>
+  </div>
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)">
+    <div style="font-size:2rem;font-weight:800;color:var(--primary)">{{ stats.users }}</div>
+    <div style="color:var(--text-muted);font-size:0.875rem;margin-top:4px">Users</div>
+  </div>
+</div>
+{% endblock %}

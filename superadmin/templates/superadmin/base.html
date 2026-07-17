@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Recruitme — Super Admin{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 240px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+      text-decoration: none;
+      margin-bottom: 32px;
+    }
+    .sidebar-logo span { color: var(--primary); }
+    .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-nav a {
+      display: block;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .sidebar-nav a:hover { background: var(--bg-elevated); color: var(--text); }
+    .sidebar-nav a.active { background: rgba(5,150,105,0.08); color: var(--primary); font-weight: 600; }
+    .sidebar-footer { padding-top: 16px; border-top: 1px solid var(--border); }
+    .sidebar-footer a {
+      display: block;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      transition: all 0.15s;
+    }
+    .sidebar-footer a:hover { background: var(--bg-elevated); color: #ef4444; }
+    .main { flex: 1; padding: 32px; }
+    .header { margin-bottom: 28px; }
+    .header h1 { font-size: 1.5rem; font-weight: 700; }
+    .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+    .messages {
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+    }
+    .messages.error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .messages.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="{% url 'superadmin:superadmin_dashboard' %}" class="sidebar-logo">recruit<span>me</span></a>
+      <nav class="sidebar-nav">
+        <a href="{% url 'superadmin:superadmin_dashboard' %}" class="{% if request.resolver_match.url_name == 'superadmin_dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="#">Companies</a>
+        <a href="#">Candidates</a>
+        <a href="#">Positions</a>
+        <a href="#">Users</a>
+        <a href="#">Skills</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="{% url 'superadmin:superadmin_logout' %}">Logout</a>
+      </div>
+    </aside>
+    <main class="main">
+      {% if messages %}
+        {% for m in messages %}
+          <div class="messages {{ m.tags }}">{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

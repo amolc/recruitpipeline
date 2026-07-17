@@ -1,6 +1,19 @@
-from django.shortcuts import render, get_object_or_404
+from functools import wraps
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
+from django.contrib.auth import authenticate, login, logout
 from api.models import Company, JobPosition
+
+
+def candidate_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('candidate_login')
+        if not request.user.roles.filter(role='candidate', is_active=True).exists():
+            return redirect('candidate_login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
 def landing(request):
@@ -16,3 +29,35 @@ def apply(request, company_slug=None):
         'company': request.company,
         'positions': positions,
     })
+
+
+def candidate_login(request, company_slug=None):
+    if request.user.is_authenticated:
+        if request.user.roles.filter(role='candidate', is_active=True).exists():
+            return redirect('candidate_dashboard')
+        logout(request)
+
+    error = None
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        pin = request.POST.get('pin', '').strip()
+        user = authenticate(request, phone=phone, pin=pin)
+        if user and user.roles.filter(role='candidate', is_active=True).exists():
+            login(request, user)
+            request.session['role'] = 'candidate'
+            return redirect('candidate_dashboard')
+        if user:
+            error = 'You do not have candidate access.'
+        else:
+            error = 'Invalid phone or PIN.'
+    return render(request, 'frontend/portal/candidate_login.html', {'error': error})
+
+
+@candidate_required
+def candidate_dashboard(request, company_slug=None):
+    return render(request, 'frontend/portal/candidate_dashboard.html')
+
+
+def candidate_logout(request, company_slug=None):
+    logout(request)
+    return redirect('candidate_login')

@@ -10,7 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +29,7 @@ SECRET_KEY = 'django-insecure-4s(1eyu@+&w!=1-_j6asn!)7nli8q39h17u6ze4vjoir)+m9%u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1','pipeline.quantbots.co']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'pipeline.quantbots.co', 'testserver']
 CSRF_TRUSTED_ORIGINS = ['https://pipeline.quantbots.co']
 
 # Application definition
@@ -40,6 +44,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'frontend',
     'adminpanel',
+    'recruitpanel',
+    'superadmin',
     'api',
     'agents',
 ]
@@ -81,8 +87,12 @@ WSGI_APPLICATION = 'conf.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'recruitme'),
+        'USER': os.getenv('DB_USER', 'recruitme'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'recruitme7070'),
+        'HOST': os.getenv('DB_HOST', 'db.quantbots.co'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
@@ -127,3 +137,10 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'uploads'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+AUTHENTICATION_BACKENDS = [
+    'api.auth_backend.PhoneAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_URL = 'landing'

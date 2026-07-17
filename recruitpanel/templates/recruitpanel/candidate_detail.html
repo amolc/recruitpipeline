@@ -1,0 +1,96 @@
+{% extends 'recruitpanel/base.html' %}
+
+{% block title %}{{ candidate.full_name }} — {{ company.name }} Candidates{% endblock %}
+{% block page_title %}{{ candidate.full_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .detail-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px; max-width: 720px;
+    box-shadow: var(--shadow);
+  }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 2px; }
+  .field .value { font-size: 0.9375rem; }
+  .field .value a { color: var(--primary); }
+  .status-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 500;
+  }
+  .status-new { background: var(--bg-elevated); color: var(--text-muted); }
+  .status-positive { background: #f0fdf4; color: #16a34a; }
+  .status-warn { background: #fff7ed; color: var(--primary); }
+  .status-rejected { background: #fef2f2; color: #dc2626; }
+  .actions-bar { margin-top: 28px; display: flex; gap: 10px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-card">
+  <div class="grid">
+    <div class="field">
+      <label>Full Name</label>
+      <div class="value">{{ candidate.full_name }}</div>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <div class="value">
+        {% with s=candidate.status %}
+        <span class="status-tag
+          {% if s == 'selected' or s == 'accepted' or s == 'onboarded' %}status-positive
+          {% elif s == 'rejected' %}status-rejected
+          {% elif s == 'new' or s == 'screening' %}status-new
+          {% else %}status-warn{% endif %}">
+          {{ candidate.get_status_display }}
+        </span>
+        {% endwith %}
+      </div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <div class="value">{{ candidate.email }}</div>
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <div class="value">{{ candidate.phone }}</div>
+    </div>
+    <div class="field">
+      <label>Position</label>
+      <div class="value">{{ candidate.position }}</div>
+    </div>
+    <div class="field">
+      <label>Experience</label>
+      <div class="value">{{ candidate.experience }} years</div>
+    </div>
+    <div class="field">
+      <label>Resume / CV</label>
+      <div class="value">
+        {% if candidate.resume %}
+          <a href="{{ candidate.resume.url }}" target="_blank">Download CV</a>
+        {% else %}
+          <span style="color:var(--text-muted);">Not provided</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="field">
+      <label>Submitted</label>
+      <div class="value">{{ candidate.submitted_at|date:"F d, Y" }}</div>
+    </div>
+  </div>
+
+  <div class="field" style="margin-top:16px;">
+    <label>Why join us?</label>
+    <div class="value" style="white-space:pre-wrap;color:var(--text-muted);">
+      {{ candidate.cover_letter }}
+    </div>
+  </div>
+
+  <div class="actions-bar">
+    <a href="{% url 'recruitpanel:candidate_list' company_slug=company.slug %}" class="btn btn-secondary">← Back</a>
+    <a href="{% url 'recruitpanel:candidate_edit' company_slug=company.slug pk=candidate.pk %}" class="btn btn-primary">✎ Edit</a>
+    <a href="{% url 'recruitpanel:candidate_delete' company_slug=company.slug pk=candidate.pk %}" class="btn btn-danger">✕ Delete</a>
+  </div>
+</div>
+{% endblock %}

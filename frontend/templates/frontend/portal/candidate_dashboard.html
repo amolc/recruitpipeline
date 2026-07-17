@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruitme — Candidate Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .logo { font-size: 1.25rem; font-weight: 800; text-decoration: none; color: var(--text); }
+    .logo span { color: var(--primary); }
+    .nav-links { display: flex; gap: 20px; align-items: center; }
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links .logout { color: #ef4444; }
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+    .header { margin-bottom: 32px; }
+    .header h1 { font-size: 1.5rem; font-weight: 700; }
+    .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .card h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; }
+    .card p { color: var(--text-muted); font-size: 0.9375rem; max-width: 480px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{% url 'candidate_dashboard' %}" class="logo">recruit<span>me</span></a>
+    <div class="nav-links">
+      <a href="#">Find Jobs</a>
+      <a href="#">My Profile</a>
+      <a href="#">Applications</a>
+      <a href="{% url 'candidate_logout' %}" class="logout">Logout</a>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="header">
+      <h1>Welcome, {{ request.user.get_full_name|default:request.user.username }}</h1>
+      <p>Your career dashboard</p>
+    </div>
+    <div class="card">
+      <h2>Get Started</h2>
+      <p>Upload your resume to get matched with the best opportunities. We'll extract your skills and find the perfect role for you.</p>
+      <div style="margin-top:24px">
+        <a href="#" style="display:inline-block;padding:12px 28px;font-size:0.9375rem;font-weight:600;font-family:inherit;border:none;border-radius:8px;cursor:pointer;background:var(--primary);color:#fff;text-decoration:none">Upload Resume</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

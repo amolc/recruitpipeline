@@ -1,0 +1,288 @@
+{% extends 'recruitpanel/base.html' %}
+{% load recruitpanel_extras %}
+
+{% block title %}{{ position.title }} — {{ company.name }} Jobs{% endblock %}
+{% block page_title %}{{ position.title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .info-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 28px;
+    box-shadow: var(--shadow);
+  }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .info-grid .field label {
+    display: block; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 2px;
+  }
+  .info-grid .field .value { font-size: 0.9375rem; }
+  .info-grid .field-full { grid-column: 1 / -1; }
+  .info-grid .field-full .value { white-space: pre-wrap; color: var(--text-muted); font-size: 0.875rem; }
+  .actions-bar { margin-top: 16px; display: flex; gap: 10px; }
+  .pipeline-label {
+    font-size: 0.8125rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 16px;
+  }
+  .board { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; align-items: flex-start; }
+  .column {
+    flex: 0 0 210px; min-width: 210px; background: var(--bg-elevated);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 10px;
+    display: flex; flex-direction: column;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .column.drag-over { background: #ecfdf5; border-color: var(--primary); }
+  .column-header {
+    font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-muted); padding-bottom: 8px;
+    border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    display: flex; justify-content: space-between;
+  }
+  .column-header .count {
+    background: var(--border); color: var(--text-muted);
+    font-size: 0.625rem; padding: 1px 6px; border-radius: 999px;
+  }
+  .card-list { display: flex; flex-direction: column; gap: 6px; min-height: 50px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px; cursor: grab; user-select: none;
+    transition: opacity 0.15s, border-color 0.15s;
+  }
+  .card:active { cursor: grabbing; }
+  .card.dragging { opacity: 0.4; }
+  .card:hover { border-color: var(--primary); }
+  .card-name { font-weight: 600; font-size: 0.75rem; }
+  .card-meta { color: var(--text-muted); font-size: 0.6875rem; margin-top: 2px; }
+  .empty { text-align: center; padding: 16px 0; color: var(--text-muted); font-size: 0.6875rem; }
+  .auto-card {
+    background: #fff7ed; border: 1px solid rgba(5,150,105,0.2);
+    border-radius: 6px; padding: 10px; font-size: 0.6875rem; line-height: 1.5;
+    color: var(--text-muted); position: relative;
+  }
+  .auto-card strong { color: var(--primary); display: block; margin-bottom: 4px; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .auto-card .pencil {
+    position: absolute; top: 6px; right: 6px; cursor: pointer; opacity: 0.4; transition: 0.15s;
+    font-size: 0.75rem; color: var(--primary); background: none; border: none; padding: 2px 4px;
+  }
+  .auto-card .pencil:hover { opacity: 1; }
+  .auto-edit { display: none; width: 100%; }
+  .auto-edit textarea {
+    width: 100%; padding: 6px 8px; font-size: 0.6875rem; font-family: inherit;
+    color: var(--text); background: var(--bg-card);
+    border: 1px solid var(--primary); border-radius: 4px; outline: none;
+    resize: vertical; min-height: 60px; margin-bottom: 6px;
+  }
+  .auto-edit .edit-actions { display: flex; gap: 4px; }
+  .auto-edit .edit-actions button {
+    flex: 1; padding: 4px 6px; font-size: 0.625rem; font-weight: 600; font-family: inherit;
+    border: none; border-radius: 4px; cursor: pointer; transition: 0.15s;
+  }
+  .auto-edit .btn-save { background: var(--primary); color: #fff; }
+  .auto-edit .btn-save:hover { opacity: 0.85; }
+  .auto-edit .btn-cancel { background: var(--bg-elevated); color: var(--text-muted); }
+  .auto-edit .btn-cancel:hover { background: var(--border); }
+  .auto-text { display: block; }
+  .auto-bullets { margin: 0; padding: 0 0 0 14px; list-style: disc; }
+  .auto-bullets li { margin-bottom: 3px; }
+  .section-divider { margin: 32px 0 20px; border: none; border-top: 1px solid var(--border); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="info-card">
+  <div class="info-grid">
+    <div class="field">
+      <label>Status</label>
+      <div class="value">{{ position.is_active|yesno:"Active,Inactive" }}</div>
+    </div>
+    <div class="field">
+      <label>Base Salary</label>
+      <div class="value">{% if position.base_salary %}${{ position.base_salary|floatformat:0 }}{% else %}—{% endif %}</div>
+    </div>
+    <div class="field">
+      <label>Per Hour</label>
+      <div class="value">{% if position.hourly_rate %}${{ position.hourly_rate|floatformat:2 }}/hr{% else %}—{% endif %}</div>
+    </div>
+    <div class="field">
+      <label>Location</label>
+      <div class="value">{{ position.location|default:"—" }}</div>
+    </div>
+    <div class="field">
+      <label>Created</label>
+      <div class="value">{{ position.created_at|date:"M d, Y" }}</div>
+    </div>
+    <div class="field">
+      <label>Applications</label>
+      <div class="value">{{ total_apps }}</div>
+    </div>
+    {% if position.description %}
+    <div class="field field-full">
+      <label>Job Description</label>
+      <div class="value">{{ position.description }}</div>
+    </div>
+    {% endif %}
+    {% if position.requirements %}
+    <div class="field field-full">
+      <label>Requirements</label>
+      <div class="value">{{ position.requirements }}</div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="actions-bar">
+    <a href="{% url 'recruitpanel:job_positions' company_slug=company.slug %}" class="btn btn-secondary">← All Positions</a>
+    <a href="{% url 'recruitpanel:job_position_edit' company_slug=company.slug pk=position.pk %}" class="btn btn-primary">✎ Edit</a>
+  </div>
+</div>
+
+<div class="pipeline-label">Automation Pipeline — {{ position.title }}</div>
+
+<div class="board">
+  {% for auto in automations %}
+    <div class="column">
+      <div class="column-header">
+        {{ auto.label }}
+        <span class="count">auto</span>
+      </div>
+      <div class="card-list">
+        <div class="auto-card" data-stage="{{ auto.key }}">
+          <strong>⚡ Automation</strong>
+          <span class="auto-text">{{ auto.description|bullet_list }}</span>
+          <button class="pencil" onclick="editAuto(this)">✎</button>
+          <div class="auto-edit">
+            <textarea>{{ auto.description }}</textarea>
+            <div class="edit-actions">
+              <button class="btn-save" onclick="saveAuto(this, '{{ auto.key }}')">Save</button>
+              <button class="btn-cancel" onclick="cancelAuto(this)">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<hr class="section-divider" />
+
+<div class="pipeline-label">Application Pipeline — {{ position.title }}</div>
+
+<div id="csrfContainer" style="display:none">{% csrf_token %}</div>
+
+<script>
+  const slug = '{{ company.slug }}';
+  const posPk = {{ position.pk }};
+
+  function getCSRF() {
+    return document.querySelector('#csrfContainer input').value;
+  }
+
+  function editAuto(btn) {
+    const card = btn.closest('.auto-card');
+    card.querySelector('.auto-text').style.display = 'none';
+    btn.style.display = 'none';
+    card.querySelector('.auto-edit').style.display = 'block';
+  }
+
+  function cancelAuto(btn) {
+    const card = btn.closest('.auto-card');
+    const textarea = card.querySelector('textarea');
+    textarea.value = card.querySelector('.auto-text').textContent;
+    card.querySelector('.auto-edit').style.display = 'none';
+    card.querySelector('.auto-text').style.display = 'block';
+    card.querySelector('.pencil').style.display = 'block';
+  }
+
+  function saveAuto(btn, stage) {
+    const card = btn.closest('.auto-card');
+    const textarea = card.querySelector('textarea');
+    const desc = textarea.value.trim();
+
+    const form = new FormData();
+    form.append('description', desc);
+    form.append('csrfmiddlewaretoken', getCSRF());
+
+    fetch(`/${slug}/panel/positions/${posPk}/automation/${stage}/`, { method: 'POST', body: form })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          card.querySelector('.auto-text').textContent = desc;
+          card.querySelector('.auto-edit').style.display = 'none';
+          card.querySelector('.auto-text').style.display = 'block';
+          card.querySelector('.pencil').style.display = 'block';
+        }
+      });
+  }
+</script>
+
+<div class="board">
+  {% for col in columns %}
+    <div class="column" data-stage="{{ col.key }}">
+      <div class="column-header">
+        {{ col.label }}
+        <span class="count">{{ col.applications|length }}</span>
+      </div>
+      <div class="card-list">
+        {% for app in col.applications %}
+          <div class="card" draggable="true" data-id="{{ app.id }}">
+            <div class="card-name">{{ app.full_name }}</div>
+            <div class="card-meta">{{ app.experience }}yr · {{ app.submitted_at|date:"M d" }}</div>
+          </div>
+        {% empty %}
+          <div class="empty">None</div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  const stages = [
+    {% for s in stages %}
+      '{{ s.key }}'{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ];
+
+  let dragSrcId = null;
+
+  document.querySelectorAll('.card[draggable]').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      dragSrcId = card.dataset.id;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', e => {
+      card.classList.remove('dragging');
+      document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+    });
+  });
+
+  document.querySelectorAll('.column').forEach(col => {
+    col.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragenter', e => {
+      e.preventDefault();
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave', e => {
+      col.classList.remove('drag-over');
+    });
+    col.addEventListener('drop', e => {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      if (!dragSrcId) return;
+      const newStage = col.dataset.stage;
+      if (!newStage) return;
+
+      const form = new FormData();
+      form.append('status', newStage);
+      fetch(`/${slug}/api/apply/${dragSrcId}/status/`, { method: 'POST', body: form })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) location.reload();
+        });
+    });
+  });
+</script>
+{% endblock %}

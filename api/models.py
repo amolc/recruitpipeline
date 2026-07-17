@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth import get_user_model
 
 
 STAGES = [
@@ -53,6 +55,56 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f'{self.user.username} @ {self.company.name}'
+
+
+class UserAuth(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='auth')
+    phone = models.CharField('Phone Number', max_length=15, unique=True)
+    pin = models.CharField('PIN', max_length=128)
+    secretname = models.CharField('Secret Name', max_length=100)
+
+    def set_pin(self, raw_pin):
+        self.pin = make_password(raw_pin)
+
+    def check_pin(self, raw_pin):
+        return check_password(raw_pin, self.pin)
+
+    def __str__(self):
+        return self.phone
+
+    class Meta:
+        verbose_name = 'User Auth'
+        verbose_name_plural = 'User Auths'
+
+
+class UserRole(models.Model):
+    ROLE_CHOICES = [
+        ('superadmin', 'Super Admin'),
+        ('recruiter', 'Recruiter'),
+        ('candidate', 'Candidate'),
+    ]
+    SUB_ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('recruiter', 'Recruiter'),
+        ('hiring_manager', 'Hiring Manager'),
+        ('viewer', 'Viewer'),
+    ]
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='roles')
+    role = models.CharField('Role', max_length=20, choices=ROLE_CHOICES)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True, related_name='user_roles')
+    sub_role = models.CharField('Sub Role', max_length=20, choices=SUB_ROLE_CHOICES, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('user', 'role')
+        verbose_name = 'User Role'
+        verbose_name_plural = 'User Roles'
+
+    def __str__(self):
+        label = self.role
+        if self.company:
+            label += f' @ {self.company.name}'
+        return label
 
 
 class Stage(models.Model):

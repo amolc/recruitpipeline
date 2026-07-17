@@ -1,0 +1,112 @@
+{% extends 'recruitpanel/base.html' %}
+
+{% block title %}{% if position %}Edit {{ position.title }}{% else %}Create Position{% endif %} — {{ company.name }}{% endblock %}
+{% block page_title %}{% if position %}Edit: {{ position.title }}{% else %}Create Job Position{% endif %}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .form-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; max-width: 720px;
+    box-shadow: var(--shadow);
+  }
+  .form-card h2 {
+    font-size: 1rem; font-weight: 700; margin-bottom: 20px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .form-section {
+    margin-bottom: 24px;
+  }
+  .form-section-title {
+    font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 12px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+  .form-hint { font-size: 0.6875rem; color: var(--text-muted); margin-top: 3px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .form-group-check { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+  .form-group-check input[type="checkbox"] { width: auto; }
+  .actions-bar {
+    margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: center;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <h2>{% if position %}Edit Position{% else %}New Position{% endif %}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-section">
+      <div class="form-section-title">Basic Information</div>
+      <div class="form-group">
+        <label for="title">Job Title *</label>
+        {% if position %}
+          <input id="title" value="{{ position.title }}" disabled style="opacity:0.6;" />
+        {% else %}
+          <input id="title" name="title" type="text" value="{{ request.POST.title|default:'' }}" placeholder="e.g. Senior Software Engineer" required />
+          <div class="form-hint">Give the position a clear, descriptive title.</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="description">Job Description</label>
+        <textarea id="description" name="description" rows="5" placeholder="Describe the role, responsibilities, and what the candidate will work on…">{{ position.description|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Compensation & Location</div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="base_salary">Base Salary ($)</label>
+          <input id="base_salary" name="base_salary" type="number" step="0.01" min="0"
+            value="{{ position.base_salary|default:'' }}" placeholder="e.g. 75000" />
+        </div>
+        <div class="form-group">
+          <label for="hourly_rate">Per Hour ($)</label>
+          <input id="hourly_rate" name="hourly_rate" type="number" step="0.01" min="0"
+            value="{{ position.hourly_rate|default:'' }}" placeholder="e.g. 35.00" />
+        </div>
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input id="location" name="location" type="text" value="{{ position.location|default:'' }}" placeholder="e.g. Austin, TX" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Requirements</div>
+      <div class="form-group">
+        <label for="requirements">Required Skills & Qualifications</label>
+        <textarea id="requirements" name="requirements" rows="4" placeholder="List the key skills, experience level, education, or certifications required…">{{ position.requirements|default:'' }}</textarea>
+        <div class="form-hint">One per line or a short paragraph.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Status</div>
+      <div class="form-group form-group-check">
+        <input id="is_active" name="is_active" type="checkbox" {% if position.is_active or not position %}checked{% endif %} />
+        <label for="is_active" style="margin:0;">Active — candidates can apply to this position</label>
+      </div>
+    </div>
+
+    <div class="actions-bar">
+      <button type="submit" class="btn btn-primary">
+        {% if position %}Save Changes{% else %}Create Position{% endif %}
+      </button>
+      {% if position %}
+        <a href="{% url 'recruitpanel:job_position_detail' company_slug=company.slug pk=position.pk %}" class="btn btn-secondary">Cancel</a>
+      {% else %}
+        <a href="{% url 'recruitpanel:job_positions' company_slug=company.slug %}" class="btn btn-secondary">Cancel</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

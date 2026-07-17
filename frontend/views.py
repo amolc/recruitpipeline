@@ -1,6 +1,8 @@
 from functools import wraps
+import re
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from api.models import Company, JobPosition
 
@@ -19,6 +21,32 @@ def candidate_required(view_func):
 def landing(request):
     companies = Company.objects.filter(is_active=True)
     return render(request, 'frontend/landing.html', {'companies': companies})
+
+
+def register_company(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if not name:
+            messages.error(request, 'Company name is required.')
+            return redirect('landing')
+
+        slug = re.sub(r'[^a-z0-9-]+', '-', name.lower()).strip('-')
+        original_slug = slug
+        counter = 1
+        while Company.objects.filter(slug=slug).exists():
+            slug = f'{original_slug}-{counter}'
+            counter += 1
+
+        company = Company.objects.create(
+            name=name,
+            slug=slug,
+            address=request.POST.get('address', '').strip(),
+            summary=request.POST.get('summary', '').strip(),
+        )
+        messages.success(request, f'"{name}" registered! You can now log in.')
+        return redirect('landing')
+
+    return redirect('landing')
 
 
 def apply(request, company_slug=None):

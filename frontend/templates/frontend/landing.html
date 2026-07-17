@@ -478,6 +478,141 @@
       color: var(--color-text);
     }
 
+    /* ── Messages ── */
+
+    .msg-container {
+      max-width: 700px;
+      margin: 20px auto 0;
+    }
+    .msg {
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .msg-success {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+    .msg-error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    /* ── Register Section ── */
+
+    .register-section {
+      padding: 0 0 80px;
+    }
+    .register-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 40px;
+      max-width: 560px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .register-card h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .register-card .subtitle {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 24px;
+    }
+    .register-card .form-group { margin-bottom: 16px; }
+    .register-card label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--color-text);
+    }
+    .register-card input,
+    .register-card textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xs);
+      outline: none;
+      transition: border-color 0.2s;
+      background: var(--color-bg-card);
+      color: var(--color-text);
+    }
+    .register-card input:focus,
+    .register-card textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(5,150,105,0.08);
+    }
+    .register-card textarea { resize: vertical; }
+    .register-card .btn-submit {
+      width: 100%;
+      padding: 12px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      background: var(--color-primary);
+      color: #fff;
+      transition: background 0.2s;
+      margin-top: 4px;
+    }
+    .register-card .btn-submit:hover { background: var(--color-primary-dark); }
+
+    /* ── Login Selector ── */
+
+    .login-section {
+      padding: 0 0 80px;
+    }
+    .login-selector {
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .login-selector select,
+    .login-selector input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xs);
+      outline: none;
+      background: var(--color-bg-card);
+      color: var(--color-text);
+    }
+    .login-selector select:focus,
+    .login-selector input:focus {
+      border-color: var(--color-primary);
+    }
+    .login-selector .btn-go {
+      padding: 12px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      background: var(--color-primary);
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .login-selector .btn-go:hover { background: var(--color-primary-dark); }
+
     /* ── Footer ── */
 
     footer {
@@ -537,12 +672,8 @@
       <a href="{% url 'landing' %}" class="logo">recruit<span>me</span></a>
       <div class="nav-actions">
         <a href="{% url 'candidate_login' %}" class="nav-btn nav-btn-outline">Candidate</a>
-        {% if companies.0 %}
-          <a href="{% url 'recruitpanel:recruitpanel_login' company_slug=companies.0.slug %}" class="nav-btn nav-btn-outline">Recruiter</a>
-        {% else %}
-          <a href="#companies" class="nav-btn nav-btn-outline">Recruiter</a>
-        {% endif %}
-        <a href="{% url 'superadmin:superadmin_login' %}" class="nav-btn nav-btn-primary">Admin</a>
+        <a href="#login" class="nav-btn nav-btn-outline">Recruiter</a>
+        <a href="#register" class="nav-btn nav-btn-primary">Register Company</a>
       </div>
     </div>
   </nav>
@@ -586,6 +717,15 @@
       </div>
     </div>
   </section>
+
+  <!-- ─── Messages ─── -->
+  {% if messages %}
+  <div class="msg-container">
+    {% for m in messages %}
+      <div class="msg msg-{{ m.tags }}">{{ m }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <!-- ─── Stats ─── -->
   <section class="stats">
@@ -638,6 +778,64 @@
     </div>
   </section>
 
+  <!-- ─── Register ─── -->
+  <section class="register-section" id="register">
+    <div class="container">
+      <div class="register-card">
+        <h2>Register Your Company</h2>
+        <p class="subtitle">Get started with Recruitme and start hiring top talent.</p>
+        <form method="post" action="{% url 'register_company' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="reg_name">Company Name *</label>
+            <input id="reg_name" name="name" type="text" placeholder="e.g. Acme Corp" required />
+          </div>
+          <div class="form-group">
+            <label for="reg_address">Address</label>
+            <textarea id="reg_address" name="address" rows="2" placeholder="Street, city, state, zip"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="reg_summary">Summary</label>
+            <textarea id="reg_summary" name="summary" rows="3" placeholder="Tell candidates what makes your company great…"></textarea>
+          </div>
+          <button type="submit" class="btn-submit">Register Company</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Login Selector ─── -->
+  <section class="login-section" id="login">
+    <div class="container">
+      <div class="section-header">
+        <h2>Recruiter Login</h2>
+        <p>Select your company to access your recruitment panel.</p>
+      </div>
+      {% if companies %}
+      <div class="login-selector">
+        <select id="companySelect">
+          <option value="">Choose your company…</option>
+          {% for c in companies %}
+            <option value="{{ c.slug }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn-go" onclick="goToCompanyLogin()">Go to Login</button>
+      </div>
+      {% else %}
+      <div class="empty-state"><p>No companies registered yet.</p></div>
+      {% endif %}
+    </div>
+  </section>
+
+  <script>
+    function goToCompanyLogin() {
+      var slug = document.getElementById('companySelect').value;
+      if (slug) {
+        window.location.href = '/' + slug + '/panel/login/';
+      }
+    }
+  </script>
+
   <!-- ─── Companies ─── -->
   <section class="company-section" id="companies">
     <div class="container">
@@ -656,7 +854,7 @@
               </div>
               <div class="links">
                 <a href="{% url 'apply' company_slug=c.slug %}" class="btn-apply">Apply</a>
-                <a href="{% url 'admin_login' company_slug=c.slug %}" class="btn-login">Login</a>
+                <a href="{% url 'recruitpanel:recruitpanel_login' company_slug=c.slug %}" class="btn-login">Login</a>
               </div>
             </div>
           {% endfor %}

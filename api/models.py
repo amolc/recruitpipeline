@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth import get_user_model
+from company.models import Company
 
 
 STAGES = [
@@ -21,27 +22,6 @@ STAGES = [
 ]
 
 STAGE_KEYS = [s[0] for s in STAGES]
-
-
-class Company(models.Model):
-    name = models.CharField('Company Name', max_length=200)
-    slug = models.SlugField('Slug', max_length=100, unique=True, help_text='Used in URL: /slug/...')
-    brand_color = models.CharField('Brand Color', max_length=7, default='#f59e0b', help_text='Hex color for branding')
-    logo_url = models.URLField('Logo URL', blank=True)
-    logo = models.ImageField('Logo', upload_to='company_logos/', blank=True)
-    website = models.URLField('Website', blank=True, help_text='Company website (e.g. https://acme.com)')
-    email = models.EmailField('Company Email', blank=True, help_text='Email address matching the website domain')
-    address = models.TextField('Address', blank=True, help_text='Street, city, state, zip')
-    summary = models.TextField('Summary', blank=True, help_text='Brief description of the company')
-    is_active = models.BooleanField('Active', default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = 'Company'
-        verbose_name_plural = 'Companies'
-
-    def __str__(self):
-        return self.name
 
 
 class UserProfile(models.Model):
@@ -100,7 +80,7 @@ class UserRole(models.Model):
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ('user', 'role')
+        unique_together = ('user', 'role', 'company')
         verbose_name = 'User Role'
         verbose_name_plural = 'User Roles'
 

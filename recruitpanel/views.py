@@ -6,7 +6,8 @@ from django.contrib import messages
 from django.db import models
 from django.http import JsonResponse, Http404
 from django.db.models import Count
-from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, Company, UserRole, UserAuth
+from company.models import Company, CompanyEditRequest
+from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, UserRole, UserAuth
 
 User = get_user_model()
 
@@ -114,7 +115,6 @@ def switch_company(request, company_id):
     return redirect(RECRUIT_DASHBOARD)
 
 
-@recruiter_active
 def validate_company_email(email, website):
     if not email or not website:
         return True
@@ -127,6 +127,11 @@ def validate_company_email(email, website):
 
 
 def add_company(request):
+    if not request.user.is_authenticated:
+        return redirect(RECRUIT_LOGIN)
+    if not request.user.roles.filter(role='recruiter', is_active=True).exists():
+        return redirect(RECRUIT_LOGIN)
+
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         website = request.POST.get('website', '').strip()
@@ -200,18 +205,16 @@ def company_edit(request):
             messages.error(request, 'Company name is required.')
             return redirect('recruitpanel:company_edit')
 
-        if email and website and not validate_company_email(email, website):
-            messages.error(request, 'Email domain must match the website domain.')
-            return redirect('recruitpanel:company_edit')
-
-        company.name = name
-        company.website = website
-        company.email = email
-        company.address = address
-        company.summary = summary
-        company.save()
-
-        messages.success(request, 'Company updated.')
+        CompanyEditRequest.objects.create(
+            company=company,
+            requested_by=request.user,
+            name=name,
+            website=website,
+            email=email,
+            address=address,
+            summary=summary,
+        )
+        messages.success(request, 'Your changes have been submitted for admin review.')
         return redirect('recruitpanel:company_detail')
 
     return render(request, 'recruitpanel/company_form.html', {

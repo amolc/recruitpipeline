@@ -6,7 +6,9 @@ from django.contrib import messages
 from django.db import models
 from django.http import JsonResponse, Http404
 from django.db.models import Count
-from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, Company, UserProfile
+from django.utils.timezone import now
+from company.models import Company, CompanyEditRequest
+from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, UserProfile
 
 User = get_user_model()
 
@@ -553,3 +555,69 @@ def super_user_create(request):
         else:
             messages.error(request, 'Username, password, and company are required.')
     return render(request, 'adminpanel/super/user_form.html', {'companies': companies, 'user_obj': None})
+
+
+# ── Edit Requests ──
+
+@super_login_required
+def super_edit_requests(request):
+    status_filter = request.GET.get('status', 'pending')
+    requests_qs = CompanyEditRequest.objects.select_related('company', 'requested_by', 'reviewed_by')
+    if status_filter in ('pending', 'approved', 'rejected'):
+        requests_qs = requests_qs.filter(status=status_filter)
+    return render(request, 'adminpanel/super/edit_requests.html', {
+        'edit_requests': requests_qs,
+        'status_filter': status_filter,
+    })
+
+
+@super_login_required
+def super_edit_request_detail(request, pk):
+    edit_request = get_object_or_404(
+        CompanyEditRequest.objects.select_related('company', 'requested_by', 'reviewed_by'), pk=pk,
+    )
+    return render(request, 'adminpanel/super/edit_request_detail.html', {
+        'edit_request': edit_request,
+    })
+
+
+@super_login_required
+def super_edit_request_approve(request, pk):
+    if request.method != 'POST':
+        return redirect('super_edit_requests')
+    edit_request = get_object_or_404(CompanyEditRequest, pk=pk, status='pending')
+    company = edit_request.company
+    if edit_request.name:
+        company.name = edit_request.name
+    if edit_request.website:
+        company.website = edit_request.website
+    if edit_request.email:
+        company.email = edit_request.email
+    if edit_request.address:
+        company.address = edit_request.address
+    if edit_request.summary:
+        company.summary = edit_request.summary
+    if edit_request.brand_color:
+        company.brand_color = edit_request.brand_color
+    if edit_request.logo:
+        company.logo = edit_request.logo
+    company.save()
+    edit_request.status = 'approved'
+    edit_request.reviewed_by = request.user
+    edit_request.reviewed_at = now()
+    edit_request.save()
+    messages.success(request, f'Edit request for "{company.name}" approved and applied.')
+    return redirect('super_edit_requests')
+
+
+@super_login_required
+def super_edit_request_reject(request, pk):
+    if request.method != 'POST':
+        return redirect('super_edit_requests')
+    edit_request = get_object_or_404(CompanyEditRequest, pk=pk, status='pending')
+    edit_request.status = 'rejected'
+    edit_request.reviewed_by = request.user
+    edit_request.reviewed_at = now()
+    edit_request.save()
+    messages.success(request, f'Edit request for "{edit_request.company.name}" rejected.')
+    return redirect('super_edit_requests')

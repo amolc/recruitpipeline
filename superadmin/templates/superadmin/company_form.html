@@ -1,0 +1,70 @@
+{% extends 'superadmin/base.html' %}
+{% block title %}{% if company %}Edit {{ company.name }}{% else %}New Company{% endif %} — Recruitme Super Admin{% endblock %}
+{% block content %}
+<div class="header">
+  <h1>{% if company %}Edit Company: {{ company.name }}{% else %}New Company{% endif %}</h1>
+</div>
+
+<div style="max-width:600px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:6px;color:var(--text-muted)" for="name">Company Name *</label>
+      <input type="text" id="name" name="name" value="{{ company.name|default:'' }}" required style="width:100%;padding:11px 14px;font-size:0.9375rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg);color:var(--text)">
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:6px;color:var(--text-muted)" for="brand_color">Brand Color</label>
+      <input type="color" id="brand_color" name="brand_color" value="{{ company.brand_color|default:'#f59e0b' }}" style="width:100%;padding:11px 14px;font-size:0.9375rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg);color:var(--text)">
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:6px;color:var(--text-muted)" for="email">Email</label>
+      <input type="email" id="email" name="email" value="{{ company.email|default:'' }}" placeholder="info@company.com" style="width:100%;padding:11px 14px;font-size:0.9375rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg);color:var(--text)">
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:6px;color:var(--text-muted)" for="website">Website</label>
+      <input type="url" id="website" name="website" value="{{ company.website|default:'' }}" placeholder="https://company.com" style="width:100%;padding:11px 14px;font-size:0.9375rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg);color:var(--text)">
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:6px;color:var(--text-muted)" for="address">Address</label>
+      <textarea id="address" name="address" rows="2" style="width:100%;padding:11px 14px;font-size:0.9375rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg);color:var(--text);resize:vertical">{{ company.address|default:'' }}</textarea>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:6px;color:var(--text-muted)" for="summary">Summary</label>
+      <textarea id="summary" name="summary" rows="3" style="width:100%;padding:11px 14px;font-size:0.9375rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg);color:var(--text);resize:vertical" placeholder="Brief description of the company">{{ company.summary|default:'' }}</textarea>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:6px;color:var(--text-muted)" for="logo">Upload Logo</label>
+      <input type="file" id="logo" name="logo" accept="image/*" style="width:100%;padding:11px 14px;font-size:0.9375rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text)">
+      {% if company.logo %}
+      <div style="margin-top:6px;font-size:0.75rem;color:var(--text-muted)">
+        Current: <a href="{{ company.logo.url }}" target="_blank" style="color:var(--primary)">{{ company.logo.name }}</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:0.8125rem;font-weight:600;margin-bottom:6px;color:var(--text-muted)" for="logo_url">Logo URL (external link)</label>
+      <input type="url" id="logo_url" name="logo_url" value="{{ company.logo_url|default:'' }}" placeholder="https://example.com/logo.png" style="width:100%;padding:11px 14px;font-size:0.9375rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg);color:var(--text)">
+    </div>
+
+    {% if company %}
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+      <input type="checkbox" id="is_active" name="is_active" {% if company.is_active %}checked{% endif %}>
+      <label for="is_active" style="font-size:0.8125rem;font-weight:500;color:var(--text)">Active</label>
+    </div>
+    {% endif %}
+
+    <div style="display:flex;gap:8px">
+      <button type="submit" style="padding:12px 24px;font-size:0.9375rem;font-weight:600;font-family:inherit;border:none;border-radius:var(--radius-sm);cursor:pointer;background:var(--primary);color:#fff">{% if company %}Save Changes{% else %}Create Company{% endif %}</button>
+      <a href="{% url 'superadmin:superadmin_companies' %}" style="padding:12px 24px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-weight:500;font-size:0.9375rem;color:var(--text-muted);text-decoration:none">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

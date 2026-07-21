@@ -57,7 +57,7 @@
       transition: all 0.15s;
     }
     .sidebar-nav a:hover { background: var(--bg-elevated); color: var(--text); }
-    .sidebar-nav a.active { background: rgba(5,150,105,0.08); color: var(--primary); font-weight: 600; }
+    .sidebar-nav a.active { background: rgba(5,150,105,0.08); color: var(--primary); font-weight: 600; border-left: 3px solid var(--primary); padding-left: 11px; }
     .sidebar-footer { padding-top: 16px; border-top: 1px solid var(--border); }
     .sidebar-footer a {
       display: block;
@@ -90,11 +90,10 @@
       <a href="{% url 'superadmin:superadmin_dashboard' %}" class="sidebar-logo">recruit<span>me</span></a>
       <nav class="sidebar-nav">
         <a href="{% url 'superadmin:superadmin_dashboard' %}" class="{% if request.resolver_match.url_name == 'superadmin_dashboard' %}active{% endif %}">Dashboard</a>
-        <a href="#">Companies</a>
-        <a href="#">Candidates</a>
-        <a href="#">Positions</a>
-        <a href="#">Users</a>
-        <a href="#">Skills</a>
+        <a href="{% url 'superadmin:superadmin_companies' %}" class="{% if request.resolver_match.url_name == 'superadmin_companies' or request.resolver_match.url_name == 'superadmin_company_detail' or request.resolver_match.url_name == 'superadmin_company_edit' or request.resolver_match.url_name == 'superadmin_company_create' %}active{% endif %}">Companies</a>
+        <a href="{% url 'superadmin:superadmin_candidates' %}" class="{% if request.resolver_match.url_name == 'superadmin_candidates' %}active{% endif %}">Candidates</a>
+        <a href="{% url 'superadmin:superadmin_positions' %}" class="{% if request.resolver_match.url_name == 'superadmin_positions' %}active{% endif %}">Positions</a>
+        <a href="{% url 'superadmin:superadmin_users' %}" class="{% if request.resolver_match.url_name == 'superadmin_users' %}active{% endif %}">Users</a>
       </nav>
       <div class="sidebar-footer">
         <a href="{% url 'superadmin:superadmin_logout' %}">Logout</a>

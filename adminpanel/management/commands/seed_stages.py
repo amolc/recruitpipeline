@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from api.models import Company, Stage, STAGES
+from company.models import Company
+from api.models import Stage, STAGES
 
 
 class Command(BaseCommand):

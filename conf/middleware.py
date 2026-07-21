@@ -1,5 +1,6 @@
 from django.http import Http404
-from api.models import Company, UserRole
+from company.models import Company
+from api.models import UserRole
 
 
 EXCLUDED_PREFIXES = ('admin', 'super', 'superadmin', 'panel', 'candidate', 'api', 'static', 'media', 'register', 'recruitpanel', 'choose-role', 'login')

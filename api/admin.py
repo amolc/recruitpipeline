@@ -1,12 +1,5 @@
 from django.contrib import admin
-from .models import Application, JobPosition, Automation, Company, Stage, UserProfile
-
-
-@admin.register(Company)
-class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'is_active', 'created_at')
-    prepopulated_fields = {'slug': ('name',)}
-    search_fields = ('name', 'slug')
+from .models import Application, JobPosition, Automation, Stage, UserProfile
 
 
 @admin.register(UserProfile)

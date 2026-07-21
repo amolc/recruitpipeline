@@ -4,7 +4,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from api.models import Company, JobPosition, UserAuth, UserRole
+from company.models import Company
+from api.models import JobPosition, UserAuth, UserRole
 
 User = get_user_model()
 

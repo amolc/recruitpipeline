@@ -1,0 +1,57 @@
+{% extends 'superadmin/base.html' %}
+{% block title %}Users — Recruitme Super Admin{% endblock %}
+{% block content %}
+<div class="header">
+  <h1>Users</h1>
+  <p>All platform users</p>
+</div>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+  <form method="get" style="display:flex;gap:8px;flex:1">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search by username, email, phone..." style="flex:1;padding:10px 14px;font-size:0.875rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg-card);color:var(--text)">
+    <button type="submit" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8125rem;cursor:pointer;font-family:inherit">Search</button>
+  </form>
+</div>
+
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+  <table style="width:100%;border-collapse:collapse;font-size:0.8125rem">
+    <thead>
+      <tr>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Username</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Phone</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Roles</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Superuser</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Active</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Joined</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600">{{ u.username }}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-muted)">{{ u.auth.phone|default:'—' }}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border)">
+          {% for role in u.roles.all %}
+          <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;margin-right:4px;
+            {% if role.role == 'superadmin' %}background:rgba(239,68,68,0.08);color:#ef4444
+            {% elif role.role == 'recruiter' %}background:rgba(5,150,105,0.08);color:var(--primary)
+            {% else %}background:rgba(100,116,139,0.08);color:var(--text-muted){% endif %}">
+            {{ role.role }}{% if role.company %} @ {{ role.company.name }}{% endif %}
+          </span>
+          {% empty %}
+          <span style="color:var(--text-muted);font-size:0.75rem">—</span>
+          {% endfor %}
+        </td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border)">{% if u.is_superuser %}★ Yes{% else %}—{% endif %}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border)">{% if u.is_active %}<span style="color:#22c55e">●</span>{% else %}<span style="color:var(--text-muted)">○</span>{% endif %}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-muted)">{{ u.date_joined|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="padding:24px 16px;text-align:center;color:var(--text-muted)">No users found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

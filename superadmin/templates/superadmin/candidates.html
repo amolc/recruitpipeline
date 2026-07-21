@@ -1,0 +1,58 @@
+{% extends 'superadmin/base.html' %}
+{% block title %}Candidates — Recruitme Super Admin{% endblock %}
+{% block content %}
+<div class="header">
+  <h1>Candidates</h1>
+  <p>All applications across companies</p>
+</div>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+  <form method="get" style="display:flex;gap:8px;flex:1">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search by name, email, phone..." style="flex:1;padding:10px 14px;font-size:0.875rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;background:var(--bg-card);color:var(--text)">
+    <select name="company" style="padding:10px 14px;font-size:0.875rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text)">
+      <option value="">All Companies</option>
+      {% for c in companies %}
+      <option value="{{ c.id }}" {% if company_filter == c.id|stringformat:"d" %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;font-size:0.8125rem;cursor:pointer;font-family:inherit">Search</button>
+  </form>
+</div>
+
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+  <table style="width:100%;border-collapse:collapse;font-size:0.8125rem">
+    <thead>
+      <tr>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Name</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Email</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Phone</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Position</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Company</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Status</th>
+        <th style="text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in candidates %}
+      <tr>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600">{{ a.full_name }}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-muted)">{{ a.email }}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-muted)">{{ a.phone }}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border)">{{ a.position }}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border)">
+          {% if a.company %}
+          <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;background:rgba(5,150,105,0.08);color:var(--primary)">{{ a.company.name }}</span>
+          {% else %}—{% endif %}
+        </td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border)">{{ a.status }}</td>
+        <td style="padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-muted)">{{ a.submitted_at|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="padding:24px 16px;text-align:center;color:var(--text-muted)">No candidates found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

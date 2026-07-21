@@ -1,0 +1,132 @@
+{% extends 'adminpanel/super/super_base.html' %}
+{% block title %}Review Edit Request — Super Admin{% endblock %}
+{% block page_title %}Review Edit Request{% endblock %}
+{% block content %}
+
+<style>
+  .detail-card {
+    background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius);
+    padding: 24px; margin-bottom: 20px;
+  }
+  .detail-card h3 { font-size: 0.9375rem; font-weight: 700; margin-bottom: 16px; }
+  .field-row {
+    display: grid; grid-template-columns: 140px 1fr; gap: 8px; padding: 8px 0;
+    border-bottom: 1px solid var(--color-border); font-size: 0.8125rem;
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { color: var(--color-text-muted); font-weight: 600; }
+  .field-value { color: var(--color-text); }
+  .field-old { color: var(--color-text-muted); text-decoration: line-through; margin-right: 8px; }
+  .field-new { color: #22c55e; font-weight: 600; }
+  .field-unchanged { color: var(--color-text-muted); font-style: italic; }
+  .actions { display: flex; gap: 8px; margin-top: 16px; }
+  .btn-approve {
+    padding: 8px 20px; background: #22c55e; color: #fff; border: none; border-radius: 6px;
+    font-weight: 600; font-size: 0.8125rem; cursor: pointer; font-family: inherit;
+  }
+  .btn-reject {
+    padding: 8px 20px; background: #ef4444; color: #fff; border: none; border-radius: 6px;
+    font-weight: 600; font-size: 0.8125rem; cursor: pointer; font-family: inherit;
+  }
+  .btn-back {
+    padding: 8px 20px; background: transparent; color: var(--color-text-muted); border: 1px solid var(--color-border);
+    border-radius: 6px; font-weight: 500; font-size: 0.8125rem; cursor: pointer; font-family: inherit; text-decoration: none;
+  }
+  .btn-back:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+  .meta { color: var(--color-text-muted); font-size: 0.8125rem; margin-bottom: 16px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-pending { background: rgba(234,179,8,0.15); color: #eab308; }
+  .badge-approved { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .badge-rejected { background: rgba(239,68,68,0.15); color: #ef4444; }
+</style>
+
+<div class="detail-card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <h3>{{ edit_request.company.name }} — Edit Request</h3>
+    <span class="badge badge-{{ edit_request.status }}">{{ edit_request.get_status_display }}</span>
+  </div>
+  <div class="meta">
+    Requested by <strong>{{ edit_request.requested_by.username }}</strong> on {{ edit_request.created_at|date:"d M Y H:i" }}
+    {% if edit_request.reviewed_by %}
+      — Reviewed by <strong>{{ edit_request.reviewed_by.username }}</strong> on {{ edit_request.reviewed_at|date:"d M Y H:i" }}
+    {% endif %}
+  </div>
+
+  <h3 style="font-size: 0.8125rem; margin-bottom: 12px;">Proposed Changes</h3>
+
+  <div class="field-row">
+    <div class="field-label">Name</div>
+    <div class="field-value">
+      {% if edit_request.name != edit_request.company.name %}
+        <span class="field-old">{{ edit_request.company.name }}</span>
+        <span class="field-new">{{ edit_request.name }}</span>
+      {% else %}
+        <span class="field-unchanged">No change</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field-label">Website</div>
+    <div class="field-value">
+      {% if edit_request.website != edit_request.company.website %}
+        <span class="field-old">{{ edit_request.company.website|default:"—" }}</span>
+        <span class="field-new">{{ edit_request.website|default:"—" }}</span>
+      {% else %}
+        <span class="field-unchanged">No change</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field-label">Email</div>
+    <div class="field-value">
+      {% if edit_request.email != edit_request.company.email %}
+        <span class="field-old">{{ edit_request.company.email|default:"—" }}</span>
+        <span class="field-new">{{ edit_request.email|default:"—" }}</span>
+      {% else %}
+        <span class="field-unchanged">No change</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field-label">Address</div>
+    <div class="field-value">
+      {% if edit_request.address != edit_request.company.address %}
+        <span class="field-old">{{ edit_request.company.address|default:"—" }}</span>
+        <span class="field-new">{{ edit_request.address|default:"—" }}</span>
+      {% else %}
+        <span class="field-unchanged">No change</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field-label">Summary</div>
+    <div class="field-value">
+      {% if edit_request.summary != edit_request.company.summary %}
+        <span class="field-old">{{ edit_request.company.summary|default:"—" }}</span>
+        <span class="field-new">{{ edit_request.summary|default:"—" }}</span>
+      {% else %}
+        <span class="field-unchanged">No change</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if edit_request.status == 'pending' %}
+  <div class="actions">
+    <form method="post" action="{% url 'super_edit_request_approve' pk=edit_request.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-approve">Approve & Apply</button>
+    </form>
+    <form method="post" action="{% url 'super_edit_request_reject' pk=edit_request.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-reject">Reject</button>
+    </form>
+    <a href="{% url 'super_edit_requests' %}" class="btn-back">Back to List</a>
+  </div>
+  {% else %}
+  <div class="actions">
+    <a href="{% url 'super_edit_requests' %}" class="btn-back">Back to List</a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

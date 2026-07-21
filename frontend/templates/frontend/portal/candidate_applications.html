@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Recruitme — Candidate Dashboard</title>
+  <title>Recruitme — My Applications</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -45,32 +45,46 @@
       transition: color 0.15s;
     }
     .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--primary); font-weight: 600; }
     .nav-links .logout { color: #ef4444; }
     .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
     .header { margin-bottom: 28px; }
     .header h1 { font-size: 1.5rem; font-weight: 700; }
     .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
-    .stat-card {
+    .app-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
-      text-align: center;
+      padding: 24px 28px;
       box-shadow: var(--shadow);
+      margin-bottom: 16px;
     }
-    .stat-card .num { font-size: 1.75rem; font-weight: 800; color: var(--primary); }
-    .stat-card .label { font-size: 0.8125rem; color: var(--text-muted); margin-top: 4px; }
-    .card {
+    .app-card h3 { font-size: 1.125rem; font-weight: 600; }
+    .app-card .company-name { font-size: 0.875rem; color: var(--primary); font-weight: 500; margin-top: 2px; }
+    .app-card .meta { font-size: 0.8125rem; color: var(--text-muted); margin-top: 4px; }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .status-badge.new { background: #eff6ff; color: #3b82f6; }
+    .status-badge.screening { background: #fef3c7; color: #f59e0b; }
+    .status-badge.interview { background: #f3e8ff; color: #8b5cf6; }
+    .status-badge.accepted { background: #f0fdf4; color: #16a34a; }
+    .status-badge.rejected { background: #fef2f2; color: #dc2626; }
+    .empty-state {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 40px;
+      padding: 60px 24px;
       text-align: center;
       box-shadow: var(--shadow);
     }
-    .card h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; }
-    .card p { color: var(--text-muted); font-size: 0.9375rem; max-width: 480px; margin: 0 auto; }
+    .empty-state h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 8px; }
+    .empty-state p { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 24px; }
     .btn {
       display: inline-block;
       padding: 12px 28px;
@@ -78,7 +92,7 @@
       font-weight: 600;
       font-family: inherit;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       background: var(--primary);
       color: #fff;
@@ -94,45 +108,31 @@
     <div class="nav-links">
       <a href="{% url 'candidate_jobs' %}">Find Jobs</a>
       <a href="{% url 'candidate_profile' %}">My Profile</a>
-      <a href="{% url 'candidate_applications' %}">Applications</a>
+      <a href="{% url 'candidate_applications' %}" class="active">Applications</a>
       <a href="{% url 'candidate_logout' %}" class="logout">Logout</a>
     </div>
   </nav>
   <div class="container">
     <div class="header">
-      <h1>Welcome, {{ candidate.full_name|default:request.user.username }}</h1>
-      <p>Your career dashboard</p>
+      <h1>My Applications</h1>
+      <p>Track the status of your job applications</p>
     </div>
 
-    {% if candidate and candidate.candidate_skills.exists %}
-    <div class="stats">
-      <div class="stat-card">
-        <div class="num">{{ candidate.candidate_skills.count }}</div>
-        <div class="label">Skills</div>
-      </div>
-      <div class="stat-card">
-        <div class="num">{{ candidate.experience|length }}</div>
-        <div class="label">Experiences</div>
-      </div>
-      <div class="stat-card">
-        <div class="num">{{ candidate.education|length }}</div>
-        <div class="label">Education</div>
-      </div>
-      {% if candidate.total_experience_years %}
-      <div class="stat-card">
-        <div class="num">{{ candidate.total_experience_years }}</div>
-        <div class="label">Years Exp.</div>
-      </div>
-      {% endif %}
-    </div>
+    {% if applications %}
+      {% for app in applications %}
+        <div class="app-card">
+          <h3>{{ app.position }}</h3>
+          <div class="company-name">{{ app.company.name }}</div>
+          <div class="meta">Applied {{ app.submitted_at|date:"M d, Y" }}</div>
+          <div><span class="status-badge {{ app.status }}">{{ app.status|title }}</span></div>
+        </div>
+      {% endfor %}
     {% else %}
-    <div class="card">
-      <h2>Get Started</h2>
-      <p>Upload your resume to get matched with the best opportunities. We'll extract your skills and find the perfect role for you.</p>
-      <div style="margin-top:24px">
-        <a href="{% url 'candidate_profile' %}" class="btn">Upload Resume</a>
+      <div class="empty-state">
+        <h3>No applications yet</h3>
+        <p>Start by finding a job that matches your skills. Your applications and their statuses will appear here.</p>
+        <a href="{% url 'candidate_jobs' %}" class="btn">Find Jobs</a>
       </div>
-    </div>
     {% endif %}
   </div>
 </body>

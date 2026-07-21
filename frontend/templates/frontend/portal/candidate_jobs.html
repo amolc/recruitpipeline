@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruitme — Find Jobs</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-size: 0.875rem;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .logo { font-size: 1.25rem; font-weight: 800; text-decoration: none; color: var(--text); }
+    .logo span { color: var(--primary); }
+    .nav-links { display: flex; gap: 20px; align-items: center; }
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--primary); font-weight: 600; }
+    .nav-links .logout { color: #ef4444; }
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+    .header { margin-bottom: 28px; }
+    .header h1 { font-size: 1.5rem; font-weight: 700; }
+    .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+    .search-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .search-box {
+      display: flex;
+      gap: 12px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+    .search-box button {
+      padding: 12px 28px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .search-box button:hover { background: var(--primary-dark); }
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .chip {
+      padding: 6px 14px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .loading { text-align: center; padding: 40px; color: var(--text-muted); }
+    .job-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      transition: border-color 0.15s;
+    }
+    .job-card:hover { border-color: var(--primary); }
+    .job-card h3 { font-size: 1.125rem; font-weight: 600; }
+    .job-card .company-name { font-size: 0.875rem; color: var(--primary); font-weight: 500; margin-top: 2px; }
+    .job-card .meta { font-size: 0.8125rem; color: var(--text-muted); margin-top: 4px; }
+    .job-card p { font-size: 0.875rem; color: var(--text); margin-top: 10px; line-height: 1.5; }
+    .job-card .skills-line { margin-top: 10px; }
+    .job-card .skill-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      margin: 2px 4px 2px 0;
+    }
+    .job-card .skill-tag.match { background: #f0fdf4; color: #16a34a; }
+    .match-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-left: 8px;
+    }
+    .apply-btn {
+      padding: 8px 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .apply-btn:hover { background: var(--primary-dark); }
+    .apply-btn.applied { background: var(--border); color: var(--text-muted); cursor: default; }
+    .empty-state { text-align: center; padding: 60px 24px; }
+    .empty-state h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 8px; }
+    .empty-state p { color: var(--text-muted); font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{% url 'candidate_dashboard' %}" class="logo">recruit<span>me</span></a>
+    <div class="nav-links">
+      <a href="{% url 'candidate_jobs' %}" class="active">Find Jobs</a>
+      <a href="{% url 'candidate_profile' %}">My Profile</a>
+      <a href="{% url 'candidate_applications' %}">Applications</a>
+      <a href="{% url 'candidate_logout' %}" class="logout">Logout</a>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="header">
+      <h1>Find Jobs</h1>
+      <p>Search across all companies for the perfect role</p>
+    </div>
+
+    <div class="search-section">
+      <div class="search-box">
+        <input id="searchInput" type="text" placeholder="Search by skills (e.g. Python, Django, React)" />
+        <button onclick="searchJobs()">Search</button>
+      </div>
+      <div class="filter-chips" id="skillChips"></div>
+    </div>
+
+    <div id="results">
+      <div class="empty-state">
+        <h3>Search for jobs</h3>
+        <p>Enter skills above or click a skill chip to find matching positions across all companies.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadSkills() {
+      try {
+        const resp = await fetch('{% url "api_skills" %}');
+        const skills = await resp.json();
+        const chips = document.getElementById('skillChips');
+        skills.slice(0, 20).forEach(s => {
+          const el = document.createElement('span');
+          el.className = 'chip';
+          el.textContent = s.name;
+          el.onclick = () => { el.classList.toggle('active'); searchJobs(); };
+          chips.appendChild(el);
+        });
+      } catch (e) {}
+    }
+
+    async function searchJobs() {
+      const input = document.getElementById('searchInput').value.trim();
+      const activeChips = [...document.querySelectorAll('#skillChips .chip.active')].map(c => c.textContent);
+      const allSkills = [...new Set([...input.split(',').map(s => s.trim()).filter(Boolean), ...activeChips])];
+      const resultsDiv = document.getElementById('results');
+
+      if (allSkills.length === 0) {
+        resultsDiv.innerHTML = '<div class="empty-state"><h3>Enter skills to search</h3><p>Type skills separated by commas or click skill chips above.</p></div>';
+        return;
+      }
+
+      resultsDiv.innerHTML = '<div class="loading">Searching...</div>';
+
+      try {
+        const resp = await fetch(`{% url "api_jobs_search" %}?skills=${encodeURIComponent(allSkills.join(','))}`);
+        const jobs = await resp.json();
+
+        if (jobs.length === 0) {
+          resultsDiv.innerHTML = '<div class="empty-state"><h3>No jobs found</h3><p>Try different skills or broaden your search.</p></div>';
+          return;
+        }
+
+        const lowerSkills = allSkills.map(s => s.toLowerCase());
+        resultsDiv.innerHTML = jobs.map(job => {
+          const matchPct = job.total_skills > 0 ? Math.round(job.match_count / job.total_skills * 100) : 0;
+          return `<div class="job-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <h3>${job.title} ${matchPct > 0 ? `<span class="match-badge">${matchPct}% match</span>` : ''}</h3>
+                <div class="company-name">${job.company}</div>
+                <div class="meta">${job.location || 'Remote'}</div>
+              </div>
+              <button onclick="applyToJob(${job.id})" class="apply-btn">Apply Now</button>
+            </div>
+            ${job.description ? `<p>${job.description}</p>` : ''}
+            <div class="skills-line">${job.skills.map(s => `<span class="skill-tag ${lowerSkills.includes(s.toLowerCase()) ? 'match' : ''}">${s}</span>`).join('')}</div>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        resultsDiv.innerHTML = '<div class="empty-state"><h3>Search failed</h3><p>Please try again.</p></div>';
+      }
+    }
+
+    async function applyToJob(jobId) {
+      const btn = event.target;
+      if (btn.classList.contains('applied')) return;
+      btn.textContent = 'Applying...';
+      try {
+        const resp = await fetch('{% url "api_apply_job" %}', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+          body: JSON.stringify({job_id: jobId}),
+        });
+        const data = await resp.json();
+        if (data.success) {
+          btn.textContent = 'Applied!';
+          btn.classList.add('applied');
+        } else {
+          btn.textContent = data.error || 'Failed';
+          setTimeout(() => { btn.textContent = 'Apply Now'; }, 2000);
+        }
+      } catch (e) {
+        btn.textContent = 'Error';
+        setTimeout(() => { btn.textContent = 'Apply Now'; }, 2000);
+      }
+    }
+    document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchJobs(); });
+    loadSkills();
+  </script>
+</body>
+</html>

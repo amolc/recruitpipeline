@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Admin Login — RecruitPipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 380px;
+    }
+    .card h1 { font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; }
+    .card p { color: #64748b; font-size: 0.8125rem; margin-bottom: 24px; }
+    .card label { display: block; font-size: 0.8125rem; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+    .card input {
+      width: 100%; padding: 10px 12px; margin-bottom: 16px; border-radius: 6px;
+      background: #0f172a; border: 1px solid #334155; color: #f1f5f9;
+      font-family: inherit; font-size: 0.875rem;
+    }
+    .card input:focus { outline: none; border-color: #ef4444; }
+    .card button {
+      width: 100%; padding: 10px; border: none; border-radius: 6px;
+      background: #ef4444; color: #fff; font-family: inherit; font-weight: 600; font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .card button:hover { opacity: 0.9; }
+    .error { background: rgba(239,68,68,0.12); color: #ef4444; padding: 8px 12px; border-radius: 6px; font-size: 0.8125rem; margin-bottom: 16px; }
+    .logo { font-size: 1.5rem; font-weight: 800; color: #ef4444; margin-bottom: 20px; text-align: center; }
+    .back { text-align: center; margin-top: 16px; }
+    .back a { color: #64748b; font-size: 0.8125rem; text-decoration: none; }
+    .back a:hover { color: #f1f5f9; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">RP<span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;background:#ef4444;color:#fff;padding:2px 8px;border-radius:4px;margin-left:6px;">Admin</span></div>
+    <h1>Super Admin Login</h1>
+    <p>Sign in with your super admin credentials</p>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required autofocus>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+      <button type="submit">Sign In</button>
+    </form>
+    <div class="back"><a href="/">← Back to Home</a></div>
+  </div>
+</body>
+</html>

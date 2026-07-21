@@ -68,7 +68,7 @@ A global candidate platform where candidates sign up, upload their master resume
 
 | Path | Page |
 |---|---|
-| `/candidate/login/` | Login (email + password) |
+| `/candidate/login/` | Login (phone + PIN) |
 | `/candidate/register/` | Register |
 
 - Uses Django's `User` model (same model as company users)
@@ -96,8 +96,8 @@ A global candidate platform where candidates sign up, upload their master resume
 
 | Path | Page | Description |
 |---|---|---|
-| `/candidate/login/` | Login | Email + password |
-| `/candidate/register/` | Register | Name, email, password |
+| `/candidate/login/` | Login | Phone + PIN |
+| `/candidate/register/` | Register | Name, phone, PIN |
 | `/candidate/dashboard/` | Dashboard | Stats, recent activity, upload/update resume CTA |
 | `/candidate/profile/` | Profile | Editable sections: summary, skills, experience, education, certifications, languages |
 | `/candidate/jobs/` | Job Search | Search bar + skill filter chips → results with match score |

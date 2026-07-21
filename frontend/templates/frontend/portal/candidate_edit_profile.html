@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruitme — Edit Profile</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-size: 0.875rem;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .logo { font-size: 1.25rem; font-weight: 800; text-decoration: none; color: var(--text); }
+    .logo span { color: var(--primary); }
+    .nav-links { display: flex; gap: 20px; align-items: center; }
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--primary); font-weight: 600; }
+    .nav-links .logout { color: #ef4444; }
+
+    .layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr 260px;
+      gap: 24px;
+      align-items: start;
+    }
+    .header { grid-column: 1 / -1; margin-bottom: 4px; }
+    .header h1 { font-size: 1.5rem; font-weight: 700; }
+    .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+
+    .sidebar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 auto 16px;
+    }
+    .profile-name { text-align: center; font-size: 1.125rem; font-weight: 700; }
+    .profile-title { text-align: center; font-size: 0.8125rem; color: var(--text-muted); margin-top: 2px; }
+    .profile-detail {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    .profile-detail:last-of-type { border-bottom: none; }
+    .profile-detail .icon { width: 18px; text-align: center; flex-shrink: 0; color: var(--text-muted); }
+    .profile-detail .val { color: var(--text); word-break: break-all; }
+
+    .main-content { display: flex; flex-direction: column; gap: 20px; }
+
+    .edit-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+    }
+    .edit-card h2 {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .edit-card h2 .count {
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .edit-field {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      transition: 0.15s;
+      resize: vertical;
+    }
+    .edit-field:hover { background: var(--bg); }
+    .edit-field:focus {
+      background: var(--bg);
+      border-color: var(--border);
+      box-shadow: 0 0 0 3px rgba(5,150,105,0.08);
+    }
+    .edit-field::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .edit-group { margin-bottom: 12px; }
+    .edit-group:last-child { margin-bottom: 0; }
+    .edit-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .inline-row {
+      display: flex;
+      gap: 12px;
+    }
+    .inline-row .edit-group { flex: 1; }
+
+    .exp-block, .edu-block {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .exp-block:last-child, .edu-block:last-child { border-bottom: none; }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-sm {
+      padding: 8px 18px;
+      font-size: 0.8125rem;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: transparent; }
+    .btn-danger-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #dc2626;
+    }
+    .btn-danger-outline:hover { border-color: #dc2626; color: #dc2626; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #dc2626; }
+
+    .skill-tag-input {
+      display: inline-flex;
+      align-items: center;
+      background: #f0fdf4;
+      color: #16a34a;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 20px;
+      margin: 3px 4px 3px 0;
+    }
+    .skill-tag-input .remove {
+      margin-left: 4px;
+      cursor: pointer;
+      opacity: 0.5;
+      font-size: 0.75rem;
+    }
+    .skill-tag-input .remove:hover { opacity: 1; }
+    .skill-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    .skill-add:hover { color: var(--primary-dark); }
+    .skill-input-inline {
+      border: none;
+      border-bottom: 1px solid var(--border);
+      padding: 4px 0;
+      font-size: 0.8125rem;
+      font-family: inherit;
+      outline: none;
+      background: transparent;
+      width: 120px;
+    }
+    .skill-input-inline:focus { border-bottom-color: var(--primary); }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--text); }
+
+    .btn-row { display: flex; flex-direction: column; gap: 8px; }
+    .unsaved { color: #f59e0b; font-size: 0.75rem; font-weight: 500; text-align: center; display: none; }
+    .unsaved.show { display: block; }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{% url 'candidate_dashboard' %}" class="logo">recruit<span>me</span></a>
+    <div class="nav-links">
+      <a href="{% url 'candidate_jobs' %}">Find Jobs</a>
+      <a href="{% url 'candidate_profile' %}" class="active">My Profile</a>
+      <a href="{% url 'candidate_applications' %}">Applications</a>
+      <a href="{% url 'candidate_logout' %}" class="logout">Logout</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <div class="header">
+      <h1>Edit Profile</h1>
+      <p>Update your career information. Changes are saved instantly.</p>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="avatar">{{ candidate.full_name|first|upper }}{% if candidate.full_name|length > 1 %}{{ candidate.full_name|slice:"1:2"|upper }}{% endif %}</div>
+      <div class="profile-name">{{ candidate.full_name }}</div>
+      <div class="profile-title">{% if candidate.total_experience_years %}{{ candidate.total_experience_years }} yrs experience{% else %}Candidate{% endif %}</div>
+      <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:12px">
+        <div class="profile-detail"><span class="icon">✉</span><span class="val">{{ candidate.email }}</span></div>
+        <div class="profile-detail"><span class="icon">✆</span><span class="val">{{ candidate.phone }}</span></div>
+        <div class="profile-detail"><span class="icon">🗓</span><span class="val">Joined {{ candidate.created_at|date:"M Y" }}</span></div>
+      </div>
+      <div class="unsaved" id="unsavedBadge">Unsaved changes</div>
+      <div style="margin-top:16px" class="btn-row">
+        <button class="btn btn-sm" id="saveBtn" onclick="saveAll()">Save Changes</button>
+        <a href="{% url 'candidate_profile' %}" class="btn btn-sm btn-outline">Cancel</a>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="edit-card">
+        <h2>Basic Information</h2>
+        <div class="inline-row">
+          <div class="edit-group">
+            <label>Full Name</label>
+            <input class="edit-field" id="field_full_name" value="{{ candidate.full_name }}" oninput="markUnsaved()" />
+          </div>
+          <div class="edit-group">
+            <label>Email</label>
+            <input class="edit-field" id="field_email" value="{{ candidate.email }}" oninput="markUnsaved()" />
+          </div>
+        </div>
+        <div class="edit-group">
+          <label>Phone</label>
+          <input class="edit-field" id="field_phone" value="{{ candidate.phone }}" oninput="markUnsaved()" />
+        </div>
+      </div>
+
+      <div class="edit-card">
+        <h2>Professional Summary</h2>
+        <textarea class="edit-field" id="field_summary" rows="4" oninput="markUnsaved()" placeholder="Write a brief professional summary...">{{ candidate.summary }}</textarea>
+      </div>
+
+      <div class="edit-card">
+        <h2>Work Experience <span class="count">({{ candidate.experience|length }})</span></h2>
+        <div id="experienceContainer">
+          {% if candidate.experience %}
+            {% for exp in candidate.experience %}
+            <div class="exp-block" data-index="{{ forloop.counter0 }}">
+              <div class="inline-row">
+                <div class="edit-group"><label>Title</label><input class="edit-field exp-title" value="{{ exp.title }}" oninput="markUnsaved()" /></div>
+                <div class="edit-group"><label>Company</label><input class="edit-field exp-company" value="{{ exp.company }}" oninput="markUnsaved()" /></div>
+              </div>
+              <div class="inline-row">
+                <div class="edit-group"><label>Start Date</label><input class="edit-field exp-start" value="{{ exp.start_date }}" placeholder="MMM YYYY" oninput="markUnsaved()" /></div>
+                <div class="edit-group"><label>End Date</label><input class="edit-field exp-end" value="{{ exp.end_date }}" placeholder="MMM YYYY or Present" oninput="markUnsaved()" /></div>
+              </div>
+              <div class="edit-group"><label>Description</label><textarea class="edit-field exp-desc" rows="2" oninput="markUnsaved()">{{ exp.description }}</textarea></div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="exp-block">
+            <div class="inline-row">
+              <div class="edit-group"><label>Title</label><input class="edit-field exp-title" placeholder="e.g. Senior Developer" oninput="markUnsaved()" /></div>
+              <div class="edit-group"><label>Company</label><input class="edit-field exp-company" placeholder="e.g. Acme Corp" oninput="markUnsaved()" /></div>
+            </div>
+            <div class="inline-row">
+              <div class="edit-group"><label>Start Date</label><input class="edit-field exp-start" placeholder="MMM YYYY" oninput="markUnsaved()" /></div>
+              <div class="edit-group"><label>End Date</label><input class="edit-field exp-end" placeholder="MMM YYYY or Present" oninput="markUnsaved()" /></div>
+            </div>
+            <div class="edit-group"><label>Description</label><textarea class="edit-field exp-desc" rows="2" placeholder="Describe your responsibilities and achievements..." oninput="markUnsaved()"></textarea></div>
+          </div>
+          {% endif %}
+        </div>
+        <div class="skill-add" onclick="addExperience()">+ Add Experience</div>
+      </div>
+
+      <div class="edit-card">
+        <h2>Education <span class="count">({{ candidate.education|length }})</span></h2>
+        <div id="educationContainer">
+          {% if candidate.education %}
+            {% for edu in candidate.education %}
+            <div class="edu-block" data-index="{{ forloop.counter0 }}">
+              <div class="inline-row">
+                <div class="edit-group"><label>Institution</label><input class="edit-field edu-institution" value="{{ edu.institution }}" oninput="markUnsaved()" /></div>
+                <div class="edit-group"><label>Degree</label><input class="edit-field edu-degree" value="{{ edu.degree }}" oninput="markUnsaved()" /></div>
+              </div>
+              <div class="inline-row">
+                <div class="edit-group"><label>Field of Study</label><input class="edit-field edu-field" value="{{ edu.field }}" oninput="markUnsaved()" /></div>
+                <div class="edit-group"><label>Graduation Year</label><input class="edit-field edu-year" value="{{ edu.graduation_year }}" oninput="markUnsaved()" /></div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="edu-block">
+            <div class="inline-row">
+              <div class="edit-group"><label>Institution</label><input class="edit-field edu-institution" placeholder="e.g. MIT" oninput="markUnsaved()" /></div>
+              <div class="edit-group"><label>Degree</label><input class="edit-field edu-degree" placeholder="e.g. B.Sc" oninput="markUnsaved()" /></div>
+            </div>
+            <div class="inline-row">
+              <div class="edit-group"><label>Field of Study</label><input class="edit-field edu-field" placeholder="e.g. Computer Science" oninput="markUnsaved()" /></div>
+              <div class="edit-group"><label>Graduation Year</label><input class="edit-field edu-year" placeholder="e.g. 2020" oninput="markUnsaved()" /></div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        <div class="skill-add" onclick="addEducation()">+ Add Education</div>
+      </div>
+
+      <div class="edit-card">
+        <h2>Skills</h2>
+        <div id="skillsContainer">
+          {% for cs in candidate.candidate_skills.all %}
+            <span class="skill-tag-input">{{ cs.skill.name }}{% if cs.level %} ({{ cs.level }}){% endif %}<span class="remove" data-skill="{{ cs.skill.name }}" onclick="removeSkill(this)">✕</span></span>
+          {% endfor %}
+        </div>
+        <div class="skill-add" onclick="addSkillInput()">+ Add Skill</div>
+        <div id="skillInputArea"></div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3 style="font-size:0.9375rem;font-weight:600;margin-bottom:8px">Tips</h3>
+      <ul style="font-size:0.8125rem;color:var(--text-muted);line-height:1.6;padding-left:16px">
+        <li>All fields are saved via API — no page reload</li>
+        <li>Use complete job titles and company names</li>
+        <li>Add relevant skills to improve job matches</li>
+        <li>Upload your resume on the profile page for AI extraction</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let pending = false;
+
+    function markUnsaved() {
+      if (!pending) {
+        pending = true;
+        document.getElementById('unsavedBadge').classList.add('show');
+      }
+    }
+
+    function getExpData() {
+      const blocks = document.querySelectorAll('#experienceContainer .exp-block');
+      return Array.from(blocks).map(b => ({
+        title: b.querySelector('.exp-title').value,
+        company: b.querySelector('.exp-company').value,
+        start_date: b.querySelector('.exp-start').value,
+        end_date: b.querySelector('.exp-end').value,
+        description: b.querySelector('.exp-desc').value,
+      })).filter(e => e.title || e.company);
+    }
+
+    function getEduData() {
+      const blocks = document.querySelectorAll('#educationContainer .edu-block');
+      return Array.from(blocks).map(b => ({
+        institution: b.querySelector('.edu-institution').value,
+        degree: b.querySelector('.edu-degree').value,
+        field: b.querySelector('.edu-field').value,
+        graduation_year: b.querySelector('.edu-year').value || null,
+      })).filter(e => e.institution);
+    }
+
+    function getSkills() {
+      const tags = document.querySelectorAll('#skillsContainer .skill-tag-input');
+      return Array.from(tags).map(t => {
+        const text = t.textContent.replace('✕', '').trim();
+        const parts = text.match(/^(.+?)\s*\((.+)\)\s*$/);
+        return { name: parts ? parts[1] : text, level: parts ? parts[2] : '' };
+      });
+    }
+
+    async function saveAll() {
+      const data = {
+        full_name: document.getElementById('field_full_name').value,
+        email: document.getElementById('field_email').value,
+        phone: document.getElementById('field_phone').value,
+        summary: document.getElementById('field_summary').value,
+        experience: getExpData(),
+        education: getEduData(),
+        skills: getSkills(),
+      };
+
+      const btn = document.getElementById('saveBtn');
+      btn.textContent = 'Saving...';
+      btn.disabled = true;
+      try {
+        const resp = await fetch('{% url "api_candidate_profile" %}', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data),
+        });
+        const result = await resp.json();
+        if (result.success) {
+          window.location.href = '{% url "candidate_profile" %}';
+        } else {
+          btn.textContent = 'Save Changes';
+          btn.disabled = false;
+          showToast('Save failed: ' + (result.error || 'unknown'), true);
+        }
+      } catch (e) {
+        btn.textContent = 'Save Changes';
+        btn.disabled = false;
+        showToast('Save failed: ' + e.message, true);
+      }
+    }
+
+    let expIdx = {{ candidate.experience|length|default:0 }};
+    function addExperience() {
+      const c = document.getElementById('experienceContainer');
+      const el = document.createElement('div');
+      el.className = 'exp-block';
+      el.innerHTML = `
+        <div class="inline-row">
+          <div class="edit-group"><label>Title</label><input class="edit-field exp-title" placeholder="e.g. Senior Developer" oninput="markUnsaved()" /></div>
+          <div class="edit-group"><label>Company</label><input class="edit-field exp-company" placeholder="e.g. Acme Corp" oninput="markUnsaved()" /></div>
+        </div>
+        <div class="inline-row">
+          <div class="edit-group"><label>Start Date</label><input class="edit-field exp-start" placeholder="MMM YYYY" oninput="markUnsaved()" /></div>
+          <div class="edit-group"><label>End Date</label><input class="edit-field exp-end" placeholder="MMM YYYY or Present" oninput="markUnsaved()" /></div>
+        </div>
+        <div class="edit-group"><label>Description</label><textarea class="edit-field exp-desc" rows="2" placeholder="Describe your responsibilities..." oninput="markUnsaved()"></textarea></div>
+      `;
+      c.appendChild(el);
+      markUnsaved();
+    }
+
+    let eduIdx = {{ candidate.education|length|default:0 }};
+    function addEducation() {
+      const c = document.getElementById('educationContainer');
+      const el = document.createElement('div');
+      el.className = 'edu-block';
+      el.innerHTML = `
+        <div class="inline-row">
+          <div class="edit-group"><label>Institution</label><input class="edit-field edu-institution" placeholder="e.g. MIT" oninput="markUnsaved()" /></div>
+          <div class="edit-group"><label>Degree</label><input class="edit-field edu-degree" placeholder="e.g. B.Sc" oninput="markUnsaved()" /></div>
+        </div>
+        <div class="inline-row">
+          <div class="edit-group"><label>Field of Study</label><input class="edit-field edu-field" placeholder="e.g. CS" oninput="markUnsaved()" /></div>
+          <div class="edit-group"><label>Graduation Year</label><input class="edit-field edu-year" placeholder="e.g. 2020" oninput="markUnsaved()" /></div>
+        </div>
+      `;
+      c.appendChild(el);
+      markUnsaved();
+    }
+
+    function removeSkill(el) {
+      el.parentElement.remove();
+      markUnsaved();
+    }
+
+    function addSkillInput() {
+      const area = document.getElementById('skillInputArea');
+      if (area.querySelector('input')) return;
+      const wrapper = document.createElement('span');
+      wrapper.style.display = 'inline-flex';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.gap = '4px';
+      wrapper.style.marginTop = '8px';
+      const input = document.createElement('input');
+      input.className = 'skill-input-inline';
+      input.placeholder = 'Type skill name...';
+      input.onkeydown = function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const name = this.value.trim();
+          if (name) {
+            const tag = document.createElement('span');
+            tag.className = 'skill-tag-input';
+            tag.innerHTML = `${name} <span class="remove" onclick="removeSkill(this)">✕</span>`;
+            document.getElementById('skillsContainer').appendChild(tag);
+            markUnsaved();
+          }
+          this.parentElement.remove();
+        }
+        if (e.key === 'Escape') this.parentElement.remove();
+      };
+      wrapper.appendChild(input);
+      area.appendChild(wrapper);
+      input.focus();
+    }
+
+    function showToast(msg, isError) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => { t.className = 'toast'; }, 3000);
+    }
+  </script>
+</body>
+</html>

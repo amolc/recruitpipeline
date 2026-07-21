@@ -4,6 +4,66 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth import get_user_model
 from company.models import Company
 
+User = get_user_model()
+
+
+class Skill(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    category = models.CharField(max_length=50, blank=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Skill'
+        verbose_name_plural = 'Skills'
+
+    def __str__(self):
+        return self.name
+
+
+class Candidate(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='candidate_profile')
+    full_name = models.CharField(max_length=200)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=30, blank=True)
+    resume = models.FileField(upload_to='candidate_resumes/', blank=True, null=True)
+    raw_text = models.TextField(blank=True)
+    summary = models.TextField(blank=True)
+    experience = models.JSONField(default=list, blank=True)
+    education = models.JSONField(default=list, blank=True)
+    certifications = models.JSONField(default=list, blank=True)
+    languages = models.JSONField(default=list, blank=True)
+    contact = models.JSONField(default=dict, blank=True)
+    total_experience_years = models.FloatField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Candidate'
+        verbose_name_plural = 'Candidates'
+
+    def __str__(self):
+        return self.full_name
+
+
+class CandidateSkill(models.Model):
+    LEVEL_CHOICES = [
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced'),
+        ('expert', 'Expert'),
+    ]
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='candidate_skills')
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='candidate_skills')
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, blank=True)
+
+    class Meta:
+        unique_together = ('candidate', 'skill')
+        verbose_name = 'Candidate Skill'
+        verbose_name_plural = 'Candidate Skills'
+
+    def __str__(self):
+        return f'{self.candidate.full_name} — {self.skill.name}'
+
 
 STAGES = [
     ('new', 'New'),
@@ -109,6 +169,7 @@ class Stage(models.Model):
 
 class Application(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='applications')
+    candidate = models.ForeignKey(Candidate, on_delete=models.SET_NULL, null=True, blank=True, related_name='applications')
     full_name = models.CharField('Full Name', max_length=200)
     email = models.EmailField('Email Address')
     phone = models.CharField('Phone Number', max_length=30)
@@ -116,6 +177,8 @@ class Application(models.Model):
     experience = models.PositiveIntegerField('Years of Experience')
     resume = models.FileField('Resume / CV', upload_to='resumes/', blank=True, null=True)
     cover_letter = models.TextField('Why join us?')
+    tailored_resume = models.TextField(blank=True)
+    generated_cover_letter = models.TextField(blank=True)
     status = models.CharField('Status', max_length=30, default='new')
     submitted_at = models.DateTimeField('Submitted', auto_now_add=True)
 
@@ -142,6 +205,7 @@ class JobPosition(models.Model):
     hourly_rate = models.DecimalField('Per Hour ($)', max_digits=8, decimal_places=2, null=True, blank=True)
     location = models.CharField('Location', max_length=200, blank=True)
     requirements = models.TextField('Requirements', blank=True)
+    skills = models.ManyToManyField(Skill, blank=True)
     is_active = models.BooleanField('Active', default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

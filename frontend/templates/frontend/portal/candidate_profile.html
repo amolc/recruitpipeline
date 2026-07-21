@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruitme — My Profile</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-size: 0.875rem;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .logo { font-size: 1.25rem; font-weight: 800; text-decoration: none; color: var(--text); }
+    .logo span { color: var(--primary); }
+    .nav-links { display: flex; gap: 20px; align-items: center; }
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--primary); font-weight: 600; }
+    .nav-links .logout { color: #ef4444; }
+
+    .layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr 260px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      margin-bottom: 4px;
+    }
+    .header h1 { font-size: 1.5rem; font-weight: 700; }
+    .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+
+    .sidebar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 auto 16px;
+    }
+    .profile-name {
+      text-align: center;
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+    .profile-title {
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .profile-detail {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    .profile-detail:last-of-type { border-bottom: none; }
+    .profile-detail .icon {
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+    .profile-detail .val {
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      font-size: 1.0625rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card h2 .count {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .msg {
+      padding: 11px 15px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .msg-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .msg-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+    .skill-tag {
+      display: inline-block;
+      background: #f0fdf4;
+      color: #16a34a;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin: 3px 4px 3px 0;
+    }
+    .exp-item, .edu-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .exp-item:last-child, .edu-item:last-child { border-bottom: none; }
+    .exp-item h3 { font-size: 0.9375rem; font-weight: 600; }
+    .exp-item .meta { font-size: 0.8125rem; color: var(--text-muted); margin-top: 2px; }
+    .exp-item p { font-size: 0.875rem; color: var(--text); margin-top: 6px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .edit-btn {
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: 0.15s;
+    }
+    .edit-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .edit-field {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    .edit-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+    .edit-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .save-btn {
+      padding: 8px 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .save-btn:hover { background: var(--primary-dark); }
+    .cancel-btn {
+      padding: 8px 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: 0.15s;
+    }
+    .cancel-btn:hover { border-color: #dc2626; color: #dc2626; }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-sm {
+      padding: 8px 18px;
+      font-size: 0.8125rem;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: transparent; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #dc2626; }
+
+    .tip-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tip-item:last-child { border-bottom: none; }
+    .tip-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .tip-icon.done { background: #f0fdf4; color: #16a34a; }
+    .tip-icon.pending { background: #fef3c7; color: #f59e0b; }
+    .tip-text { font-size: 0.8125rem; color: var(--text); flex: 1; }
+    .tip-text .label { font-weight: 600; }
+    .tip-text .desc { color: var(--text-muted); font-size: 0.75rem; margin-top: 2px; }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{% url 'candidate_dashboard' %}" class="logo">recruit<span>me</span></a>
+    <div class="nav-links">
+      <a href="{% url 'candidate_jobs' %}">Find Jobs</a>
+      <a href="{% url 'candidate_profile' %}" class="active">My Profile</a>
+      <a href="{% url 'candidate_applications' %}">Applications</a>
+      <a href="{% url 'candidate_logout' %}" class="logout">Logout</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <div class="header">
+      <h1>My Profile</h1>
+      <p>Manage your career profile and upload your resume</p>
+    </div>
+
+    {% if messages %}
+      {% for m in messages %}
+        <div class="msg msg-{{ m.tags }}" style="grid-column:1/-1;margin-bottom:0">{{ m }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="sidebar-card">
+      <div class="avatar">{{ candidate.full_name|first|upper }}{% if candidate.full_name|length > 1 %}{{ candidate.full_name|slice:"1:2"|upper }}{% endif %}</div>
+      <div class="profile-name">{{ candidate.full_name }}</div>
+      <div class="profile-title">{% if candidate.total_experience_years %}{{ candidate.total_experience_years }} yrs experience{% else %}Candidate{% endif %}</div>
+      <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:12px">
+        <div class="profile-detail">
+          <span class="icon">✉</span>
+          <span class="val">{{ candidate.email }}</span>
+        </div>
+        <div class="profile-detail">
+          <span class="icon">✆</span>
+          <span class="val">{{ candidate.phone }}</span>
+        </div>
+        <div class="profile-detail">
+          <span class="icon">🗓</span>
+          <span class="val">Joined {{ candidate.created_at|date:"M Y" }}</span>
+        </div>
+        {% if candidate.resume %}
+        <div class="profile-detail">
+          <span class="icon">📄</span>
+          <span class="val">Resume uploaded</span>
+        </div>
+        {% endif %}
+      </div>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+        <a href="{% url 'candidate_edit_profile' %}" class="btn btn-sm">Edit Profile</a>
+        <a href="{% url 'candidate_jobs' %}" class="btn btn-sm btn-outline">Search Jobs</a>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="card">
+        <h2>Professional Summary <button class="edit-btn" onclick="toggleEdit('summary')">Edit</button></h2>
+        {% if candidate.summary %}
+          <div id="summaryView"><p style="font-size:0.9375rem;line-height:1.6">{{ candidate.summary }}</p></div>
+          <div id="summaryEdit" style="display:none">
+            <textarea class="edit-field" id="summaryInput" rows="4">{{ candidate.summary }}</textarea>
+            <div class="edit-actions">
+              <button class="save-btn" onclick="saveField('summary')">Save</button>
+              <button class="cancel-btn" onclick="cancelEdit('summary')">Cancel</button>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">Upload your resume to generate a professional summary.</div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h2>Experience <span class="count">({{ candidate.experience|length }})</span></h2>
+        {% if candidate.experience %}
+          {% for exp in candidate.experience %}
+            <div class="exp-item">
+              <h3>{{ exp.title }} at {{ exp.company }}</h3>
+              <div class="meta">{{ exp.start_date|default:'' }} — {{ exp.end_date|default:'' }} {% if exp.duration_years %}({{ exp.duration_years }} yrs){% endif %}</div>
+              {% if exp.description %}<p>{{ exp.description }}</p>{% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">Upload your resume to extract work experience.</div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h2>Education <span class="count">({{ candidate.education|length }})</span></h2>
+        {% if candidate.education %}
+          {% for edu in candidate.education %}
+            <div class="edu-item">
+              <h3>{{ edu.degree|default:'' }} in {{ edu.field|default:'' }}</h3>
+              <div class="meta">{{ edu.institution }}{% if edu.graduation_year %} — {{ edu.graduation_year }}{% endif %}{% if edu.gpa %} (GPA: {{ edu.gpa }}){% endif %}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">Upload your resume to extract education details.</div>
+        {% endif %}
+      </div>
+
+      {% if candidate.certifications %}
+      <div class="card">
+        <h2>Certifications <span class="count">({{ candidate.certifications|length }})</span></h2>
+        {% for cert in candidate.certifications %}
+          <div class="exp-item">
+            <h3>{{ cert.name }}</h3>
+            <div class="meta">{% if cert.issuer %}{{ cert.issuer }}{% endif %}{% if cert.year %} — {{ cert.year }}{% endif %}</div>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if candidate.languages %}
+      <div class="card">
+        <h2>Languages</h2>
+        {% for lang in candidate.languages %}
+          <span class="skill-tag">{{ lang.language }}{% if lang.proficiency %} ({{ lang.proficiency }}){% endif %}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="card">
+        <h2>Skills <span class="count">({{ candidate.candidate_skills.count }})</span></h2>
+        {% if candidate.candidate_skills.exists %}
+          {% for cs in candidate.candidate_skills.all %}
+            <span class="skill-tag">{{ cs.skill.name }}{% if cs.level %} ({{ cs.level }}){% endif %}</span>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">Upload your resume to extract skills automatically.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3 style="font-size:0.9375rem;font-weight:600;margin-bottom:4px">Profile Optimization</h3>
+      <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px">Complete these steps to get better matches</p>
+
+      <div class="tip-item">
+        <div class="tip-icon {% if candidate.summary %}done{% else %}pending{% endif %}">
+          {% if candidate.summary %}✓{% else %}{% endif %}
+        </div>
+        <div class="tip-text">
+          <div class="label">Professional Summary</div>
+          <div class="desc">{% if candidate.summary %}Added{% else %}Upload resume to auto-generate{% endif %}</div>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <div class="tip-icon {% if candidate.candidate_skills.exists %}done{% else %}pending{% endif %}">
+          {% if candidate.candidate_skills.exists %}✓{% else %}{% endif %}
+        </div>
+        <div class="tip-text">
+          <div class="label">Skills</div>
+          <div class="desc">{% if candidate.candidate_skills.exists %}{{ candidate.candidate_skills.count }} skills extracted{% else %}Upload resume to auto-extract{% endif %}</div>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <div class="tip-icon {% if candidate.experience %}done{% else %}pending{% endif %}">
+          {% if candidate.experience %}✓{% else %}{% endif %}
+        </div>
+        <div class="tip-text">
+          <div class="label">Work Experience</div>
+          <div class="desc">{% if candidate.experience %}{{ candidate.experience|length }} entries{% else %}Upload resume to extract{% endif %}</div>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <div class="tip-icon {% if candidate.education %}done{% else %}pending{% endif %}">
+          {% if candidate.education %}✓{% else %}{% endif %}
+        </div>
+        <div class="tip-text">
+          <div class="label">Education</div>
+          <div class="desc">{% if candidate.education %}{{ candidate.education|length }} entries{% else %}Upload resume to extract{% endif %}</div>
+        </div>
+      </div>
+
+      <div class="tip-item">
+        <div class="tip-icon {% if candidate.resume %}done{% else %}pending{% endif %}">
+          {% if candidate.resume %}✓{% else %}{% endif %}
+        </div>
+        <div class="tip-text">
+          <div class="label">Resume Uploaded</div>
+          <div class="desc">{% if candidate.resume %}File on file{% else %}Upload your resume below{% endif %}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <form method="post" action="{% url 'upload_resume' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="file" name="resume" accept=".pdf,.docx,.txt" style="width:100%;padding:8px;font-size:0.8125rem;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;background:var(--bg)" />
+          <button type="submit" class="btn btn-sm">Upload & Extract</button>
+        </form>
+        {% if candidate.resume %}
+          <p style="margin-top:6px;font-size:0.7rem;color:var(--text-muted)">{{ candidate.resume.name }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let editing = null;
+
+    function toggleEdit(field) {
+      if (editing === field) return;
+      cancelEdit(editing);
+      editing = field;
+      document.getElementById(field + 'View').style.display = 'none';
+      document.getElementById(field + 'Edit').style.display = 'block';
+    }
+
+    function cancelEdit(field) {
+      if (!field) return;
+      document.getElementById(field + 'View').style.display = '';
+      document.getElementById(field + 'Edit').style.display = 'none';
+      editing = null;
+    }
+
+    async function saveField(field) {
+      const val = document.getElementById(field + 'Input').value;
+      try {
+        const resp = await fetch('{% url "api_candidate_profile" %}', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+          body: JSON.stringify({[field]: val}),
+        });
+        const data = await resp.json();
+        if (data.success) {
+          document.getElementById(field + 'View').innerHTML = `<p style="font-size:0.9375rem;line-height:1.6">${val}</p>`;
+          showToast('Saved!');
+          cancelEdit(field);
+        } else {
+          showToast('Save failed', true);
+        }
+      } catch (e) {
+        showToast('Save failed', true);
+      }
+    }
+
+    function showToast(msg, isError) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => { t.className = 'toast'; }, 3000);
+    }
+  </script>
+</body>
+</html>

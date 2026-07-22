@@ -4,11 +4,12 @@ import re
 from pathlib import Path
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, JsonResponse
+from django.db import models
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from company.models import Company
-from api.models import JobPosition, UserAuth, UserRole, Candidate, CandidateSkill, Skill
+from api.models import Application, JobPosition, UserAuth, UserRole, Candidate, CandidateSkill, Skill
 
 User = get_user_model()
 
@@ -500,18 +501,28 @@ def api_skills(request, company_slug=None):
 
 def api_jobs_search(request, company_slug=None):
     skills_param = request.GET.get('skills', '').strip()
+    query = request.GET.get('q', '').strip()
     jobs = JobPosition.objects.filter(is_active=True).select_related('company').prefetch_related('skills')
 
+    skill_names = []
     if skills_param:
         skill_names = [s.strip() for s in skills_param.split(',') if s.strip()]
         if skill_names:
             jobs = jobs.filter(skills__name__in=skill_names).distinct()
 
+    if query:
+        jobs = jobs.filter(
+            models.Q(title__icontains=query) |
+            models.Q(description__icontains=query) |
+            models.Q(requirements__icontains=query) |
+            models.Q(location__icontains=query)
+        ).distinct()
+
     results = []
     for job in jobs:
         job_skills = list(job.skills.values_list('name', flat=True))
         match_count = 0
-        if skills_param:
+        if skill_names:
             match_count = sum(1 for s in job_skills if s.lower() in [x.lower() for x in skill_names])
         results.append({
             'id': job.id,
@@ -526,7 +537,7 @@ def api_jobs_search(request, company_slug=None):
             'total_skills': len(job_skills),
         })
 
-    if skills_param:
+    if skill_names:
         results.sort(key=lambda j: j['match_count'], reverse=True)
 
     return JsonResponse(results, safe=False)

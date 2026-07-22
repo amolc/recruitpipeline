@@ -7,7 +7,7 @@
 <style>
   .detail-card {
     background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 32px; max-width: 720px;
+    border-radius: var(--radius); padding: 32px; max-width: 900px;
     box-shadow: var(--shadow);
   }
   .field { margin-bottom: 16px; }
@@ -22,8 +22,29 @@
   .status-positive { background: #f0fdf4; color: #16a34a; }
   .status-warn { background: #fff7ed; color: var(--primary); }
   .status-rejected { background: #fef2f2; color: #dc2626; }
-  .actions-bar { margin-top: 28px; display: flex; gap: 10px; }
+  .actions-bar { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .section { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .section h3 { font-size: 0.875rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+  .skill-tag {
+    display: inline-block; font-size: 0.75rem; font-weight: 500;
+    padding: 3px 10px; border-radius: 20px;
+    background: var(--bg-elevated); color: var(--text-muted);
+    margin: 2px 4px 2px 0;
+  }
+  .skill-tag.level { background: #f0fdf4; color: #16a34a; }
+  .json-block {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px; font-size: 0.8125rem;
+    white-space: pre-wrap; line-height: 1.5; max-height: 220px; overflow-y: auto;
+  }
+  .json-block::-webkit-scrollbar { width: 4px; }
+  .json-block::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .entry-item { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .entry-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .entry-item .entry-title { font-weight: 600; font-size: 0.875rem; }
+  .entry-item .entry-sub { font-size: 0.8125rem; color: var(--text-muted); }
+  .resume-link { display: inline-flex; align-items: center; gap: 6px; }
 </style>
 {% endblock %}
 
@@ -43,7 +64,7 @@
           {% elif s == 'rejected' %}status-rejected
           {% elif s == 'new' or s == 'screening' %}status-new
           {% else %}status-warn{% endif %}">
-          {{ candidate.get_status_display }}
+          {{ candidate.status_label }}
         </span>
         {% endwith %}
       </div>
@@ -57,7 +78,7 @@
       <div class="value">{{ candidate.phone }}</div>
     </div>
     <div class="field">
-      <label>Position</label>
+      <label>Position Applied</label>
       <div class="value">{{ candidate.position }}</div>
     </div>
     <div class="field">
@@ -68,7 +89,7 @@
       <label>Resume / CV</label>
       <div class="value">
         {% if candidate.resume %}
-          <a href="{{ candidate.resume.url }}" target="_blank">Download CV</a>
+          <a href="{{ candidate.resume.url }}" target="_blank" class="resume-link">Download CV</a>
         {% else %}
           <span style="color:var(--text-muted);">Not provided</span>
         {% endif %}
@@ -83,12 +104,107 @@
   <div class="field" style="margin-top:16px;">
     <label>Why join us?</label>
     <div class="value" style="white-space:pre-wrap;color:var(--text-muted);">
-      {{ candidate.cover_letter }}
+      {{ candidate.cover_letter|default:"Not provided" }}
     </div>
   </div>
 
+  {% if candidate_profile %}
+    {% if candidate_profile.summary %}
+    <div class="section">
+      <h3>Summary / Profile</h3>
+      <div class="json-block">{{ candidate_profile.summary }}</div>
+    </div>
+    {% endif %}
+
+    {% if skills %}
+    <div class="section">
+      <h3>Skills</h3>
+      <div>
+        {% for cs in skills %}
+          <span class="skill-tag{% if cs.level %} level{% endif %}">
+            {{ cs.skill.name }}{% if cs.level %} ({{ cs.level }}){% endif %}
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if candidate_profile.experience %}
+    <div class="section">
+      <h3>Work Experience</h3>
+      {% for exp in candidate_profile.experience %}
+        <div class="entry-item">
+          <div class="entry-title">{{ exp.title }}</div>
+          <div class="entry-sub">{{ exp.company }}{% if exp.dates %} — {{ exp.dates }}{% endif %}</div>
+          {% if exp.description %}
+            <div style="font-size:0.8125rem;color:var(--text);margin-top:4px;">{{ exp.description }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if candidate_profile.education %}
+    <div class="section">
+      <h3>Education</h3>
+      {% for edu in candidate_profile.education %}
+        <div class="entry-item">
+          <div class="entry-title">{{ edu.degree }}{% if edu.field %} in {{ edu.field }}{% endif %}</div>
+          <div class="entry-sub">{{ edu.institution }}{% if edu.year %} — {{ edu.year }}{% endif %}</div>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if candidate_profile.certifications %}
+    <div class="section">
+      <h3>Certifications</h3>
+      {% for cert in candidate_profile.certifications %}
+        <div class="entry-item">
+          <div class="entry-title">{{ cert.name }}</div>
+          {% if cert.issuer or cert.date %}
+            <div class="entry-sub">{{ cert.issuer }}{% if cert.date %} — {{ cert.date }}{% endif %}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if candidate_profile.languages %}
+    <div class="section">
+      <h3>Languages</h3>
+      <div>
+        {% for lang in candidate_profile.languages %}
+          <span class="skill-tag">{{ lang.name }}{% if lang.level %} ({{ lang.level }}){% endif %}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if candidate_profile.total_experience_years is not None %}
+    <div class="section">
+      <h3>Total Experience (AI-extracted)</h3>
+      <div class="value">{{ candidate_profile.total_experience_years }} years</div>
+    </div>
+    {% endif %}
+  {% endif %}
+
+  {% if candidate.tailored_resume %}
+  <div class="section">
+    <h3>AI-Generated Tailored Resume</h3>
+    <div class="json-block">{{ candidate.tailored_resume }}</div>
+  </div>
+  {% endif %}
+
+  {% if candidate.generated_cover_letter %}
+  <div class="section">
+    <h3>AI-Generated Cover Letter</h3>
+    <div class="json-block">{{ candidate.generated_cover_letter }}</div>
+  </div>
+  {% endif %}
+
   <div class="actions-bar">
-    <a href="{% url 'recruitpanel:candidate_list' %}" class="btn btn-secondary">← Back</a>
+    <a href="{% url 'recruitpanel:candidate_list' %}" class="btn btn-secondary">← Back to List</a>
     <a href="{% url 'recruitpanel:candidate_edit' pk=candidate.pk %}" class="btn btn-primary">✎ Edit</a>
     <a href="{% url 'recruitpanel:candidate_delete' pk=candidate.pk %}" class="btn btn-danger">✕ Delete</a>
   </div>

@@ -180,10 +180,22 @@
             <div class="card-meta">
               <span>{{ app.experience }}yr</span>
               <span>{{ app.submitted_at|date:"M d" }}</span>
+              {% if app.candidate and app.candidate.total_experience_years is not None %}
+                <span>{{ app.candidate.total_experience_years }}yr total</span>
+              {% endif %}
               {% if app.resume %}
                 <span><a href="{{ app.resume.url }}" target="_blank" style="color:var(--primary);text-decoration:none;">resume</a></span>
               {% endif %}
             </div>
+            {% with skills=app.candidate.candidate_skills.all %}
+              {% if skills %}
+                <div style="margin-bottom:8px;">
+                  {% for cs in skills|slice:":3" %}
+                    <span style="display:inline-block;font-size:0.625rem;padding:1px 6px;border-radius:8px;background:var(--bg-elevated);color:var(--text-muted);margin:1px 2px;">{{ cs.skill.name }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
             <div class="card-actions">
               {% if not forloop.parentloop.first %}
                 <button class="btn-left" onclick="move({{ app.id }}, 'left')">←</button>

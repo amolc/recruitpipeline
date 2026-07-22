@@ -210,44 +210,55 @@
       } catch (e) {}
     }
 
+    async function loadAllJobs() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="loading">Loading jobs...</div>';
+      try {
+        const resp = await fetch('{% url "api_jobs_search" %}');
+        const jobs = await resp.json();
+        renderJobs(jobs, []);
+      } catch (e) {
+        resultsDiv.innerHTML = '<div class="empty-state"><h3>Failed to load jobs</h3><p>Please try again.</p></div>';
+      }
+    }
+
+    function renderJobs(jobs, lowerSkills) {
+      const resultsDiv = document.getElementById('results');
+      if (jobs.length === 0) {
+        resultsDiv.innerHTML = '<div class="empty-state"><h3>No jobs found</h3><p>Try different skills or broaden your search.</p></div>';
+        return;
+      }
+      resultsDiv.innerHTML = jobs.map(job => {
+        const matchPct = job.total_skills > 0 && lowerSkills.length > 0 ? Math.round(job.match_count / job.total_skills * 100) : 0;
+        return `<div class="job-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <h3>${job.title} ${matchPct > 0 ? `<span class="match-badge">${matchPct}% match</span>` : ''}</h3>
+              <div class="company-name">${job.company}</div>
+              <div class="meta">${job.location || 'Remote'}</div>
+            </div>
+            <button onclick="applyToJob(${job.id})" class="apply-btn">Apply Now</button>
+          </div>
+          ${job.description ? `<p>${job.description}</p>` : ''}
+          <div class="skills-line">${job.skills.map(s => `<span class="skill-tag ${lowerSkills.includes(s.toLowerCase()) ? 'match' : ''}">${s}</span>`).join('')}</div>
+        </div>`;
+      }).join('');
+    }
+
     async function searchJobs() {
       const input = document.getElementById('searchInput').value.trim();
       const activeChips = [...document.querySelectorAll('#skillChips .chip.active')].map(c => c.textContent);
       const allSkills = [...new Set([...input.split(',').map(s => s.trim()).filter(Boolean), ...activeChips])];
       const resultsDiv = document.getElementById('results');
 
-      if (allSkills.length === 0) {
-        resultsDiv.innerHTML = '<div class="empty-state"><h3>Enter skills to search</h3><p>Type skills separated by commas or click skill chips above.</p></div>';
-        return;
-      }
-
       resultsDiv.innerHTML = '<div class="loading">Searching...</div>';
 
       try {
-        const resp = await fetch(`{% url "api_jobs_search" %}?skills=${encodeURIComponent(allSkills.join(','))}`);
+        const params = new URLSearchParams();
+        if (allSkills.length > 0) params.set('skills', allSkills.join(','));
+        const resp = await fetch(`{% url "api_jobs_search" %}?${params.toString()}`);
         const jobs = await resp.json();
-
-        if (jobs.length === 0) {
-          resultsDiv.innerHTML = '<div class="empty-state"><h3>No jobs found</h3><p>Try different skills or broaden your search.</p></div>';
-          return;
-        }
-
-        const lowerSkills = allSkills.map(s => s.toLowerCase());
-        resultsDiv.innerHTML = jobs.map(job => {
-          const matchPct = job.total_skills > 0 ? Math.round(job.match_count / job.total_skills * 100) : 0;
-          return `<div class="job-card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start">
-              <div>
-                <h3>${job.title} ${matchPct > 0 ? `<span class="match-badge">${matchPct}% match</span>` : ''}</h3>
-                <div class="company-name">${job.company}</div>
-                <div class="meta">${job.location || 'Remote'}</div>
-              </div>
-              <button onclick="applyToJob(${job.id})" class="apply-btn">Apply Now</button>
-            </div>
-            ${job.description ? `<p>${job.description}</p>` : ''}
-            <div class="skills-line">${job.skills.map(s => `<span class="skill-tag ${lowerSkills.includes(s.toLowerCase()) ? 'match' : ''}">${s}</span>`).join('')}</div>
-          </div>`;
-        }).join('');
+        renderJobs(jobs, allSkills.map(s => s.toLowerCase()));
       } catch (e) {
         resultsDiv.innerHTML = '<div class="empty-state"><h3>Search failed</h3><p>Please try again.</p></div>';
       }
@@ -278,6 +289,7 @@
     }
     document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchJobs(); });
     loadSkills();
+    loadAllJobs();
   </script>
 </body>
 </html>

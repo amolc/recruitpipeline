@@ -52,6 +52,7 @@
         <th>Phone</th>
         <th>Position</th>
         <th>Exp</th>
+        <th>Skills</th>
         <th>Status</th>
         <th>CV</th>
         <th>Date</th>
@@ -66,6 +67,20 @@
           <td>{{ c.phone }}</td>
           <td>{{ c.position }}</td>
           <td>{{ c.experience }}yr</td>
+          <td style="max-width:200px;">
+            {% with skills=c.candidate.candidate_skills.all %}
+              {% if skills %}
+                {% for cs in skills|slice:":3" %}
+                  <span style="display:inline-block;font-size:0.6875rem;padding:1px 6px;border-radius:10px;background:var(--bg-elevated);color:var(--text-muted);margin:1px 2px;">{{ cs.skill.name }}</span>
+                {% endfor %}
+                {% if skills|length > 3 %}
+                  <span style="font-size:0.6875rem;color:var(--text-muted);">+{{ skills|length|add:"-3" }}</span>
+                {% endif %}
+              {% else %}
+                <span style="color:var(--text-muted);">—</span>
+              {% endif %}
+            {% endwith %}
+          </td>
           <td>
             {% with s=c.status %}
             <span class="status-tag
@@ -95,7 +110,7 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="9" class="empty-state">No candidates found.</td>
+          <td colspan="10" class="empty-state">No candidates found.</td>
         </tr>
       {% endfor %}
     </tbody>

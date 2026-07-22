@@ -363,7 +363,7 @@ def board(request):
         auto_objs = {a.stage: a.description for a in Automation.objects.filter(company=request.company, position=first_pos)}
     automations = []
     for s in stages:
-        apps = Application.objects.filter(company=request.company, status=s.key)
+        apps = Application.objects.filter(company=request.company, status=s.key).select_related('candidate').prefetch_related('candidate__candidate_skills__skill')
         columns.append({'key': s.key, 'label': s.label, 'applications': apps})
         desc = auto_objs.get(s.key, DEFAULT_AUTOMATIONS.get(s.key, ''))
         automations.append({'key': s.key, 'label': s.label, 'description': desc})
@@ -381,7 +381,7 @@ def board(request):
 def candidate_list(request):
     q = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '')
-    queryset = Application.objects.filter(company=request.company)
+    queryset = Application.objects.filter(company=request.company).select_related('candidate').prefetch_related('candidate__candidate_skills__skill')
     if q:
         queryset = queryset.filter(
             models.Q(full_name__icontains=q) |
@@ -402,9 +402,15 @@ def candidate_list(request):
 
 @recruiter_required
 def candidate_detail(request, pk):
-    candidate = get_object_or_404(Application, company=request.company, pk=pk)
+    application = get_object_or_404(Application, company=request.company, pk=pk)
+    candidate_profile = application.candidate
+    skills = []
+    if candidate_profile:
+        skills = list(candidate_profile.candidate_skills.select_related('skill').all())
     return render(request, 'recruitpanel/candidate_detail.html', {
-        'candidate': candidate,
+        'candidate': application,
+        'candidate_profile': candidate_profile,
+        'skills': skills,
         'company': request.company,
     })
 

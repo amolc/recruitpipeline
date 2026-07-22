@@ -247,3 +247,51 @@ class Automation(models.Model):
 
     def __str__(self):
         return f'{self.position.title} / {self.stage}'
+
+
+class Panelist(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='panelists')
+    name = models.CharField('Name', max_length=200)
+    email = models.EmailField('Email', blank=True)
+    phone = models.CharField('Phone', max_length=30, blank=True)
+    specialization = models.TextField('Specialization', blank=True)
+    is_active = models.BooleanField('Active', default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Panelist'
+        verbose_name_plural = 'Panelists'
+
+    def __str__(self):
+        return self.name
+
+
+class Screening(models.Model):
+    STATUS_CHOICES = [
+        ('not_scheduled', 'Not Scheduled'),
+        ('scheduled', 'Scheduled'),
+        ('in_progress', 'In Progress'),
+        ('passed', 'Passed'),
+        ('failed', 'Failed'),
+    ]
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='screenings')
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='screenings')
+    position = models.ForeignKey(JobPosition, on_delete=models.CASCADE, related_name='screenings')
+    screening_type = models.CharField('Screening Type', max_length=200, blank=True)
+    panelist = models.ForeignKey(Panelist, on_delete=models.SET_NULL, null=True, blank=True, related_name='screenings')
+    scheduled_at = models.DateTimeField('Scheduled At', null=True, blank=True)
+    duration_minutes = models.PositiveIntegerField('Duration (min)', default=45)
+    meeting_link = models.URLField('Meeting Link', max_length=500, blank=True)
+    score = models.FloatField('Score', null=True, blank=True)
+    status = models.CharField('Status', max_length=20, choices=STATUS_CHOICES, default='not_scheduled')
+    notes = models.TextField('Notes', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-scheduled_at']
+        verbose_name = 'Screening'
+        verbose_name_plural = 'Screenings'
+
+    def __str__(self):
+        return f'{self.application.full_name} — {self.screening_type or self.position.title}'

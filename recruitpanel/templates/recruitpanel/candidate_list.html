@@ -52,9 +52,7 @@
         <th>Phone</th>
         <th>Position</th>
         <th>Exp</th>
-        <th>Skills</th>
         <th>Status</th>
-        <th>CV</th>
         <th>Date</th>
         <th>Actions</th>
       </tr>
@@ -67,20 +65,6 @@
           <td>{{ c.phone }}</td>
           <td>{{ c.position }}</td>
           <td>{{ c.experience }}yr</td>
-          <td style="max-width:200px;">
-            {% with skills=c.candidate.candidate_skills.all %}
-              {% if skills %}
-                {% for cs in skills|slice:":3" %}
-                  <span style="display:inline-block;font-size:0.6875rem;padding:1px 6px;border-radius:10px;background:var(--bg-elevated);color:var(--text-muted);margin:1px 2px;">{{ cs.skill.name }}</span>
-                {% endfor %}
-                {% if skills|length > 3 %}
-                  <span style="font-size:0.6875rem;color:var(--text-muted);">+{{ skills|length|add:"-3" }}</span>
-                {% endif %}
-              {% else %}
-                <span style="color:var(--text-muted);">—</span>
-              {% endif %}
-            {% endwith %}
-          </td>
           <td>
             {% with s=c.status %}
             <span class="status-tag
@@ -91,13 +75,6 @@
               {{ c.status_label }}
             </span>
             {% endwith %}
-          </td>
-          <td>
-            {% if c.resume %}
-              <a href="{{ c.resume.url }}" target="_blank" style="color:var(--primary);">View</a>
-            {% else %}
-              <span style="color:var(--text-muted);">—</span>
-            {% endif %}
           </td>
           <td style="white-space:nowrap;">{{ c.submitted_at|date:"M d, Y" }}</td>
           <td>
@@ -110,7 +87,7 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="10" class="empty-state">No candidates found.</td>
+          <td colspan="8" class="empty-state">No candidates found.</td>
         </tr>
       {% endfor %}
     </tbody>

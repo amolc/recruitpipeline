@@ -1,10 +1,276 @@
 {% extends 'recruitpanel/base.html' %}
+{% load static %}
 
-{% block title %}Screenings — {{ company.name }} Pipeline{% endblock %}
+{% block title %}Screenings — {{ company.name }}{% endblock %}
 {% block page_title %}Screenings{% endblock %}
 
+{% block extra_head %}
+<style>
+  :root{
+    --ink:#1f2a37;
+    --slate:#5b6b7c;
+    --slate-light:#8b98a5;
+    --line:#e6e9ed;
+    --orange:#f2932e;
+    --orange-deep:#d97706;
+    --green-bg:#eaf7ee;
+    --green-ink:#1f8a44;
+    --blue-bg:#eaf1fb;
+    --blue-ink:#2563a8;
+    --amber-bg:#fdf3e3;
+    --amber-ink:#b9770e;
+    --red-bg:#fbeaea;
+    --red-ink:#c0392b;
+  }
+
+  .s-content{padding:0;}
+  .toolbar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:18px;flex-wrap:wrap;gap:12px;
+  }
+  .stats{display:flex;gap:14px;}
+  .stat{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:12px;
+    padding:14px 18px;min-width:120px;
+  }
+  .stat .num{font-size:22px;font-weight:800;}
+  .stat .lbl{font-size:12px;color:var(--slate-light);margin-top:2px;}
+
+  .actions{display:flex;gap:10px;}
+  .btn-s{
+    border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:600;
+    border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;
+    font-family:inherit;
+  }
+  .btn-s:hover{background:#fafbfc;}
+  .btn-primary-s{
+    background:var(--orange);border-color:var(--orange);color:#fff;
+  }
+  .btn-primary-s:hover{background:var(--orange-deep);}
+
+  .filters{
+    display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .filters input[type=text]{
+    flex:1;min-width:200px;
+    padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+    font-size:13.5px;color:var(--ink);background:var(--bg-card);
+    font-family:inherit;
+  }
+  .filters select{
+    padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+    font-size:13.5px;color:var(--slate);background:var(--bg-card);
+    font-family:inherit;
+  }
+
+  .s-card{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;
+  }
+  .s-card table{width:100%;border-collapse:collapse;}
+  .s-card thead th{
+    text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;
+    color:var(--slate-light);font-weight:700;
+    padding:13px 20px;border-bottom:1px solid var(--line);background:#fafbfc;
+  }
+  .s-card tbody td{
+    padding:14px 20px;font-size:13.5px;border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  .s-card tbody tr:last-child td{border-bottom:none;}
+  .s-card tbody tr:hover{background:#fafbfc;}
+
+  .candidate{display:flex;align-items:center;gap:10px;}
+  .avatar{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12.5px;font-weight:700;color:#fff;flex-shrink:0;
+  }
+  .cand-name{font-weight:700;color:var(--ink);}
+  .cand-role{color:var(--slate-light);font-size:12px;margin-top:1px;}
+
+  .badge{
+    display:inline-block;padding:4px 11px;border-radius:20px;
+    font-size:12px;font-weight:700;
+  }
+  .b-scheduled{background:var(--blue-bg);color:var(--blue-ink);}
+  .b-progress{background:var(--amber-bg);color:var(--amber-ink);}
+  .b-passed{background:var(--green-bg);color:var(--green-ink);}
+  .b-failed{background:var(--red-bg);color:var(--red-ink);}
+  .b-pending{background:#f1f2f4;color:var(--slate);}
+
+  .score{font-weight:800;}
+  .score-hi{color:var(--green-ink);}
+  .score-mid{color:var(--amber-ink);}
+  .score-lo{color:var(--red-ink);}
+  .score-none{color:var(--slate-light);font-weight:500;}
+
+  .row-actions{display:flex;gap:8px;}
+  .icon-btn{
+    width:30px;height:30px;border-radius:7px;border:1px solid var(--line);
+    background:#fff;display:inline-flex;align-items:center;justify-content:center;
+    font-size:13px;cursor:pointer;color:var(--slate);text-decoration:none;
+  }
+  .icon-btn:hover{background:#fafbfc;}
+
+  .s-meta{color:var(--slate);font-size:13px;}
+  .s-meta .sub{color:var(--slate-light);font-size:11.5px;margin-top:1px;}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--slate-light);}
+
+  a { text-decoration: none; }
+
+  .stage-tag {
+    display:inline-block;padding:4px 11px;border-radius:20px;
+    font-size:12px;font-weight:600;
+  }
+  .stage-new{background:#f1f2f4;color:var(--slate);}
+  .stage-screening{background:var(--blue-bg);color:var(--blue-ink);}
+  .stage-qualified{background:#eaf7ee;color:var(--green-ink);}
+  .stage-interview{background:var(--amber-bg);color:var(--amber-ink);}
+  .stage-selected{background:var(--green-bg);color:var(--green-ink);}
+  .stage-rejected{background:var(--red-bg);color:var(--red-ink);}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card" style="padding: 40px; text-align: center; color: var(--text-muted);">
-  <p style="font-size:1rem;">Screenings management coming soon.</p>
+<div class="s-content">
+  <div class="toolbar">
+    <div class="stats">
+      <div class="stat"><div class="num">{{ scheduled_today }}</div><div class="lbl">Scheduled today</div></div>
+      <div class="stat"><div class="num">{{ in_progress }}</div><div class="lbl">In progress</div></div>
+      <div class="stat"><div class="num">{{ pass_rate }}%</div><div class="lbl">Pass rate (30d)</div></div>
+    </div>
+    <div class="actions">
+      <a href="#" class="btn-s" onclick="alert('Export coming soon')">Export</a>
+      <a href="#" class="btn-s btn-primary-s" onclick="alert('Schedule screening coming soon')">＋ Schedule screening</a>
+    </div>
+  </div>
+
+  <form method="get" class="filters">
+    <input type="text" name="q" placeholder="Search candidate or position…" value="{{ q }}">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All stages</option>
+      {% for s in stages %}
+        <option value="{{ s.key }}" {% if status_filter == s.key %}selected{% endif %}>{{ s.label }}</option>
+      {% endfor %}
+    </select>
+    <select name="position" onchange="this.form.submit()">
+      <option value="">All positions</option>
+      {% for p in positions %}
+        <option value="{{ p.id }}" {% if position_filter|slugify == p.id|slugify %}selected{% endif %}>{{ p.title }}</option>
+      {% endfor %}
+    </select>
+    <select name="panelist" onchange="this.form.submit()">
+      <option value="">All panelists</option>
+      {% for p in panelists %}
+        <option value="{{ p.id }}" {% if panelist_filter|slugify == p.id|slugify %}selected{% endif %}>{{ p.name }}</option>
+      {% endfor %}
+    </select>
+    {% if q or status_filter or position_filter or panelist_filter %}
+      <a href="{% url 'recruitpanel:screenings' %}" style="padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;color:var(--slate);background:var(--bg-card);display:inline-flex;align-items:center;">Clear</a>
+    {% endif %}
+  </form>
+
+  <div class="s-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Position</th>
+          <th>Stage</th>
+          <th>Screening type</th>
+          <th>Panelist</th>
+          <th>Scheduled</th>
+          <th>Score</th>
+          <th>Screen status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in screenings %}
+          {% with scr=s.screenings.all|first %}
+          <tr>
+            <td>
+              <div class="candidate">
+                {% with first_char=s.full_name|first|upper %}
+                <div class="avatar" style="background:{% cycle '#f2932e' '#2563a8' '#1f8a44' '#c0392b' '#8b98a5' '#b9770e' '#7c3aed' '#db2777' %};">{{ first_char }}</div>
+                {% endwith %}
+                <div>
+                  <div class="cand-name">{{ s.full_name }}</div>
+                  <div class="cand-role">{{ s.experience }} yrs experience</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ s.position }}</td>
+            <td>
+              <span class="stage-tag stage-{{ s.status }}">{{ s.status_label }}</span>
+            </td>
+            <td>{{ scr.screening_type|default:"—" }}</td>
+            <td>{{ scr.panelist.name|default:"—" }}</td>
+            <td class="s-meta">
+              {% if scr.scheduled_at %}
+                {{ scr.scheduled_at|date:"M d, g:i A" }}
+                <div class="sub">
+                  {% if scr.status == 'scheduled' %}
+                    {{ scr.duration_minutes }} min
+                  {% elif scr.status == 'in_progress' %}
+                    In progress
+                  {% elif scr.status == 'passed' or scr.status == 'failed' %}
+                    Completed
+                  {% else %}
+                    Upcoming
+                  {% endif %}
+                </div>
+              {% else %}
+                <span style="color:var(--slate-light);">Not set</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if scr.score is not None %}
+                <span class="score 
+                  {% if scr.score >= 7 %}score-hi
+                  {% elif scr.score >= 4 %}score-mid
+                  {% else %}score-lo{% endif %}">
+                  {{ scr.score }}
+                </span>
+              {% elif scr %}
+                <span class="score score-none">—</span>
+              {% else %}
+                <span class="score score-none">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if scr %}
+                <span class="badge 
+                  {% if scr.status == 'scheduled' %}b-scheduled
+                  {% elif scr.status == 'in_progress' %}b-progress
+                  {% elif scr.status == 'passed' %}b-passed
+                  {% elif scr.status == 'failed' %}b-failed
+                  {% else %}b-pending{% endif %}">
+                  {{ scr.get_status_display }}
+                </span>
+              {% else %}
+                <span class="badge b-pending">Not scheduled</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="row-actions">
+                <a href="{% url 'recruitpanel:candidate_detail' pk=s.pk %}" class="icon-btn" title="View candidate">👁</a>
+                {% if not scr %}
+                  <a href="#" class="icon-btn" onclick="alert('Schedule screening coming soon')" title="Schedule screening">📅</a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endwith %}
+        {% empty %}
+          <tr>
+            <td colspan="9" class="empty-state">No candidates found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Application, JobPosition, Automation, Stage, UserProfile, Skill, Candidate, CandidateSkill
+from .models import Application, JobPosition, Automation, Stage, UserProfile, Skill, Candidate, CandidateSkill, Panelist, Screening
 
 
 @admin.register(UserProfile)
@@ -54,3 +54,17 @@ class CandidateAdmin(admin.ModelAdmin):
 class CandidateSkillAdmin(admin.ModelAdmin):
     list_display = ('candidate', 'skill', 'level')
     list_filter = ('level',)
+
+
+@admin.register(Panelist)
+class PanelistAdmin(admin.ModelAdmin):
+    list_display = ('name', 'company', 'email', 'phone', 'is_active')
+    list_filter = ('company', 'is_active')
+    search_fields = ('name', 'email')
+
+
+@admin.register(Screening)
+class ScreeningAdmin(admin.ModelAdmin):
+    list_display = ('application', 'position', 'screening_type', 'panelist', 'scheduled_at', 'score', 'status')
+    list_filter = ('company', 'status', 'position')
+    search_fields = ('application__full_name', 'screening_type')

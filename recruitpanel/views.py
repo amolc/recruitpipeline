@@ -1,4 +1,6 @@
 from functools import wraps
+from datetime import timedelta
+from django.utils.timezone import now
 import re
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -7,7 +9,7 @@ from django.db import models
 from django.http import JsonResponse, Http404
 from django.db.models import Count
 from company.models import Company, CompanyEditRequest
-from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, UserRole, UserAuth
+from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, UserRole, UserAuth, Screening, Panelist
 
 User = get_user_model()
 
@@ -699,7 +701,7 @@ def update_automation(request, position_pk, stage):
     return JsonResponse({'success': False}, status=405)
 
 
-# ── Panelist & Screenings (stubs) ──
+# ── Panelist & Screenings ──
 
 @recruiter_required
 def panelist(request):
@@ -708,4 +710,72 @@ def panelist(request):
 
 @recruiter_required
 def screenings(request):
-    return render(request, 'recruitpanel/screenings.html', {'company': request.company})
+    q = request.GET.get('q', '').strip()
+    stage_filter = request.GET.get('status', '')
+    position_filter = request.GET.get('position', '')
+    panelist_filter = request.GET.get('panelist', '')
+
+    queryset = Application.objects.filter(company=request.company).select_related(
+        'candidate'
+    ).prefetch_related(
+        models.Prefetch('screenings', queryset=Screening.objects.select_related('panelist'))
+    )
+
+    if q:
+        queryset = queryset.filter(
+            models.Q(full_name__icontains=q) |
+            models.Q(position__icontains=q) |
+            models.Q(email__icontains=q)
+        )
+    if stage_filter:
+        queryset = queryset.filter(status=stage_filter)
+    if position_filter:
+        try:
+            pos = JobPosition.objects.get(id=position_filter)
+            queryset = queryset.filter(position=pos.title)
+        except JobPosition.DoesNotExist:
+            pass
+    if panelist_filter:
+        queryset = queryset.filter(screenings__panelist_id=panelist_filter)
+
+    current_dt = now()
+    today_start = current_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+    scheduled_today = Screening.objects.filter(
+        company=request.company,
+        scheduled_at__gte=today_start, scheduled_at__lt=today_end,
+        status='scheduled'
+    ).count()
+    in_progress = Screening.objects.filter(
+        company=request.company, status='in_progress'
+    ).count()
+
+    thirty_days_ago = current_dt - timedelta(days=30)
+    completed_30d = Screening.objects.filter(
+        company=request.company,
+        status__in=('passed', 'failed'),
+        updated_at__gte=thirty_days_ago
+    )
+    total_completed = completed_30d.count()
+    passed_30d = completed_30d.filter(status='passed').count()
+    pass_rate = round(passed_30d / total_completed * 100) if total_completed > 0 else 0
+
+    positions = JobPosition.objects.filter(company=request.company, is_active=True)
+    panelists = Panelist.objects.filter(company=request.company, is_active=True)
+    stages = Stage.objects.filter(company=request.company)
+
+    return render(request, 'recruitpanel/screenings.html', {
+        'screenings': queryset,
+        'scheduled_today': scheduled_today,
+        'in_progress': in_progress,
+        'pass_rate': pass_rate,
+        'positions': positions,
+        'panelists': panelists,
+        'screening_statuses': Screening.STATUS_CHOICES,
+        'stages': stages,
+        'q': q,
+        'status_filter': stage_filter,
+        'position_filter': position_filter,
+        'panelist_filter': panelist_filter,
+        'company': request.company,
+    })

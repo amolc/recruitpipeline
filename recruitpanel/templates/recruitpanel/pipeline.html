@@ -2,209 +2,262 @@
 {% load recruitpanel_extras %}
 
 {% block title %}Pipeline — {{ company.name }}{% endblock %}
-{% block page_title %}Pipeline Stages{% endblock %}
+{% block page_title %}Pipeline{% endblock %}
 
 {% block extra_head %}
 <style>
-  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  .desc { color: var(--text-muted); font-size: 0.8125rem; }
-  .btn-sm {
-    padding: 4px 10px; font-size: 0.6875rem; font-weight: 500; font-family: inherit;
-    border: none; border-radius: 4px; cursor: pointer; transition: 0.15s;
+  .pipeline-strip {
+    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 20px;
+    align-items: stretch;
   }
-  .btn-del-stage { background: #fef2f2; color: #dc2626; float: right; margin-top: 8px; }
-  .btn-del-stage:hover { background: #fee2e2; }
-  .stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-  .stage-card {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px; position: relative;
-    box-shadow: var(--shadow);
+  .strip-card {
+    flex: 0 0 200px; min-width: 200px;
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px; position: relative;
   }
-  .stage-card h3 {
-    font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-    color: var(--primary); margin-bottom: 8px; padding-bottom: 6px;
+  .strip-card h3 {
+    font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--primary); margin-bottom: 4px; padding-bottom: 4px;
     border-bottom: 1px solid var(--border);
   }
-  .auto-bullets { margin: 0; padding: 0 0 0 16px; list-style: disc; }
-  .auto-bullets li { font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 4px; line-height: 1.5; }
-  .pencil {
-    position: absolute; top: 8px; right: 8px; cursor: pointer; opacity: 0.4; transition: 0.15s;
-    font-size: 0.75rem; color: var(--primary); background: none; border: none; padding: 2px 4px;
+  .strip-card .auto-bullets { margin: 0; padding: 0 0 0 12px; list-style: disc; }
+  .strip-card .auto-bullets li {
+    font-size: 0.6875rem; color: var(--text-muted); margin-bottom: 2px; line-height: 1.4;
   }
-  .pencil:hover { opacity: 1; }
-  .auto-edit { display: none; width: 100%; }
-  .auto-edit textarea {
-    width: 100%; padding: 6px 8px; font-size: 0.75rem; font-family: inherit;
-    color: var(--text); background: var(--bg-card);
-    border: 1px solid var(--primary); border-radius: 4px; outline: none;
-    resize: vertical; min-height: 80px; margin-bottom: 6px;
-  }
-  .auto-edit .edit-actions { display: flex; gap: 4px; }
-  .auto-edit .edit-actions button {
-    flex: 1; padding: 4px 6px; font-size: 0.625rem; font-weight: 600; font-family: inherit;
-    border: none; border-radius: 4px; cursor: pointer; transition: 0.15s;
-  }
-  .auto-edit .btn-save { background: var(--primary); color: #fff; }
-  .auto-edit .btn-save:hover { opacity: 0.85; }
-  .auto-edit .btn-cancel { background: var(--bg-elevated); color: var(--text-muted); }
-  .auto-edit .btn-cancel:hover { background: var(--border); }
-  .auto-text { display: block; }
-  .empty-state { text-align: center; padding: 60px 0; color: var(--text-muted); }
 
-  .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    align-items: center; justify-content: center; z-index: 100;
+  .board {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    min-height: calc(100vh - var(--header-h) - 160px);
+    align-items: flex-start;
+    padding-bottom: 16px;
   }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 24px; width: 400px; max-width: 90vw;
-    box-shadow: var(--shadow-md);
+  .column {
+    flex: 0 0 220px;
+    min-width: 220px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    max-height: calc(100vh - var(--header-h) - 180px);
+    display: flex;
+    flex-direction: column;
+    transition: background 0.15s, border-color 0.15s;
   }
-  .modal h2 { font-size: 1rem; margin-bottom: 16px; }
-  .modal label { display: block; font-size: 0.8125rem; font-weight: 500; margin-bottom: 4px; }
-  .modal input, .modal select {
-    width: 100%; padding: 8px 12px; font-size: 0.8125rem; font-family: inherit;
-    border: 1px solid var(--border); border-radius: var(--radius-xs); outline: none;
-    margin-bottom: 14px;
+  .column.drag-over { background: #ecfdf5; border-color: var(--primary); }
+  .column-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .modal input:focus, .modal select:focus { border-color: var(--primary); }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-  .modal-actions button {
-    padding: 8px 16px; font-size: 0.8125rem; font-weight: 600; font-family: inherit;
-    border: none; border-radius: var(--radius-xs); cursor: pointer; transition: 0.15s;
+  .column-header .count {
+    background: var(--border);
+    color: var(--text-muted);
+    font-size: 0.6875rem;
+    padding: 2px 8px;
+    border-radius: 999px;
   }
-  .modal-actions .btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
-  .modal-actions .btn-cancel:hover { color: var(--text); }
+  .card-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 60px;
+  }
+  .card-list::-webkit-scrollbar { width: 4px; }
+  .card-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    transition: border-color 0.15s, opacity 0.15s;
+    cursor: grab;
+    user-select: none;
+  }
+  .card:active { cursor: grabbing; }
+  .card.dragging { opacity: 0.4; }
+  .card:hover { border-color: var(--primary); }
+  .card-name { font-weight: 600; font-size: 0.8125rem; margin-bottom: 2px; }
+  .card-position { color: var(--text-muted); font-size: 0.75rem; margin-bottom: 8px; }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .card-meta span {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    background: var(--bg-elevated);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .card-actions { display: flex; gap: 4px; }
+  .card-actions button {
+    flex: 1;
+    padding: 4px 8px;
+    font-size: 0.6875rem;
+    font-family: inherit;
+    font-weight: 500;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .btn-left { background: var(--bg-elevated); color: var(--text-muted); }
+  .btn-left:hover { background: var(--border); }
+  .btn-right { background: var(--primary); color: #fff; }
+  .btn-right:hover { opacity: 0.85; }
+  .empty {
+    padding: 20px 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+  .pipeline-strip .strip-card-new {
+    border-color: var(--primary);
+    background: rgba(5,150,105,0.04);
+  }
+  .pipeline-strip .strip-card-new h3 { color: var(--primary); }
 </style>
 {% endblock %}
 
 {% block content %}
 <div id="csrfContainer" style="display:none">{% csrf_token %}</div>
 
-<div class="toolbar">
-  <p class="desc">Editable automation descriptions apply per-stage across all positions.</p>
-  <button class="btn btn-primary btn-sm" onclick="openModal()">+ Add Stage</button>
-</div>
-
-<div class="stage-grid">
+<div class="pipeline-strip">
   {% for auto in automations %}
-    <div class="stage-card" data-stage="{{ auto.key }}">
+    <div class="strip-card{% if auto.key == 'new' %} strip-card-new{% endif %}">
       <h3>{{ auto.label }}</h3>
       <span class="auto-text">{{ auto.description|bullet_list }}</span>
-      <button class="pencil" onclick="editAuto(this)">✎</button>
-      <div class="auto-edit">
-        <textarea>{{ auto.description }}</textarea>
-        <div class="edit-actions">
-          <button class="btn-save" onclick="saveAuto(this, '{{ auto.key }}')">Save</button>
-          <button class="btn-cancel" onclick="cancelAuto(this)">Cancel</button>
-        </div>
-      </div>
-      <button class="btn-sm btn-del-stage" onclick="deleteStage('{{ auto.key }}', '{{ auto.label }}')">Delete</button>
     </div>
   {% endfor %}
 </div>
 
-<div class="modal-overlay" id="addStageModal">
-  <div class="modal">
-    <h2>Add Pipeline Stage</h2>
-    <label for="stageLabel">Stage Name</label>
-    <input id="stageLabel" type="text" placeholder="e.g. Reference Check" autofocus />
-    <label for="stageAfter">Insert After</label>
-    <select id="stageAfter">
-      <option value="">— At the end —</option>
-      {% for auto in automations %}
-        <option value="{{ auto.key }}">{{ auto.label }}</option>
-      {% endfor %}
-    </select>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" onclick="addStage()">Add</button>
+<div class="board">
+  {% for col in columns %}
+    <div class="column" data-stage="{{ col.key }}">
+      <div class="column-header">
+        {{ col.label }}
+        <span class="count">{{ col.applications|length }}</span>
+      </div>
+      <div class="card-list">
+        {% for app in col.applications %}
+          <div class="card" draggable="true" data-id="{{ app.id }}">
+            <div class="card-name">{{ app.full_name }}</div>
+            <div class="card-position">{{ app.position }}</div>
+            <div class="card-meta">
+              <span>{{ app.experience }}yr</span>
+              <span>{{ app.submitted_at|date:"M d" }}</span>
+              {% if app.candidate and app.candidate.total_experience_years is not None %}
+                <span>{{ app.candidate.total_experience_years }}yr total</span>
+              {% endif %}
+              {% if app.resume %}
+                <span><a href="{{ app.resume.url }}" target="_blank" style="color:var(--primary);text-decoration:none;">resume</a></span>
+              {% endif %}
+            </div>
+            {% with skills=app.candidate.candidate_skills.all %}
+              {% if skills %}
+                <div style="margin-bottom:8px;">
+                  {% for cs in skills|slice:":3" %}
+                    <span style="display:inline-block;font-size:0.625rem;padding:1px 6px;border-radius:8px;background:var(--bg-elevated);color:var(--text-muted);margin:1px 2px;">{{ cs.skill.name }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            <div class="card-actions">
+              {% if not forloop.parentloop.first %}
+                <button class="btn-left" onclick="move({{ app.id }}, 'left')">←</button>
+              {% endif %}
+              {% if not forloop.parentloop.last %}
+                <button class="btn-right" onclick="move({{ app.id }}, 'right')">→</button>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty">No candidates</div>
+        {% endfor %}
+      </div>
     </div>
-  </div>
+  {% endfor %}
 </div>
 
 <script>
+  var stages = [
+    {% for s in pipeline_stages %}
+      '{{ s.key }}'{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ];
+
   function getCSRF() {
     return document.querySelector('#csrfContainer input').value;
   }
 
-  function openModal() {
-    document.getElementById('addStageModal').classList.add('open');
-  }
-  function closeModal() {
-    document.getElementById('addStageModal').classList.remove('open');
-  }
+  var dragSrcId = null;
 
-  function addStage() {
-    const label = document.getElementById('stageLabel').value.trim();
-    const after = document.getElementById('stageAfter').value;
-    if (!label) return;
+  document.querySelectorAll('.card[draggable]').forEach(function(card) {
+    card.addEventListener('dragstart', function(e) {
+      dragSrcId = card.dataset.id;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', function(e) {
+      card.classList.remove('dragging');
+      document.querySelectorAll('.column').forEach(function(c) { c.classList.remove('drag-over'); });
+    });
+  });
 
-    const form = new FormData();
-    form.append('label', label);
-    form.append('after', after);
-    form.append('csrfmiddlewaretoken', getCSRF());
+  document.querySelectorAll('.column').forEach(function(col) {
+    col.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragenter', function(e) {
+      e.preventDefault();
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave', function(e) {
+      col.classList.remove('drag-over');
+    });
+    col.addEventListener('drop', function(e) {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      if (!dragSrcId) return;
+      var newStage = col.dataset.stage;
+      if (!newStage) return;
 
-    fetch(`/recruitpanel/pipeline/add/`, { method: 'POST', body: form })
-      .then(r => r.json())
-      .then(data => {
+      var form = new FormData();
+      form.append('status', newStage);
+      fetch('/api/apply/' + dragSrcId + '/status/', { method: 'POST', body: form })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) location.reload();
+        });
+    });
+  });
+
+  function move(id, dir) {
+    var card = document.querySelector('.card[data-id="' + id + '"]');
+    if (!card) return;
+    var col = card.closest('.column');
+    var idx = stages.indexOf(col.dataset.stage);
+    var newIdx = dir === 'right' ? idx + 1 : idx - 1;
+    if (newIdx < 0 || newIdx >= stages.length) return;
+
+    var form = new FormData();
+    form.append('status', stages[newIdx]);
+
+    fetch('/api/apply/' + id + '/status/', { method: 'POST', body: form })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
         if (data.success) location.reload();
-        else alert(data.error || 'Failed to add stage');
-      });
-  }
-
-  function deleteStage(key, label) {
-    if (!confirm('Delete stage "' + label + '"?\nApplications in this stage will be moved to "New".')) return;
-    const form = new FormData();
-    form.append('csrfmiddlewaretoken', getCSRF());
-    fetch(`/recruitpanel/pipeline/${key}/delete/`, { method: 'POST', body: form })
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) location.reload();
-        else alert('Failed to delete stage');
-      });
-  }
-
-  function editAuto(btn) {
-    const card = btn.closest('.stage-card');
-    card.querySelector('.auto-text').style.display = 'none';
-    btn.style.display = 'none';
-    card.querySelector('.auto-edit').style.display = 'block';
-  }
-
-  function cancelAuto(btn) {
-    const card = btn.closest('.stage-card');
-    const textarea = card.querySelector('textarea');
-    textarea.value = card.querySelector('.auto-text').innerText.replace(/\s+/g, ' ').trim();
-    card.querySelector('.auto-edit').style.display = 'none';
-    card.querySelector('.auto-text').style.display = 'block';
-    card.querySelector('.pencil').style.display = 'block';
-  }
-
-  function saveAuto(btn, stage) {
-    const card = btn.closest('.stage-card');
-    const textarea = card.querySelector('textarea');
-    const desc = textarea.value.trim();
-
-    const form = new FormData();
-    form.append('description', desc);
-    form.append('csrfmiddlewaretoken', getCSRF());
-
-    fetch(`/recruitpanel/pipeline/${stage}/`, { method: 'POST', body: form })
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          const ul = card.querySelector('.auto-bullets');
-          if (ul) ul.remove();
-          const span = card.querySelector('.auto-text');
-          const lines = desc.split('\n').filter(l => l.trim()).map(l => l.replace(/^- /, '').trim());
-          const html = '<ul class="auto-bullets">' + lines.map(l => '<li>' + l + '</li>').join('') + '</ul>';
-          span.innerHTML = html;
-          card.querySelector('.auto-edit').style.display = 'none';
-          card.querySelector('.auto-text').style.display = 'block';
-          card.querySelector('.pencil').style.display = 'block';
-        }
       });
   }
 </script>

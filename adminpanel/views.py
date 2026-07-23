@@ -8,7 +8,7 @@ from django.http import JsonResponse, Http404
 from django.db.models import Count
 from django.utils.timezone import now
 from company.models import Company, CompanyEditRequest
-from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, UserProfile
+from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, UserProfile, seed_default_stages
 
 User = get_user_model()
 
@@ -58,6 +58,9 @@ def logout_view(request, company_slug=None):
 @company_login_required
 def board(request, company_slug=None):
     stages = Stage.objects.filter(company=request.company)
+    if not stages.exists():
+        seed_default_stages(request.company)
+        stages = Stage.objects.filter(company=request.company)
     columns = []
     first_pos = JobPosition.objects.filter(company=request.company, is_active=True).first()
     auto_objs = {}
@@ -106,6 +109,9 @@ def job_position_add(request, company_slug=None):
 def job_position_detail(request, pk, company_slug=None):
     position = get_object_or_404(JobPosition, company=request.company, pk=pk)
     stages = Stage.objects.filter(company=request.company)
+    if not stages.exists():
+        seed_default_stages(request.company)
+        stages = Stage.objects.filter(company=request.company)
     columns = []
     for s in stages:
         apps = Application.objects.filter(company=request.company, position=position.title, status=s.key)
@@ -264,15 +270,41 @@ def candidate_delete(request, pk, company_slug=None):
 
 
 @company_login_required
+def approve_candidate(request, pk, company_slug=None):
+    candidate = get_object_or_404(Application, company=request.company, pk=pk)
+    if candidate.status == 'new' and request.method == 'POST':
+        candidate.status = 'screening'
+        candidate.save()
+        messages.success(request, f'{candidate.full_name} approved and moved to Screening.')
+    else:
+        messages.error(request, 'Candidate cannot be approved.')
+    return redirect('candidate_list', company_slug=company_slug)
+
+
+@company_login_required
 def pipeline(request, company_slug=None):
     stages = Stage.objects.filter(company=request.company)
+    if not stages.exists():
+        seed_default_stages(request.company)
+        stages = Stage.objects.filter(company=request.company)
+    pipeline_stages = stages.exclude(key='new')
+    columns = []
+    first_pos = JobPosition.objects.filter(company=request.company, is_active=True).first()
+    auto_objs = {}
+    if first_pos:
+        auto_objs = {a.stage: a.description for a in Automation.objects.filter(company=request.company, position=first_pos)}
     automations = []
     for s in stages:
-        desc = DEFAULT_AUTOMATIONS.get(s.key, '')
+        desc = auto_objs.get(s.key, DEFAULT_AUTOMATIONS.get(s.key, ''))
         automations.append({'key': s.key, 'label': s.label, 'description': desc})
+    for s in pipeline_stages:
+        apps = Application.objects.filter(company=request.company, status=s.key)
+        columns.append({'key': s.key, 'label': s.label, 'applications': apps})
     return render(request, 'adminpanel/pipeline.html', {
         'automations': automations,
         'stages': stages,
+        'pipeline_stages': pipeline_stages,
+        'columns': columns,
         'company': request.company,
     })
 

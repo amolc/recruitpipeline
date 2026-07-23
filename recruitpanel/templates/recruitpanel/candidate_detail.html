@@ -60,7 +60,7 @@
       <div class="value">
         {% with s=candidate.status %}
         <span class="status-tag
-          {% if s == 'selected' or s == 'accepted' or s == 'onboarded' %}status-positive
+          {% if s == 'hired' %}status-positive
           {% elif s == 'rejected' %}status-rejected
           {% elif s == 'new' or s == 'screening' %}status-new
           {% else %}status-warn{% endif %}">
@@ -205,6 +205,12 @@
 
   <div class="actions-bar">
     <a href="{% url 'recruitpanel:candidate_list' %}" class="btn btn-secondary">← Back to List</a>
+    {% if candidate.status == 'new' %}
+      <form method="post" action="{% url 'recruitpanel:approve_candidate' pk=candidate.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Approve & Send to Screening</button>
+      </form>
+    {% endif %}
     <a href="{% url 'recruitpanel:candidate_edit' pk=candidate.pk %}" class="btn btn-primary">✎ Edit</a>
     <a href="{% url 'recruitpanel:candidate_delete' pk=candidate.pk %}" class="btn btn-danger">✕ Delete</a>
   </div>

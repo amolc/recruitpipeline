@@ -68,7 +68,7 @@
           <td>
             {% with s=c.status %}
             <span class="status-tag
-              {% if s == 'selected' or s == 'accepted' or s == 'onboarded' %}status-positive
+              {% if s == 'hired' %}status-positive
               {% elif s == 'rejected' %}status-rejected
               {% elif s == 'new' or s == 'screening' %}status-new
               {% else %}status-warn{% endif %}">
@@ -79,6 +79,12 @@
           <td style="white-space:nowrap;">{{ c.submitted_at|date:"M d, Y" }}</td>
           <td>
             <div class="actions">
+              {% if c.status == 'new' %}
+                <form method="post" action="{% url 'recruitpanel:approve_candidate' pk=c.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                </form>
+              {% endif %}
               <a href="{% url 'recruitpanel:candidate_detail' pk=c.pk %}" class="btn btn-secondary btn-sm">View</a>
               <a href="{% url 'recruitpanel:candidate_edit' pk=c.pk %}" class="btn btn-secondary btn-sm">Edit</a>
               <a href="{% url 'recruitpanel:candidate_delete' pk=c.pk %}" class="btn btn-danger btn-sm">Del</a>

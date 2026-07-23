@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth import get_user_model
@@ -67,17 +69,11 @@ class CandidateSkill(models.Model):
 
 STAGES = [
     ('new', 'New'),
-    ('need_info', 'Need Info'),
     ('screening', 'Screening'),
-    ('qualified', 'Qualified'),
-    ('contacted', 'Contacted'),
-    ('assessment', 'Assessment'),
+    ('shortlisted', 'Shortlisted'),
     ('interview', 'Interview'),
-    ('selected', 'Selected'),
-    ('background_check', 'Background Check'),
-    ('offer_sent', 'Offer Sent'),
-    ('accepted', 'Accepted'),
-    ('onboarded', 'Onboarded'),
+    ('offer', 'Offer'),
+    ('hired', 'Hired'),
     ('rejected', 'Rejected'),
 ]
 
@@ -220,19 +216,22 @@ class JobPosition(models.Model):
 
 DEFAULT_AUTOMATIONS = {
     'new': '- Send acknowledgement email\n- Parse resume for skills/experience\n- Auto-tag by position match',
-    'need_info': '- Detect incomplete application fields\n- Send follow-up email requesting missing documents\n- Flag for manual review',
     'screening': '- Auto-screen with keyword matching\n- Run basic skills assessment\n- Schedule phone screen',
-    'qualified': '- Send qualification confirmation email\n- Add to talent pool\n- Notify hiring manager',
-    'contacted': '- Track email open rates\n- Auto-follow-up after 3 days of no response\n- Log contact history',
-    'assessment': '- Generate assessment link\n- Set deadline reminder\n- Auto-grade multiple-choice section',
+    'shortlisted': '- Send shortlist confirmation email\n- Notify hiring manager\n- Prepare interview packet',
     'interview': '- Auto-schedule via calendar\n- Send invite with prep materials\n- Send 24h reminder',
-    'selected': '- Notify HR department\n- Initiate offer packet generation\n- Trigger background check request',
-    'background_check': '- Send authorization form\n- Track check status via API\n- Flag results for review',
-    'offer_sent': '- Generate offer letter from template\n- Send via DocuSign\n- Track signature status',
-    'accepted': '- Trigger onboarding workflow\n- Send welcome packet\n- Create employee record in HRIS',
-    'onboarded': '- Schedule orientation session\n- Assign equipment provisioning\n- Send 30-day survey',
+    'offer': '- Generate offer letter from template\n- Send offer details for approval\n- Track acceptance status',
+    'hired': '- Trigger onboarding workflow\n- Send welcome packet\n- Create employee record in HRIS',
     'rejected': '- Send personalized rejection email\n- Add to future talent pool\n- Request interviewer feedback',
 }
+
+def seed_default_stages(company):
+    for order, (key, label) in enumerate(STAGES):
+        Stage.objects.get_or_create(
+            company=company,
+            key=key,
+            defaults={'label': label, 'order': order},
+        )
+
 
 class Automation(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='automations')
@@ -295,3 +294,9 @@ class Screening(models.Model):
 
     def __str__(self):
         return f'{self.application.full_name} — {self.screening_type or self.position.title}'
+
+
+@receiver(post_save, sender=Company)
+def company_post_save(sender, instance, created, **kwargs):
+    if created:
+        seed_default_stages(instance)

@@ -9,7 +9,7 @@ from django.db import models
 from django.http import JsonResponse, Http404
 from django.db.models import Count
 from company.models import Company, CompanyEditRequest
-from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, UserRole, UserAuth, Screening, Panelist
+from api.models import Application, JobPosition, Automation, DEFAULT_AUTOMATIONS, Stage, UserRole, UserAuth, Screening, Panelist, seed_default_stages
 
 User = get_user_model()
 
@@ -358,6 +358,9 @@ def user_create(request):
 @recruiter_required
 def board(request):
     stages = Stage.objects.filter(company=request.company)
+    if not stages.exists():
+        seed_default_stages(request.company)
+        stages = Stage.objects.filter(company=request.company)
     columns = []
     first_pos = JobPosition.objects.filter(company=request.company, is_active=True).first()
     auto_objs = {}
@@ -483,6 +486,18 @@ def candidate_delete(request, pk):
     })
 
 
+@recruiter_required
+def approve_candidate(request, pk):
+    candidate = get_object_or_404(Application, company=request.company, pk=pk)
+    if candidate.status == 'new' and request.method == 'POST':
+        candidate.status = 'screening'
+        candidate.save()
+        messages.success(request, f'{candidate.full_name} approved and moved to Screening.')
+    else:
+        messages.error(request, 'Candidate cannot be approved.')
+    return redirect(RECRUIT_CANDIDATES)
+
+
 # ── Job Positions ──
 
 @recruiter_required
@@ -562,6 +577,9 @@ def job_position_add(request):
 def job_position_detail(request, pk):
     position = get_object_or_404(JobPosition, pk=pk)
     stages = Stage.objects.filter(company=request.company)
+    if not stages.exists():
+        seed_default_stages(request.company)
+        stages = Stage.objects.filter(company=request.company)
     columns = []
     for s in stages:
         apps = Application.objects.filter(company=request.company, position=position.title, status=s.key)
@@ -616,13 +634,27 @@ def job_position_delete(request, pk):
 @recruiter_required
 def pipeline(request):
     stages = Stage.objects.filter(company=request.company)
+    if not stages.exists():
+        seed_default_stages(request.company)
+        stages = Stage.objects.filter(company=request.company)
+    pipeline_stages = stages.exclude(key='new')
+    columns = []
+    first_pos = JobPosition.objects.filter(company=request.company, is_active=True).first()
+    auto_objs = {}
+    if first_pos:
+        auto_objs = {a.stage: a.description for a in Automation.objects.filter(company=request.company, position=first_pos)}
     automations = []
     for s in stages:
-        desc = DEFAULT_AUTOMATIONS.get(s.key, '')
+        desc = auto_objs.get(s.key, DEFAULT_AUTOMATIONS.get(s.key, ''))
         automations.append({'key': s.key, 'label': s.label, 'description': desc})
+    for s in pipeline_stages:
+        apps = Application.objects.filter(company=request.company, status=s.key).select_related('candidate').prefetch_related('candidate__candidate_skills__skill')
+        columns.append({'key': s.key, 'label': s.label, 'applications': apps})
     return render(request, 'recruitpanel/pipeline.html', {
         'automations': automations,
         'stages': stages,
+        'pipeline_stages': pipeline_stages,
+        'columns': columns,
         'company': request.company,
     })
 

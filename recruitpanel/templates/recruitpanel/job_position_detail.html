@@ -96,8 +96,8 @@
       <div class="value">{{ position.is_active|yesno:"Active,Inactive" }}</div>
     </div>
     <div class="field">
-      <label>Base Salary</label>
-      <div class="value">{% if position.base_salary %}${{ position.base_salary|floatformat:0 }}{% else %}—{% endif %}</div>
+      <label>Salary Range</label>
+      <div class="value">{% if position.base_salary %}${{ position.base_salary|floatformat:0 }}{% if position.salary_max %} – ${{ position.salary_max|floatformat:0 }}{% endif %}{% else %}—{% endif %}</div>
     </div>
     <div class="field">
       <label>Per Hour</label>
@@ -106,6 +106,18 @@
     <div class="field">
       <label>Location</label>
       <div class="value">{{ position.location|default:"—" }}</div>
+    </div>
+    <div class="field">
+      <label>Work Type</label>
+      <div class="value">{{ position.get_work_type_display|default:"—" }}</div>
+    </div>
+    <div class="field">
+      <label>Employment Type</label>
+      <div class="value">{{ position.get_employment_type_display|default:"—" }}</div>
+    </div>
+    <div class="field">
+      <label>Experience Required</label>
+      <div class="value">{% if position.experience_required %}{{ position.experience_required }} years{% else %}—{% endif %}</div>
     </div>
     <div class="field">
       <label>Created</label>

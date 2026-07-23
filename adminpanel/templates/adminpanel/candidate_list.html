@@ -88,12 +88,11 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th>Email</th>
         <th>Phone</th>
         <th>Position</th>
         <th>Exp</th>
+        <th>Resume</th>
         <th>Status</th>
-        <th>CV</th>
         <th>Date</th>
         <th>Actions</th>
       </tr>
@@ -102,7 +101,6 @@
       {% for c in candidates %}
         <tr>
           <td><strong>{{ c.full_name }}</strong></td>
-          <td>{{ c.email }}</td>
           <td>{{ c.phone }}</td>
           <td>{{ c.position }}</td>
           <td>{{ c.experience }}yr</td>
@@ -141,7 +139,7 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="9" class="empty-state">No candidates found.</td>
+          <td colspan="8" class="empty-state">No candidates found.</td>
         </tr>
       {% endfor %}
     </tbody>

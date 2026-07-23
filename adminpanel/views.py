@@ -140,7 +140,11 @@ def job_position_edit(request, pk, company_slug=None):
         position.description = request.POST.get('description', '').strip()
         position.base_salary = request.POST.get('base_salary') or None
         position.hourly_rate = request.POST.get('hourly_rate') or None
+        position.salary_max = request.POST.get('salary_max') or None
         position.location = request.POST.get('location', '').strip()
+        position.employment_type = request.POST.get('employment_type', 'full_time')
+        position.work_type = request.POST.get('work_type', 'on_site')
+        position.experience_required = request.POST.get('experience_required') or None
         position.requirements = request.POST.get('requirements', '').strip()
         position.is_active = request.POST.get('is_active') == 'on'
         position.save()

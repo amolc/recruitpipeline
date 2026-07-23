@@ -194,12 +194,27 @@ class Application(models.Model):
 
 
 class JobPosition(models.Model):
+    EMPLOYMENT_TYPES = [
+        ('full_time', 'Full-time'),
+        ('part_time', 'Part-time'),
+        ('internship', 'Internship'),
+        ('contract', 'Contract'),
+    ]
+    WORK_TYPES = [
+        ('remote', 'Remote'),
+        ('hybrid', 'Hybrid'),
+        ('on_site', 'On-site'),
+    ]
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='job_positions')
     title = models.CharField('Job Title', max_length=200)
     description = models.TextField('Job Description', blank=True)
     base_salary = models.DecimalField('Base Salary ($)', max_digits=10, decimal_places=2, null=True, blank=True)
     hourly_rate = models.DecimalField('Per Hour ($)', max_digits=8, decimal_places=2, null=True, blank=True)
+    salary_max = models.DecimalField('Max Salary ($)', max_digits=10, decimal_places=2, null=True, blank=True)
     location = models.CharField('Location', max_length=200, blank=True)
+    employment_type = models.CharField('Employment Type', max_length=20, choices=EMPLOYMENT_TYPES, default='full_time')
+    work_type = models.CharField('Work Type', max_length=20, choices=WORK_TYPES, default='on_site')
+    experience_required = models.PositiveIntegerField('Experience Required (years)', null=True, blank=True)
     requirements = models.TextField('Requirements', blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
     is_active = models.BooleanField('Active', default=True)

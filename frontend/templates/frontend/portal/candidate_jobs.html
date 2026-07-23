@@ -47,36 +47,68 @@
     .nav-links a:hover { color: var(--text); }
     .nav-links a.active { color: var(--primary); font-weight: 600; }
     .nav-links .logout { color: #ef4444; }
-    .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; display: flex; gap: 28px; }
     .header { margin-bottom: 28px; }
     .header h1 { font-size: 1.5rem; font-weight: 700; }
     .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
-    .search-section {
+
+    .filters-sidebar {
+      flex: 0 0 260px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 20px;
       box-shadow: var(--shadow);
-      margin-bottom: 24px;
+      align-self: flex-start;
+      position: sticky;
+      top: 24px;
     }
-    .search-box {
+    .filters-sidebar h3 { font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 16px; }
+    .filter-group { margin-bottom: 18px; }
+    .filter-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .filter-group input, .filter-group select {
+      width: 100%; padding: 8px 10px; font-size: 0.8125rem; font-family: inherit;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); outline: none;
+      background: var(--bg); color: var(--text);
+    }
+    .filter-group input:focus, .filter-group select:focus { border-color: var(--primary); }
+    .filter-group .salary-row { display: flex; gap: 6px; }
+    .filter-group .salary-row input { width: 50%; }
+    .filter-actions { display: flex; gap: 6px; margin-top: 8px; }
+    .filter-actions button {
+      flex: 1; padding: 8px; font-size: 0.75rem; font-weight: 600; font-family: inherit;
+      border: none; border-radius: var(--radius-sm); cursor: pointer; transition: 0.15s;
+    }
+    .btn-filter { background: var(--primary); color: #fff; }
+    .btn-filter:hover { background: var(--primary-dark); }
+    .btn-clear-filters { background: var(--bg-elevated); color: var(--text-muted); }
+    .btn-clear-filters:hover { color: var(--text); }
+
+    .main-content { flex: 1; min-width: 0; }
+    .search-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
       display: flex;
       gap: 12px;
     }
-    .search-box input {
+    .search-bar input {
       flex: 1;
-      padding: 12px 16px;
-      font-size: 0.9375rem;
+      padding: 10px 14px;
+      font-size: 0.875rem;
       font-family: inherit;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       outline: none;
       transition: border-color 0.2s;
     }
-    .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
-    .search-box button {
-      padding: 12px 28px;
-      font-size: 0.9375rem;
+    .search-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+    .search-bar button {
+      padding: 10px 24px;
+      font-size: 0.875rem;
       font-weight: 600;
       font-family: inherit;
       border: none;
@@ -86,18 +118,16 @@
       color: #fff;
       transition: background 0.2s;
     }
-    .search-box button:hover { background: var(--primary-dark); }
-    .filter-chips {
+    .search-bar button:hover { background: var(--primary-dark); }
+    .skill-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
+      gap: 6px;
+      margin-bottom: 20px;
     }
     .chip {
-      padding: 6px 14px;
-      font-size: 0.8125rem;
+      padding: 5px 12px;
+      font-size: 0.75rem;
       font-weight: 500;
       border-radius: 20px;
       border: 1px solid var(--border);
@@ -109,19 +139,26 @@
     .chip:hover { border-color: var(--primary); color: var(--primary); }
     .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .loading { text-align: center; padding: 40px; color: var(--text-muted); }
+
     .job-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px 28px;
+      padding: 22px 26px;
       box-shadow: var(--shadow);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       transition: border-color 0.15s;
     }
     .job-card:hover { border-color: var(--primary); }
-    .job-card h3 { font-size: 1.125rem; font-weight: 600; }
+    .job-card h3 { font-size: 1.0625rem; font-weight: 600; }
     .job-card .company-name { font-size: 0.875rem; color: var(--primary); font-weight: 500; margin-top: 2px; }
-    .job-card .meta { font-size: 0.8125rem; color: var(--text-muted); margin-top: 4px; }
+    .job-card .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .job-card .meta-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.75rem; color: var(--text-muted);
+      background: var(--bg-elevated); padding: 3px 10px; border-radius: 20px;
+    }
+    .job-card .meta-tag .icon { font-size: 0.75rem; }
     .job-card p { font-size: 0.875rem; color: var(--text); margin-top: 10px; line-height: 1.5; }
     .job-card .skills-line { margin-top: 10px; }
     .job-card .skill-tag {
@@ -160,6 +197,11 @@
     .empty-state { text-align: center; padding: 60px 24px; }
     .empty-state h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 8px; }
     .empty-state p { color: var(--text-muted); font-size: 0.875rem; }
+
+    @media (max-width: 768px) {
+      .container { flex-direction: column; }
+      .filters-sidebar { flex: none; position: static; }
+    }
   </style>
 </head>
 <body>
@@ -173,23 +215,74 @@
     </div>
   </nav>
   <div class="container">
-    <div class="header">
-      <h1>Find Jobs</h1>
-      <p>Search across all companies for the perfect role</p>
+    <div class="filters-sidebar">
+      <h3>Filters</h3>
+
+      <div class="filter-group">
+        <label>📍 Location</label>
+        <input id="filterLocation" type="text" placeholder="City, State..." />
+      </div>
+
+      <div class="filter-group">
+        <label>💼 Experience</label>
+        <select id="filterExp">
+          <option value="">Any experience</option>
+          <option value="0">Entry level (0+ yr)</option>
+          <option value="1">1+ years</option>
+          <option value="2">2+ years</option>
+          <option value="3">3+ years</option>
+          <option value="5">5+ years</option>
+          <option value="7">7+ years</option>
+          <option value="10">10+ years</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>🏠 Work Type</label>
+        <select id="filterWorkType">
+          <option value="">All types</option>
+          <option value="remote">Remote</option>
+          <option value="hybrid">Hybrid</option>
+          <option value="on_site">On-site</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>💰 Salary Range</label>
+        <div class="salary-row">
+          <input id="filterSalaryMin" type="number" min="0" placeholder="Min $" />
+          <input id="filterSalaryMax" type="number" min="0" placeholder="Max $" />
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>📋 Job Type</label>
+        <select id="filterJobType">
+          <option value="">All types</option>
+          <option value="full_time">Full-time</option>
+          <option value="part_time">Part-time</option>
+          <option value="internship">Internship</option>
+          <option value="contract">Contract</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-filter" onclick="searchJobs()">Apply Filters</button>
+        <button class="btn-clear-filters" onclick="clearFilters()">Clear</button>
+      </div>
     </div>
 
-    <div class="search-section">
-      <div class="search-box">
-        <input id="searchInput" type="text" placeholder="Search by skills (e.g. Python, Django, React)" />
+    <div class="main-content">
+      <div class="search-bar">
+        <input id="searchInput" type="text" placeholder="Search by keyword (title, skills, company...)" />
         <button onclick="searchJobs()">Search</button>
       </div>
-      <div class="filter-chips" id="skillChips"></div>
-    </div>
-
-    <div id="results">
-      <div class="empty-state">
-        <h3>Search for jobs</h3>
-        <p>Enter skills above or click a skill chip to find matching positions across all companies.</p>
+      <div class="skill-chips" id="skillChips"></div>
+      <div id="results">
+        <div class="empty-state">
+          <h3>Search for jobs</h3>
+          <p>Use the search bar or filters to find matching positions across all companies.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -200,7 +293,7 @@
         const resp = await fetch('{% url "api_skills" %}');
         const skills = await resp.json();
         const chips = document.getElementById('skillChips');
-        skills.slice(0, 20).forEach(s => {
+        skills.slice(0, 30).forEach(s => {
           const el = document.createElement('span');
           el.className = 'chip';
           el.textContent = s.name;
@@ -208,6 +301,74 @@
           chips.appendChild(el);
         });
       } catch (e) {}
+    }
+
+    function getFilterParams() {
+      const params = new URLSearchParams();
+      const input = document.getElementById('searchInput').value.trim();
+      const activeChips = [...document.querySelectorAll('#skillChips .chip.active')].map(c => c.textContent);
+      const allSkills = [...new Set([...input.split(',').map(s => s.trim()).filter(Boolean), ...activeChips])];
+      if (allSkills.length > 0) params.set('skills', allSkills.join(','));
+
+      const location = document.getElementById('filterLocation').value.trim();
+      if (location) params.set('location', location);
+
+      const exp = document.getElementById('filterExp').value;
+      if (exp) params.set('exp_min', exp);
+
+      const workType = document.getElementById('filterWorkType').value;
+      if (workType) params.set('work_type', workType);
+
+      const salaryMin = document.getElementById('filterSalaryMin').value.trim();
+      if (salaryMin) params.set('salary_min', salaryMin);
+
+      const salaryMax = document.getElementById('filterSalaryMax').value.trim();
+      if (salaryMax) params.set('salary_max', salaryMax);
+
+      const jobType = document.getElementById('filterJobType').value;
+      if (jobType) params.set('employment_type', jobType);
+
+      return params;
+    }
+
+    function clearFilters() {
+      document.getElementById('filterLocation').value = '';
+      document.getElementById('filterExp').value = '';
+      document.getElementById('filterWorkType').value = '';
+      document.getElementById('filterSalaryMin').value = '';
+      document.getElementById('filterSalaryMax').value = '';
+      document.getElementById('filterJobType').value = '';
+      document.getElementById('searchInput').value = '';
+      searchJobs();
+    }
+
+    function renderJobs(jobs, lowerSkills) {
+      const resultsDiv = document.getElementById('results');
+      if (jobs.length === 0) {
+        resultsDiv.innerHTML = '<div class="empty-state"><h3>No jobs found</h3><p>Try different filters or broaden your search.</p></div>';
+        return;
+      }
+      resultsDiv.innerHTML = jobs.map(job => {
+        const matchPct = job.total_skills > 0 && lowerSkills.length > 0 ? Math.round(job.match_count / job.total_skills * 100) : 0;
+        return '<div class="job-card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+            '<div>' +
+              '<h3>' + job.title + (matchPct > 0 ? '<span class="match-badge">' + matchPct + '% match</span>' : '') + '</h3>' +
+              '<div class="company-name">' + job.company + '</div>' +
+              '<div class="meta-row">' +
+                '<span class="meta-tag"><span class="icon">📍</span> ' + job.location + '</span>' +
+                (job.employment_type ? '<span class="meta-tag"><span class="icon">📋</span> ' + job.employment_type + '</span>' : '') +
+                (job.work_type ? '<span class="meta-tag"><span class="icon">🏠</span> ' + job.work_type + '</span>' : '') +
+                (job.experience_required ? '<span class="meta-tag"><span class="icon">💼</span> ' + job.experience_required + '+ yr</span>' : '') +
+                (job.salary_range ? '<span class="meta-tag"><span class="icon">💰</span> ' + job.salary_range + '</span>' : '') +
+              '</div>' +
+            '</div>' +
+            '<button onclick="applyToJob(' + job.id + ')" class="apply-btn">Apply Now</button>' +
+          '</div>' +
+          (job.description ? '<p>' + job.description + '</p>' : '') +
+          '<div class="skills-line">' + job.skills.map(function(s) { return '<span class="skill-tag' + (lowerSkills.includes(s.toLowerCase()) ? ' match' : '') + '">' + s + '</span>'; }).join('') + '</div>' +
+        '</div>';
+      }).join('');
     }
 
     async function loadAllJobs() {
@@ -222,42 +383,19 @@
       }
     }
 
-    function renderJobs(jobs, lowerSkills) {
-      const resultsDiv = document.getElementById('results');
-      if (jobs.length === 0) {
-        resultsDiv.innerHTML = '<div class="empty-state"><h3>No jobs found</h3><p>Try different skills or broaden your search.</p></div>';
-        return;
-      }
-      resultsDiv.innerHTML = jobs.map(job => {
-        const matchPct = job.total_skills > 0 && lowerSkills.length > 0 ? Math.round(job.match_count / job.total_skills * 100) : 0;
-        return `<div class="job-card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start">
-            <div>
-              <h3>${job.title} ${matchPct > 0 ? `<span class="match-badge">${matchPct}% match</span>` : ''}</h3>
-              <div class="company-name">${job.company}</div>
-              <div class="meta">${job.location || 'Remote'}</div>
-            </div>
-            <button onclick="applyToJob(${job.id})" class="apply-btn">Apply Now</button>
-          </div>
-          ${job.description ? `<p>${job.description}</p>` : ''}
-          <div class="skills-line">${job.skills.map(s => `<span class="skill-tag ${lowerSkills.includes(s.toLowerCase()) ? 'match' : ''}">${s}</span>`).join('')}</div>
-        </div>`;
-      }).join('');
-    }
-
     async function searchJobs() {
-      const input = document.getElementById('searchInput').value.trim();
-      const activeChips = [...document.querySelectorAll('#skillChips .chip.active')].map(c => c.textContent);
-      const allSkills = [...new Set([...input.split(',').map(s => s.trim()).filter(Boolean), ...activeChips])];
+      const params = getFilterParams();
       const resultsDiv = document.getElementById('results');
-
       resultsDiv.innerHTML = '<div class="loading">Searching...</div>';
 
       try {
-        const params = new URLSearchParams();
-        if (allSkills.length > 0) params.set('skills', allSkills.join(','));
-        const resp = await fetch(`{% url "api_jobs_search" %}?${params.toString()}`);
+        const qs = params.toString();
+        const url = '{% url "api_jobs_search" %}' + (qs ? '?' + qs : '');
+        const resp = await fetch(url);
         const jobs = await resp.json();
+        const input = document.getElementById('searchInput').value.trim();
+        const activeChips = [...document.querySelectorAll('#skillChips .chip.active')].map(c => c.textContent);
+        const allSkills = [...new Set([...input.split(',').map(s => s.trim()).filter(Boolean), ...activeChips])];
         renderJobs(jobs, allSkills.map(s => s.toLowerCase()));
       } catch (e) {
         resultsDiv.innerHTML = '<div class="empty-state"><h3>Search failed</h3><p>Please try again.</p></div>';
@@ -280,14 +418,15 @@
           btn.classList.add('applied');
         } else {
           btn.textContent = data.error || 'Failed';
-          setTimeout(() => { btn.textContent = 'Apply Now'; }, 2000);
+          setTimeout(function() { btn.textContent = 'Apply Now'; }, 2000);
         }
       } catch (e) {
         btn.textContent = 'Error';
-        setTimeout(() => { btn.textContent = 'Apply Now'; }, 2000);
+        setTimeout(function() { btn.textContent = 'Apply Now'; }, 2000);
       }
     }
-    document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchJobs(); });
+
+    document.getElementById('searchInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') searchJobs(); });
     loadSkills();
     loadAllJobs();
   </script>

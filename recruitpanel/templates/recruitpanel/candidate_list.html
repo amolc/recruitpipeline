@@ -48,10 +48,10 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th>Email</th>
         <th>Phone</th>
         <th>Position</th>
         <th>Exp</th>
+        <th>Resume</th>
         <th>Status</th>
         <th>Date</th>
         <th>Actions</th>
@@ -61,10 +61,10 @@
       {% for c in candidates %}
         <tr>
           <td><strong>{{ c.full_name }}</strong></td>
-          <td>{{ c.email }}</td>
           <td>{{ c.phone }}</td>
           <td>{{ c.position }}</td>
           <td>{{ c.experience }}yr</td>
+          <td>{% if c.resume %}<a href="{{ c.resume.url }}" target="_blank" style="color:var(--primary);">View</a>{% else %}<span style="color:var(--text-muted);">—</span>{% endif %}</td>
           <td>
             {% with s=c.status %}
             <span class="status-tag

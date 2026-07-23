@@ -502,6 +502,13 @@ def api_skills(request, company_slug=None):
 def api_jobs_search(request, company_slug=None):
     skills_param = request.GET.get('skills', '').strip()
     query = request.GET.get('q', '').strip()
+    location = request.GET.get('location', '').strip()
+    work_type = request.GET.get('work_type', '').strip()
+    employment_type = request.GET.get('employment_type', '').strip()
+    exp_min = request.GET.get('exp_min', '').strip()
+    salary_min = request.GET.get('salary_min', '').strip()
+    salary_max = request.GET.get('salary_max', '').strip()
+
     jobs = JobPosition.objects.filter(is_active=True).select_related('company').prefetch_related('skills')
 
     skill_names = []
@@ -518,23 +525,72 @@ def api_jobs_search(request, company_slug=None):
             models.Q(location__icontains=query)
         ).distinct()
 
+    if location:
+        jobs = jobs.filter(location__icontains=location)
+
+    if work_type:
+        jobs = jobs.filter(work_type=work_type)
+
+    if employment_type:
+        jobs = jobs.filter(employment_type=employment_type)
+
+    if exp_min:
+        try:
+            exp_val = int(exp_min)
+            jobs = jobs.filter(
+                models.Q(experience_required__lte=exp_val) |
+                models.Q(experience_required__isnull=True)
+            )
+        except ValueError:
+            pass
+
+    if salary_min:
+        try:
+            sal_min = float(salary_min)
+            jobs = jobs.filter(
+                models.Q(base_salary__gte=sal_min) |
+                models.Q(salary_max__gte=sal_min) |
+                models.Q(base_salary__isnull=True, salary_max__isnull=True)
+            )
+        except ValueError:
+            pass
+
+    if salary_max:
+        try:
+            sal_max = float(salary_max)
+            jobs = jobs.filter(
+                models.Q(base_salary__lte=sal_max) |
+                models.Q(base_salary__isnull=True)
+            )
+        except ValueError:
+            pass
+
     results = []
     for job in jobs:
         job_skills = list(job.skills.values_list('name', flat=True))
         match_count = 0
         if skill_names:
             match_count = sum(1 for s in job_skills if s.lower() in [x.lower() for x in skill_names])
+        salary_range = ''
+        if job.base_salary and job.salary_max:
+            salary_range = f'${job.base_salary:,.0f} – ${job.salary_max:,.0f}'
+        elif job.base_salary:
+            salary_range = f'${job.base_salary:,.0f}+'
         results.append({
             'id': job.id,
             'title': job.title,
             'company': job.company.name,
             'company_slug': job.company.slug,
-            'location': job.location,
+            'location': job.location or 'Remote',
             'description': job.description[:300] if job.description else '',
             'requirements': job.requirements[:300] if job.requirements else '',
             'skills': job_skills,
             'match_count': match_count,
             'total_skills': len(job_skills),
+            'salary_range': salary_range,
+            'employment_type': job.get_employment_type_display(),
+            'work_type': job.get_work_type_display(),
+            'experience_required': job.experience_required,
         })
 
     if skill_names:

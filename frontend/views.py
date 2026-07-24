@@ -3,13 +3,15 @@ import json
 import re
 from pathlib import Path
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, FileResponse
 from django.db import models
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.conf import settings
 from company.models import Company
-from api.models import Application, JobPosition, UserAuth, UserRole, Candidate, CandidateSkill, Skill
+from api.models import Application, JobPosition, UserAuth, UserRole, Candidate, CandidateSkill, Skill, STAGES
 
 User = get_user_model()
 
@@ -364,7 +366,10 @@ def candidate_edit_profile(request, company_slug=None):
 
 @candidate_required
 def candidate_jobs(request, company_slug=None):
-    return render(request, 'frontend/portal/candidate_jobs.html')
+    candidate = _get_candidate(request.user) if request.user.is_authenticated else None
+    return render(request, 'frontend/portal/candidate_jobs.html', {
+        'candidate': candidate,
+    })
 
 
 @candidate_required
@@ -418,13 +423,51 @@ def upload_resume(request, company_slug=None):
     return redirect('candidate_profile')
 
 
+@csrf_exempt
+@candidate_required
+def upload_photo(request, company_slug=None):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    candidate = _get_candidate(request.user)
+    if 'photo' in request.FILES:
+        candidate.photo.save(request.FILES['photo'].name, request.FILES['photo'])
+        candidate.save()
+        return JsonResponse({'success': True, 'url': candidate.photo.url})
+    return JsonResponse({'error': 'No photo provided'}, status=400)
+
+
 @candidate_required
 def candidate_applications(request, company_slug=None):
     candidate = _get_candidate(request.user)
     applications = Application.objects.filter(candidate=candidate).order_by('-submitted_at')
+    stage_keys = [s[0] for s in STAGES]
+    for app in applications:
+        try:
+            app.status_index = stage_keys.index(app.status)
+        except ValueError:
+            app.status_index = -1
     return render(request, 'frontend/portal/candidate_applications.html', {
         'candidate': candidate,
         'applications': applications,
+        'stages': STAGES,
+        'stage_keys': stage_keys,
+    })
+
+
+@candidate_required
+def candidate_application_detail(request, application_id, company_slug=None):
+    candidate = _get_candidate(request.user)
+    app = get_object_or_404(Application, id=application_id, candidate=candidate)
+    stage_keys = [s[0] for s in STAGES]
+    try:
+        app.status_index = stage_keys.index(app.status)
+    except ValueError:
+        app.status_index = -1
+    return render(request, 'frontend/portal/candidate_application_detail.html', {
+        'candidate': candidate,
+        'app': app,
+        'stages': STAGES,
+        'stage_keys': stage_keys,
     })
 
 
@@ -604,10 +647,15 @@ def api_apply_job(request, company_slug=None):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
 
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    if request.content_type and 'multipart/form-data' in request.content_type:
+        data = request.POST
+        resume_file = request.FILES.get('resume')
+    else:
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        resume_file = None
 
     job_id = data.get('job_id')
     if not job_id:
@@ -619,18 +667,29 @@ def api_apply_job(request, company_slug=None):
     if Application.objects.filter(candidate=candidate, position=job.title, company=job.company).exists():
         return JsonResponse({'error': 'You have already applied for this position.'}, status=409)
 
+    full_name = data.get('full_name', candidate.full_name).strip() or candidate.full_name
+    email = data.get('email', candidate.email).strip() or candidate.email
+    phone = data.get('phone', candidate.phone).strip() or candidate.phone
+    try:
+        experience = int(data.get('experience', candidate.total_experience_years or 0))
+    except (ValueError, TypeError):
+        experience = int(candidate.total_experience_years or 0)
+    cover_letter = data.get('cover_letter', '').strip() or 'Applied via candidate portal.'
+
     application = Application.objects.create(
         company=job.company,
         candidate=candidate,
-        full_name=candidate.full_name,
-        email=candidate.email,
-        phone=candidate.phone,
+        full_name=full_name,
+        email=email,
+        phone=phone,
         position=job.title,
-        experience=int(candidate.total_experience_years or 0),
-        cover_letter='Applied via candidate portal.',
+        experience=experience,
+        cover_letter=cover_letter,
     )
 
-    if candidate.resume:
+    if resume_file:
+        application.resume.save(resume_file.name, resume_file)
+    elif candidate.resume:
         try:
             from shutil import copy2
             src = candidate.resume.path
@@ -639,30 +698,83 @@ def api_apply_job(request, company_slug=None):
             application.resume.save(dest_name, candidate.resume.file)
         except Exception:
             pass
-
-    if candidate.summary and job.description:
+    if job.description:
         try:
-            from agents.extractor import extract_with_ai
-            prompt = f"""Based on this candidate profile and job description, generate a tailored resume summary (2-3 sentences) and a professional cover letter (3-4 paragraphs).
+            from agents.extractor import gen_with_ai
+            skills_list = ', '.join(cs.skill.name for cs in candidate.candidate_skills.select_related('skill').all())
+            system_prompt = 'You are a professional cover letter and resume writer. Return ONLY valid JSON with keys "tailored_resume" and "cover_letter".'
+            user_prompt = f"""Based on this candidate profile and job description, generate a tailored resume summary (2-3 sentences) and a professional cover letter (3-4 paragraphs).
 
 Candidate Profile:
-{candidate.summary}
+{candidate.summary or 'No summary available'}
 
-Skills: {', '.join(cs.skill.name for cs in candidate.candidate_skills.select_related('skill').all())}
+Skills: {skills_list or 'No skills listed'}
 
 Experience: {json.dumps(candidate.experience)}
 
 Job Title: {job.title}
 Job Description: {job.description}
-Requirements: {job.requirements}
-
-Return JSON with keys: "tailored_resume" and "cover_letter"."""
-            result = extract_with_ai(prompt)
+Requirements: {job.requirements or 'Not specified'}"""
+            result = gen_with_ai(system_prompt, user_prompt, temperature=0.4, max_tokens=2048)
             if result:
-                application.tailored_resume = result.get('tailored_resume', '') or result.get('cover_letter', '')
-                application.generated_cover_letter = result.get('cover_letter', '') or result.get('tailored_resume', '')
+                application.tailored_resume = result.get('tailored_resume', '')
+                application.generated_cover_letter = result.get('cover_letter', '')
                 application.save()
         except Exception:
             pass
 
     return JsonResponse({'success': True, 'application_id': application.id})
+
+
+@csrf_exempt
+@candidate_required
+def api_generate_cover_letter(request, company_slug=None):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    job_id = data.get('job_id')
+    job = get_object_or_404(JobPosition, id=job_id, is_active=True) if job_id else None
+    candidate = _get_candidate(request.user)
+
+    if not candidate.summary and not candidate.raw_text:
+        return JsonResponse({'cover_letter': candidate.summary or 'Tell us about yourself...'})
+
+    from agents.extractor import gen_with_ai
+    skills_list = ', '.join(cs.skill.name for cs in candidate.candidate_skills.select_related('skill').all())
+    system_prompt = 'You are a professional cover letter writer. Return ONLY valid JSON with a single key "cover_letter" containing 3-4 paragraphs.'
+    user_prompt = f"""Write a professional cover letter for this candidate.
+
+Candidate Profile:
+{candidate.summary or candidate.raw_text[:1000]}
+
+Skills: {skills_list or 'No skills listed'}
+
+Experience: {json.dumps(candidate.experience)}"""
+
+    if job:
+        user_prompt += f"""
+
+Job Title: {job.title}
+Job Description: {job.description}
+Requirements: {job.requirements or 'Not specified'}"""
+
+    result = gen_with_ai(system_prompt, user_prompt, temperature=0.4, max_tokens=2048)
+    cover = (result or {}).get('cover_letter', '') or candidate.summary or ''
+    return JsonResponse({'cover_letter': cover})
+
+
+@xframe_options_exempt
+def serve_resume_file(request, file_path, company_slug=None):
+    from pathlib import Path as PPath
+    safe_path = PPath(settings.MEDIA_ROOT) / file_path
+    safe_path = safe_path.resolve()
+    media_root = PPath(settings.MEDIA_ROOT).resolve()
+    if not str(safe_path).startswith(str(media_root)):
+        raise Http404
+    if not safe_path.exists():
+        raise Http404
+    return FileResponse(open(safe_path, 'rb'))

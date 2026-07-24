@@ -18,6 +18,7 @@
       --radius: 10px;
       --radius-sm: 6px;
       --shadow: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
     }
     body {
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -38,11 +39,7 @@
     .logo span { color: var(--primary); }
     .nav-links { display: flex; gap: 20px; align-items: center; }
     .nav-links a {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.15s;
+      font-size: 0.875rem; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: color 0.15s;
     }
     .nav-links a:hover { color: var(--text); }
     .nav-links a.active { color: var(--primary); font-weight: 600; }
@@ -53,15 +50,9 @@
     .header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
 
     .filters-sidebar {
-      flex: 0 0 260px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      align-self: flex-start;
-      position: sticky;
-      top: 24px;
+      flex: 0 0 260px; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+      align-self: flex-start; position: sticky; top: 24px;
     }
     .filters-sidebar h3 { font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 16px; }
     .filter-group { margin-bottom: 18px; }
@@ -86,68 +77,36 @@
 
     .main-content { flex: 1; min-width: 0; }
     .search-bar {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-      display: flex;
-      gap: 12px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow);
+      margin-bottom: 20px; display: flex; gap: 12px;
     }
     .search-bar input {
-      flex: 1;
-      padding: 10px 14px;
-      font-size: 0.875rem;
-      font-family: inherit;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      outline: none;
+      flex: 1; padding: 10px 14px; font-size: 0.875rem; font-family: inherit;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); outline: none;
       transition: border-color 0.2s;
     }
     .search-bar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
     .search-bar button {
-      padding: 10px 24px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      font-family: inherit;
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      background: var(--primary);
-      color: #fff;
-      transition: background 0.2s;
+      padding: 10px 24px; font-size: 0.875rem; font-weight: 600; font-family: inherit;
+      border: none; border-radius: var(--radius-sm); cursor: pointer;
+      background: var(--primary); color: #fff; transition: background 0.2s;
     }
     .search-bar button:hover { background: var(--primary-dark); }
-    .skill-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 20px;
-    }
+    .skill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
     .chip {
-      padding: 5px 12px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: 0.15s;
+      padding: 5px 12px; font-size: 0.75rem; font-weight: 500;
+      border-radius: 20px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text-muted); cursor: pointer; transition: 0.15s;
     }
     .chip:hover { border-color: var(--primary); color: var(--primary); }
     .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .loading { text-align: center; padding: 40px; color: var(--text-muted); }
 
     .job-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px 26px;
-      box-shadow: var(--shadow);
-      margin-bottom: 14px;
-      transition: border-color 0.15s;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 26px; box-shadow: var(--shadow);
+      margin-bottom: 14px; transition: border-color 0.15s;
     }
     .job-card:hover { border-color: var(--primary); }
     .job-card h3 { font-size: 1.0625rem; font-weight: 600; }
@@ -162,35 +121,16 @@
     .job-card p { font-size: 0.875rem; color: var(--text); margin-top: 10px; line-height: 1.5; }
     .job-card .skills-line { margin-top: 10px; }
     .job-card .skill-tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 500;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: var(--bg-elevated);
-      color: var(--text-muted);
-      margin: 2px 4px 2px 0;
+      display: inline-block; font-size: 0.75rem; font-weight: 500;
+      padding: 3px 10px; border-radius: 20px; background: var(--bg-elevated);
+      color: var(--text-muted); margin: 2px 4px 2px 0;
     }
     .job-card .skill-tag.match { background: #f0fdf4; color: #16a34a; }
-    .match-badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin-left: 8px;
-    }
+    .match-badge { display: inline-block; font-size: 0.75rem; font-weight: 700; color: var(--primary); margin-left: 8px; }
     .apply-btn {
-      padding: 8px 20px;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      font-family: inherit;
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      background: var(--primary);
-      color: #fff;
-      transition: background 0.2s;
-      flex-shrink: 0;
+      padding: 8px 20px; font-size: 0.8125rem; font-weight: 600; font-family: inherit;
+      border: none; border-radius: var(--radius-sm); cursor: pointer;
+      background: var(--primary); color: #fff; transition: background 0.2s; flex-shrink: 0;
     }
     .apply-btn:hover { background: var(--primary-dark); }
     .apply-btn.applied { background: var(--border); color: var(--text-muted); cursor: default; }
@@ -202,6 +142,80 @@
       .container { flex-direction: column; }
       .filters-sidebar { flex: none; position: static; }
     }
+
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      padding: 24px 28px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .modal-header h2 { font-size: 1.125rem; font-weight: 700; }
+    .modal-header .sub { font-size: 0.8125rem; color: var(--primary); font-weight: 500; margin-top: 2px; }
+    .modal-close {
+      background: none; border: none; font-size: 1.25rem; color: var(--text-muted);
+      cursor: pointer; padding: 4px; line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 20px 28px; }
+    .modal-body .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-body .form-group { margin-bottom: 14px; }
+    .modal-body .form-group.full { grid-column: 1 / -1; }
+    .modal-body .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .modal-body .form-group input,
+    .modal-body .form-group textarea,
+    .modal-body .form-group select {
+      width: 100%; padding: 9px 12px; font-size: 0.8125rem; font-family: inherit;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); outline: none;
+      background: var(--bg); color: var(--text); transition: border-color 0.2s;
+    }
+    .modal-body .form-group input:focus,
+    .modal-body .form-group textarea:focus { border-color: var(--primary); }
+    .modal-body .form-group textarea { min-height: 100px; resize: vertical; }
+    .modal-body .form-group .file-input-wrap {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .modal-body .form-group .file-input-wrap input[type="file"] { display: none; }
+    .file-btn {
+      padding: 8px 16px; font-size: 0.75rem; font-weight: 600; font-family: inherit;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;
+      background: var(--bg-elevated); color: var(--text); transition: 0.15s;
+    }
+    .file-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .file-name { font-size: 0.75rem; color: var(--text-muted); }
+    .modal-footer {
+      padding: 16px 28px 24px;
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .modal-footer button {
+      padding: 10px 24px; font-size: 0.8125rem; font-weight: 600; font-family: inherit;
+      border: none; border-radius: var(--radius-sm); cursor: pointer; transition: 0.15s;
+    }
+    .btn-cancel { background: var(--bg-elevated); color: var(--text-muted); }
+    .btn-cancel:hover { color: var(--text); }
+    .btn-submit { background: var(--primary); color: #fff; }
+    .btn-submit:hover { background: var(--primary-dark); }
+    .btn-submit:disabled { opacity: 0.5; cursor: default; }
+    .modal-error { color: #dc2626; font-size: 0.75rem; margin-top: 8px; text-align: center; }
   </style>
 </head>
 <body>
@@ -217,12 +231,10 @@
   <div class="container">
     <div class="filters-sidebar">
       <h3>Filters</h3>
-
       <div class="filter-group">
         <label>📍 Location</label>
         <input id="filterLocation" type="text" placeholder="City, State..." />
       </div>
-
       <div class="filter-group">
         <label>💼 Experience</label>
         <select id="filterExp">
@@ -236,7 +248,6 @@
           <option value="10">10+ years</option>
         </select>
       </div>
-
       <div class="filter-group">
         <label>🏠 Work Type</label>
         <select id="filterWorkType">
@@ -246,7 +257,6 @@
           <option value="on_site">On-site</option>
         </select>
       </div>
-
       <div class="filter-group">
         <label>💰 Salary Range</label>
         <div class="salary-row">
@@ -254,7 +264,6 @@
           <input id="filterSalaryMax" type="number" min="0" placeholder="Max $" />
         </div>
       </div>
-
       <div class="filter-group">
         <label>📋 Job Type</label>
         <select id="filterJobType">
@@ -265,7 +274,6 @@
           <option value="contract">Contract</option>
         </select>
       </div>
-
       <div class="filter-actions">
         <button class="btn-filter" onclick="searchJobs()">Apply Filters</button>
         <button class="btn-clear-filters" onclick="clearFilters()">Clear</button>
@@ -287,7 +295,77 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="applyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2 id="modalJobTitle">Position</h2>
+          <div class="sub" id="modalCompanyName">Company</div>
+        </div>
+        <button class="modal-close" onclick="closeApplyModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input id="applyName" type="text" value="{{ candidate.full_name }}" readonly style="background:var(--bg-elevated);color:var(--text-muted);cursor:not-allowed" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input id="applyEmail" type="email" placeholder="Your email" value="{{ candidate.email }}" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input id="applyPhone" type="text" placeholder="Your phone" value="{{ candidate.phone }}" />
+          </div>
+          <div class="form-group">
+            <label>Years of Experience</label>
+            <input id="applyExperience" type="number" min="0" placeholder="0" value="{{ candidate.total_experience_years|default:0 }}" />
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Cover Letter</label>
+          <textarea id="applyCoverLetter" placeholder="Loading AI-generated cover letter..." style="min-height:130px"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Resume</label>
+          <div class="file-input-wrap">
+            <button class="file-btn" onclick="document.getElementById('applyResume').click()">Choose File</button>
+            <span class="file-name" id="resumeFileName">
+              {% if candidate.resume %}
+              <a href="#" onclick="event.preventDefault();openResumePreview('{% url 'serve_resume_file' candidate.resume.name %}')" style="color:var(--primary);text-decoration:none;font-weight:500">{{ candidate.resume.name|cut:'candidate_resumes/' }}</a>
+              {% else %}No file chosen{% endif %}
+            </span>
+            <input type="file" id="applyResume" accept=".pdf,.docx,.txt" onchange="handleResumeChange(this)" />
+          </div>
+        </div>
+        <div class="modal-error" id="modalError"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeApplyModal()">Cancel</button>
+        <button class="btn-submit" id="submitApplyBtn" onclick="submitApplication()">Submit Application</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="resumePreviewModal">
+    <div class="modal" style="max-width:800px">
+      <div class="modal-header">
+        <div><h2>Resume Preview</h2></div>
+        <button class="modal-close" onclick="closeResumePreview()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:0">
+        <iframe id="resumePreviewFrame" style="width:100%;height:70vh;border:none;border-radius:0 0 var(--radius) var(--radius)"></iframe>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let currentJobId = null;
+    let currentBtn = null;
+
     async function loadSkills() {
       try {
         const resp = await fetch('{% url "api_skills" %}');
@@ -309,25 +387,18 @@
       const activeChips = [...document.querySelectorAll('#skillChips .chip.active')].map(c => c.textContent);
       const allSkills = [...new Set([...input.split(',').map(s => s.trim()).filter(Boolean), ...activeChips])];
       if (allSkills.length > 0) params.set('skills', allSkills.join(','));
-
       const location = document.getElementById('filterLocation').value.trim();
       if (location) params.set('location', location);
-
       const exp = document.getElementById('filterExp').value;
       if (exp) params.set('exp_min', exp);
-
       const workType = document.getElementById('filterWorkType').value;
       if (workType) params.set('work_type', workType);
-
       const salaryMin = document.getElementById('filterSalaryMin').value.trim();
       if (salaryMin) params.set('salary_min', salaryMin);
-
       const salaryMax = document.getElementById('filterSalaryMax').value.trim();
       if (salaryMax) params.set('salary_max', salaryMax);
-
       const jobType = document.getElementById('filterJobType').value;
       if (jobType) params.set('employment_type', jobType);
-
       return params;
     }
 
@@ -363,7 +434,7 @@
                 (job.salary_range ? '<span class="meta-tag"><span class="icon">💰</span> ' + job.salary_range + '</span>' : '') +
               '</div>' +
             '</div>' +
-            '<button onclick="applyToJob(' + job.id + ')" class="apply-btn">Apply Now</button>' +
+            '<button onclick="openApplyModal(' + job.id + ', \'' + job.title.replace(/'/g, "\\'") + '\', \'' + job.company.replace(/'/g, "\\'") + '\', this)" class="apply-btn">Apply Now</button>' +
           '</div>' +
           (job.description ? '<p>' + job.description + '</p>' : '') +
           '<div class="skills-line">' + job.skills.map(function(s) { return '<span class="skill-tag' + (lowerSkills.includes(s.toLowerCase()) ? ' match' : '') + '">' + s + '</span>'; }).join('') + '</div>' +
@@ -387,7 +458,6 @@
       const params = getFilterParams();
       const resultsDiv = document.getElementById('results');
       resultsDiv.innerHTML = '<div class="loading">Searching...</div>';
-
       try {
         const qs = params.toString();
         const url = '{% url "api_jobs_search" %}' + (qs ? '?' + qs : '');
@@ -402,31 +472,138 @@
       }
     }
 
-    async function applyToJob(jobId) {
-      const btn = event.target;
-      if (btn.classList.contains('applied')) return;
+    function openApplyModal(jobId, title, company, btn) {
+      currentJobId = jobId;
+      currentBtn = btn;
       btn.textContent = 'Applying...';
+      btn.disabled = true;
+      document.getElementById('modalJobTitle').textContent = title;
+      document.getElementById('modalCompanyName').textContent = company;
+      document.getElementById('modalError').textContent = '';
+      document.getElementById('applyCoverLetter').value = 'Generating your cover letter...';
+      document.getElementById('submitApplyBtn').disabled = true;
+      document.getElementById('submitApplyBtn').textContent = 'Generating...';
+      fetchCoverLetter(jobId);
+    }
+
+    function closeApplyModal() {
+      document.getElementById('applyModal').classList.remove('show');
+      document.body.style.overflow = '';
+      if (currentBtn) {
+        currentBtn.textContent = 'Apply Now';
+        currentBtn.disabled = false;
+        currentBtn = null;
+      }
+      currentJobId = null;
+      document.getElementById('applyResume').value = '';
+      handleResumeChange(document.getElementById('applyResume'));
+    }
+
+    function openResumePreview(url) {
+      document.getElementById('resumePreviewFrame').src = url;
+      document.getElementById('resumePreviewModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeResumePreview() {
+      document.getElementById('resumePreviewFrame').src = '';
+      document.getElementById('resumePreviewModal').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    function handleResumeChange(input) {
+      const label = document.getElementById('resumeFileName');
+      if (input.files && input.files[0]) {
+        label.textContent = input.files[0].name;
+      } else {
+        label.innerHTML = '{% if candidate.resume %}<a href="#" onclick="event.preventDefault();openResumePreview(\'{% url "serve_resume_file" candidate.resume.name %}\')" style="color:var(--primary);text-decoration:none;font-weight:500">{{ candidate.resume.name|cut:"candidate_resumes/" }}</a>{% else %}No file chosen{% endif %}';
+      }
+    }
+
+    async function fetchCoverLetter(jobId) {
       try {
-        const resp = await fetch('{% url "api_apply_job" %}', {
+        const resp = await fetch('{% url "api_generate_cover_letter" %}', {
           method: 'POST',
           headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
           body: JSON.stringify({job_id: jobId}),
         });
         const data = await resp.json();
-        if (data.success) {
-          btn.textContent = 'Applied!';
-          btn.classList.add('applied');
+        if (data.cover_letter) {
+          document.getElementById('applyCoverLetter').value = data.cover_letter;
         } else {
-          btn.textContent = data.error || 'Failed';
-          setTimeout(function() { btn.textContent = 'Apply Now'; }, 2000);
+          document.getElementById('applyCoverLetter').value = '{{ candidate.summary|escapejs }}';
         }
       } catch (e) {
-        btn.textContent = 'Error';
-        setTimeout(function() { btn.textContent = 'Apply Now'; }, 2000);
+        document.getElementById('applyCoverLetter').value = '{{ candidate.summary|escapejs }}';
       }
+      document.getElementById('applyModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('submitApplyBtn').disabled = false;
+      document.getElementById('submitApplyBtn').textContent = 'Submit Application';
     }
 
-    document.getElementById('searchInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') searchJobs(); });
+    async function submitApplication() {
+      const btn = document.getElementById('submitApplyBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+      document.getElementById('modalError').textContent = '';
+
+      const form = new FormData();
+      form.append('job_id', currentJobId);
+      form.append('full_name', document.getElementById('applyName').value.trim());
+      form.append('email', document.getElementById('applyEmail').value.trim());
+      form.append('phone', document.getElementById('applyPhone').value.trim());
+      form.append('experience', document.getElementById('applyExperience').value);
+      form.append('cover_letter', document.getElementById('applyCoverLetter').value.trim());
+
+      const resumeFile = document.getElementById('applyResume').files[0];
+      if (resumeFile) form.append('resume', resumeFile);
+
+      try {
+        const resp = await fetch('{% url "api_apply_job" %}', {
+          method: 'POST',
+          headers: {'X-CSRFToken': '{{ csrf_token }}'},
+          body: form,
+        });
+        const data = await resp.json();
+        if (data.success) {
+          closeApplyModal();
+          const buttons = document.querySelectorAll('.apply-btn');
+          buttons.forEach(b => {
+            if (b.textContent === 'Apply Now' && buttons.length === 1) {
+              b.textContent = 'Applied!';
+              b.classList.add('applied');
+            }
+          });
+          document.querySelectorAll('.job-card').forEach(card => {
+            const btn = card.querySelector('.apply-btn');
+            if (btn && btn.onclick && btn.onclick.toString().includes('openApplyModal(' + currentJobId)) {
+              btn.textContent = 'Applied!';
+              btn.classList.add('applied');
+              btn.onclick = null;
+            }
+          });
+        } else {
+          document.getElementById('modalError').textContent = data.error || 'Submission failed. Please try again.';
+        }
+      } catch (e) {
+        document.getElementById('modalError').textContent = 'Network error. Please try again.';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Submit Application';
+    }
+
+    document.getElementById('applyModal').addEventListener('click', function(e) {
+      if (e.target === this) closeApplyModal();
+    });
+    document.getElementById('resumePreviewModal').addEventListener('click', function(e) {
+      if (e.target === this) closeResumePreview();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closeApplyModal(); closeResumePreview(); }
+    });
+
     loadSkills();
     loadAllJobs();
   </script>

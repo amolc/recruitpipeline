@@ -27,6 +27,7 @@ class Candidate(models.Model):
     full_name = models.CharField(max_length=200)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=30, blank=True)
+    photo = models.ImageField('Profile Photo', upload_to='candidate_photos/', blank=True, null=True)
     resume = models.FileField(upload_to='candidate_resumes/', blank=True, null=True)
     raw_text = models.TextField(blank=True)
     summary = models.TextField(blank=True)

@@ -65,6 +65,37 @@ EXTRACTION_PROMPT = """You are an expert CV/resume parser. Extract all structure
 Extract EVERY piece of information visible in the CV. If a section is not present in the CV, use an empty array or null. Be thorough and accurate."""
 
 
+def gen_with_ai(system_prompt, user_prompt, temperature=0.3, max_tokens=2048):
+    if not OPENROUTER_API_KEY:
+        return None
+    try:
+        with httpx.Client(timeout=120) as client:
+            resp = client.post(
+                f'{OPENROUTER_BASE}/chat/completions',
+                headers={
+                    'Authorization': f'Bearer {OPENROUTER_API_KEY}',
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': 'https://github.com/amolc/recruitpipeline',
+                },
+                json={
+                    'model': OPENROUTER_MODEL,
+                    'messages': [
+                        {'role': 'system', 'content': system_prompt},
+                        {'role': 'user', 'content': user_prompt},
+                    ],
+                    'temperature': temperature,
+                    'max_tokens': max_tokens,
+                    'response_format': {'type': 'json_object'},
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            content = data['choices'][0]['message']['content']
+            return json.loads(content)
+    except Exception:
+        return None
+
+
 def extract_with_ai(text):
     if not OPENROUTER_API_KEY:
         return None

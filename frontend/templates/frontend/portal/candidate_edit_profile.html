@@ -69,17 +69,46 @@
       box-shadow: var(--shadow);
     }
     .avatar {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       background: var(--primary);
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.75rem;
+      font-size: 2rem;
       font-weight: 700;
+      margin: 0;
+      overflow: hidden;
+      border: 3px solid var(--border);
+      transition: opacity 0.2s;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-wrap {
+      position: relative;
+      width: 100px;
+      height: 100px;
       margin: 0 auto 16px;
+      cursor: pointer;
+    }
+    .avatar-wrap:hover .avatar { opacity: 0.85; }
+    .avatar-edit-icon {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8125rem;
+      border: 2px solid var(--bg-card);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      pointer-events: none;
     }
     .profile-name { text-align: center; font-size: 1.125rem; font-weight: 700; }
     .profile-title { text-align: center; font-size: 0.8125rem; color: var(--text-muted); margin-top: 2px; }
@@ -294,7 +323,17 @@
     </div>
 
     <div class="sidebar-card">
-      <div class="avatar">{{ candidate.full_name|first|upper }}{% if candidate.full_name|length > 1 %}{{ candidate.full_name|slice:"1:2"|upper }}{% endif %}</div>
+      <div class="avatar-wrap" onclick="document.getElementById('photoInput').click()">
+        <div class="avatar" id="avatarInitial">
+          {% if candidate.photo %}
+          <img src="{{ candidate.photo.url }}" alt="Photo" id="avatarImg">
+          {% else %}
+          {{ candidate.full_name|first|upper }}{% if candidate.full_name|length > 1 %}{{ candidate.full_name|slice:"1:2"|upper }}{% endif %}
+          {% endif %}
+        </div>
+        <div class="avatar-edit-icon">✎</div>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none">
       <div class="profile-name">{{ candidate.full_name }}</div>
       <div class="profile-title">{% if candidate.total_experience_years %}{{ candidate.total_experience_years }} yrs experience{% else %}Candidate{% endif %}</div>
       <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:12px">
@@ -580,6 +619,37 @@
       t.className = 'toast show' + (isError ? ' error' : '');
       setTimeout(() => { t.className = 'toast'; }, 3000);
     }
+
+    document.getElementById('photoInput').addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const form = new FormData();
+      form.append('photo', file);
+      try {
+        const resp = await fetch('{% url "upload_photo" %}', {
+          method: 'POST',
+          headers: {'X-CSRFToken': '{{ csrf_token }}'},
+          body: form,
+        });
+        const data = await resp.json();
+        if (data.success) {
+          const img = document.getElementById('avatarImg') || document.createElement('img');
+          if (!img.id) {
+            img.id = 'avatarImg';
+            img.alt = 'Photo';
+            document.getElementById('avatarInitial').innerHTML = '';
+            document.getElementById('avatarInitial').appendChild(img);
+          }
+          img.src = data.url + '?t=' + Date.now();
+          showToast('Photo updated!');
+        } else {
+          showToast('Upload failed', true);
+        }
+      } catch (err) {
+        showToast('Upload failed', true);
+      }
+      e.target.value = '';
+    });
   </script>
 </body>
 </html>

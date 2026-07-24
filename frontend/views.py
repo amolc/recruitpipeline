@@ -770,6 +770,7 @@ Requirements: {job.requirements or 'Not specified'}"""
 @xframe_options_exempt
 def serve_resume_file(request, file_path, company_slug=None):
     from pathlib import Path as PPath
+    import mimetypes
     safe_path = PPath(settings.MEDIA_ROOT) / file_path
     safe_path = safe_path.resolve()
     media_root = PPath(settings.MEDIA_ROOT).resolve()
@@ -777,4 +778,5 @@ def serve_resume_file(request, file_path, company_slug=None):
         raise Http404
     if not safe_path.exists():
         raise Http404
-    return FileResponse(open(safe_path, 'rb'))
+    content_type, _ = mimetypes.guess_type(str(safe_path))
+    return FileResponse(open(safe_path, 'rb'), content_type=content_type or 'application/octet-stream')

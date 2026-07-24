@@ -335,7 +335,7 @@
             <button class="file-btn" onclick="document.getElementById('applyResume').click()">Choose File</button>
             <span class="file-name" id="resumeFileName">
               {% if candidate.resume %}
-              <a href="#" onclick="event.preventDefault();openResumePreview('{% url 'serve_resume_file' candidate.resume.name %}')" style="color:var(--primary);text-decoration:none;font-weight:500">{{ candidate.resume.name|cut:'candidate_resumes/' }}</a>
+              <a href="#" onclick="event.preventDefault();openResumePreview('{{ candidate.resume.url }}')" style="color:var(--primary);text-decoration:none;font-weight:500">{{ candidate.resume.name|cut:'candidate_resumes/' }}</a>
               {% else %}No file chosen{% endif %}
             </span>
             <input type="file" id="applyResume" accept=".pdf,.docx,.txt" onchange="handleResumeChange(this)" />
@@ -516,7 +516,7 @@
       if (input.files && input.files[0]) {
         label.textContent = input.files[0].name;
       } else {
-        label.innerHTML = '{% if candidate.resume %}<a href="#" onclick="event.preventDefault();openResumePreview(\'{% url "serve_resume_file" candidate.resume.name %}\')" style="color:var(--primary);text-decoration:none;font-weight:500">{{ candidate.resume.name|cut:"candidate_resumes/" }}</a>{% else %}No file chosen{% endif %}';
+        label.innerHTML = '{% if candidate.resume %}<a href="#" onclick="event.preventDefault();openResumePreview(\'{{ candidate.resume.url }}\')" style="color:var(--primary);text-decoration:none;font-weight:500">{{ candidate.resume.name|cut:"candidate_resumes/" }}</a>{% else %}No file chosen{% endif %}';
       }
     }
 

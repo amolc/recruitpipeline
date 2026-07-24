@@ -29,6 +29,8 @@ SECRET_KEY = 'django-insecure-4s(1eyu@+&w!=1-_j6asn!)7nli8q39h17u6ze4vjoir)+m9%u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'pipeline.quantbots.co', 'testserver','recruitme.apolloaitech.co']
 CSRF_TRUSTED_ORIGINS = ['https://pipeline.quantbots.co','https://recruitme.apolloaitech.co','http://localhost:8000']
 
